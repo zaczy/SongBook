@@ -1,0 +1,155 @@
+﻿<Window x:Class="Zaczy.SongBook.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Zaczy.SongBook.WPF"
+        mc:Ignorable="d"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Loaded="Window_Loaded"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="_Plik">
+                <MenuItem Header="_Nowy" Click="NewMenuItem_Click"/>
+                <MenuItem Header="_Otwórz z pliku" Click="OpenMenuItem_Click"/>
+                <MenuItem Header="_Zapisz w bazie danych" Click="SaveMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Click="ExitMenuItem_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="AboutMenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Zapisane">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Toolbar z przyciskami -->
+                    <ToolBar Grid.Row="0">
+                        <Button Content="Odśwież" Click="RefreshSongs_Click" Padding="10,2"/>
+                        <Button Content="Usuń" Click="DeleteSong_Click" Padding="10,2"/>
+                    </ToolBar>
+                    
+                    <!-- Tabela piosenek -->
+                    <DataGrid 
+                        Grid.Row="1"
+                        x:Name="SongsDataGrid"
+                        ItemsSource="{Binding ViewModel.Songs}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        SelectionMode="Single"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        MouseDoubleClick="SongsDataGrid_MouseDoubleClick"
+                        >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Tytuł" Binding="{Binding Title}" Width="*"/>
+                            <DataGridTextColumn Header="Artysta" Binding="{Binding Artist}" Width="150"/>
+                            <DataGridTextColumn Header="Dodano" Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Source">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                <TextBox 
+                    x:Name="SongTextBox"
+                    Grid.Row="0" 
+                    Margin="5" 
+                    TextWrapping="Wrap" 
+                    AcceptsReturn="True" 
+                    VerticalScrollBarVisibility="Auto"
+                    Text="{Binding Path=ViewModel.SourceSongHtml, Mode=TwoWay}" 
+                    TextChanged="SongTextBox_TextChanged"
+                    />
+                <Button 
+                    Grid.Row="1"
+                    x:Name="AnalizujBtn" 
+                    Content="Analizuj" 
+                    Width="90"
+                    Height="20"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Right"
+                    Margin="0,5,20,5"
+                    Click="AnalizujBtn_Click"
+                    />
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <TabControl
+            Grid.Row="2">
+            <TabItem Header="Tekst">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar z przyciskami -->
+                    <ToolBar Grid.Row="0" Grid.ColumnSpan="2">
+                        <Button Content="Zapis do DB" Click="SaveMenuItem_Click" Padding="10,2"/>
+                        <Button Content="Tonacja +" Click="ToneUpButton_Click" Padding="10,2"/>
+                        <Button Content="Tonacja -" Click="ToneDownButton_Click" Padding="10,2"/>
+                    </ToolBar>
+
+
+                    <Label Grid.Row="1">Tytuł</Label>
+
+                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Title}" Grid.Row="1" Grid.Column="1" Height="25" />
+
+                    <Label Grid.Row="2">Artysta</Label>
+                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Artist}" Grid.Row="2" Grid.Column="1"  Height="25"/>
+
+                    <Label Grid.Row="3">Tekst</Label>
+                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.LyricsAuthor}" Grid.Row="3" Grid.Column="1"  Height="25"/>
+
+                    <Label Grid.Row="4">Muzyka</Label>
+                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.MusicAuthor}" Grid.Row="4" Grid.Column="1"  Height="25"/>
+
+                    <Label Grid.Row="5">Kapo</Label>
+                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Capo}" Grid.Row="5" Grid.Column="1"  Height="25"/>
+
+                    <TextBox
+                        Text="{Binding Path=ViewModel.ConvertedSong.Lyrics}" 
+                        Grid.Column="0" 
+                        Grid.ColumnSpan="2" 
+                        Grid.Row="6"
+                        Padding="10,5,10,5"
+                        FontFamily="Lucida Console"
+                        />
+                </Grid>
+            </TabItem>
+            <TabItem Header="HTML">
+                <WebBrowser 
+                    x:Name="PreviewBrowser" 
+                    Grid.Row="2"
+                    Source="about:blank"
+                    />
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
