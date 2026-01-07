@@ -131,7 +131,8 @@ public class ViewModel : INotifyPropertyChanged
             Capo = entity.Capo,
             Lyrics = entity.Lyrics,
             LyricsAuthor = entity.LyricsAuthor,
-            MusicAuthor = entity.MusicAuthor
+            MusicAuthor = entity.MusicAuthor,
+            ChordsVariations = entity.ChordsVariations
         };
     }
 

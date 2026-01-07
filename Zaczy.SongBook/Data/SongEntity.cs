@@ -37,6 +37,9 @@ public class SongEntity
     [Column("comments")]
     public string? Comments { get; set; }
 
+    [Column("chords_variations")]
+    public string? ChordsVariations { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -51,5 +54,6 @@ public class SongEntity
         Lyrics = song.Lyrics;
         LyricsAuthor = song.LyricsAuthor;
         MusicAuthor = song.MusicAuthor;
+        ChordsVariations = song.ChordsVariations;
     }
 }

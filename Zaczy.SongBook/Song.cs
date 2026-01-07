@@ -95,6 +95,17 @@ public class Song: INotifyPropertyChanged
         }
     }
 
+    private string? _chordsVariations;
+    /// <summary>
+    /// Wykaz niestandardowych wersji akordów
+    /// </summary>
+    public string? ChordsVariations
+    {
+        get { return _chordsVariations; }
+        set { _chordsVariations = value; }
+    }
+
+
     private List<string>? _lines;
     /// <summary>
     /// Wiersze tekstu piosenki

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using MahApps.Metro.Controls;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -18,7 +19,7 @@ namespace Zaczy.SongBook.WPF
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
         public MainWindow()
         {
@@ -77,6 +78,9 @@ namespace Zaczy.SongBook.WPF
             }
         }
 
+        /// <summary>
+        /// Aktualizuje podgląd piosenki
+        /// </summary>
         private void UpdateSongVisualization()
         {
             if (ViewModel?.ConvertedSong != null)
@@ -116,16 +120,6 @@ namespace Zaczy.SongBook.WPF
             }
         }
 
-        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await ViewModel.LoadSongsAsync();
@@ -148,13 +142,17 @@ namespace Zaczy.SongBook.WPF
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    // Dodaj metodę DeleteAsync w ViewModel lub użyj repozytorium bezpośrednio
                     await ViewModel.DeleteSongAsync(selectedSong.Id);
                     await ViewModel.LoadSongsAsync();
                 }
             }
         }
 
+        /// <summary>
+        /// Załaduj wybraną piosenkę do edycji
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SongsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (SongsDataGrid.SelectedItem is SongEntity selectedSong)
@@ -176,6 +174,11 @@ namespace Zaczy.SongBook.WPF
             ViewModel.ConvertedSong = new Song();
         }
 
+        /// <summary>
+        /// Analizuj html źródłowy i pobierz z niego dane piosenki
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AnalizujBtn_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(ViewModel.SourceSongHtml))
@@ -185,6 +188,11 @@ namespace Zaczy.SongBook.WPF
             }
         }
 
+        /// <summary>
+        /// Jeden półton w górę
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ToneUpButton_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.ConvertedSong != null)
@@ -194,6 +202,11 @@ namespace Zaczy.SongBook.WPF
             }
         }
 
+        /// <summary>
+        /// Jeden półton w dół
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ToneDownButton_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.ConvertedSong != null)

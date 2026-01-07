@@ -41,6 +41,10 @@ namespace Zaczy.SongBook.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("capo");
 
+                    b.Property<string>("ChordsVariations")
+                        .HasColumnType("longtext")
+                        .HasColumnName("chords_variations");
+
                     b.Property<string>("Comments")
                         .HasColumnType("longtext")
                         .HasColumnName("comments");
