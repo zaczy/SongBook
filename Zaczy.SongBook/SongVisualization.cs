@@ -81,8 +81,9 @@ public class SongVisualization
 
         sb.AppendLine("H1 { font-family: RobotoVariable_beta; font-stretch: 100%; color: #b62610; }");
         sb.AppendLine("H1 .artist { font-family: RobotoVariable_beta; color: #CCC; font-size: 0.6em; }");
-        sb.AppendLine("H2 { font-family: 'CustomFixedFont2_beta' !important; }");
-        
+        sb.AppendLine("H2 { font-family: PoltawskiVariable_beta; font-weight: 600; }");
+        sb.AppendLine("H2 .artist { color: #CCC; font-size: 0.6em; }");
+
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
         sb.AppendLine(".lyrics-line.annotated .chords { position: relative; top: -1.5em; }");
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  color: #b62610; 
@@ -91,7 +92,7 @@ public class SongVisualization
     position: absolute;
     transform: translateY(-1.15em);
     white-space: nowrap; }");
-        sb.AppendLine(".lyrics-line { position: relative; border: 1px solid yellow; font-family: PoltawskiVariable_beta; font-weight: 500; display: inline-block; }");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: PoltawskiVariable_beta; font-weight: 500; display: inline-block; }");
         sb.AppendLine(".lyrics-line.annotated { height: 1.2em; margin-top: 1.5em; }");
 
         sb.AppendLine("</style>");
@@ -124,6 +125,7 @@ public class SongVisualization
         }
         sb.AppendLine($"<pre>{lyrics}</pre>");
 
+        sb.AppendLine($"<h2>{song.Title} <span class=\"artist\">Variable Font Version</span></h2>");
         sb.AppendLine(TransformToVariableFontVersion(song));
 
         sb.AppendLine("</body></html>");
