@@ -11,15 +11,43 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
-    <None Remove="css\Monofonto Regular\Monofonto Regular.ttf" />
+    <None Remove="assets\css\Inconsolata\Inconsolata-VariableFont_wdth,wght.ttf" />
+    <None Remove="assets\css\Inconsolata\static\Inconsolata-Black.ttf" />
+    <None Remove="assets\css\Inconsolata\static\Inconsolata_Condensed-Black.ttf" />
+    <None Remove="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf" />
+    <None Remove="assets\css\Monofonto Regular\Monofonto Regular.ttf" />
+    <None Remove="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
+    <None Remove="assets\css\Roboto\Roboto-VariableFont_wdth,wght.ttf" />
+    <None Remove="assets\ikona256.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="css\Monofonto Regular\Monofonto Regular.ttf">
+    <Content Include="assets\css\Inconsolata\Inconsolata-VariableFont_wdth,wght.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Inconsolata\static\Inconsolata-Black.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Inconsolata\static\Inconsolata_Condensed-Black.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Monofonto Regular\Monofonto Regular.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\css\Roboto\Roboto-VariableFont_wdth,wght.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\ikona256.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Materiały\ikona.ico" />
     <Content Include="Piosenki\dds.html">
@@ -33,6 +61,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3650.58" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
   </ItemGroup>

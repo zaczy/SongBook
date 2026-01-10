@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,15 +14,15 @@ namespace Zaczy.SongBook.WPF;
 public class ViewModel : INotifyPropertyChanged
 {
     private readonly SongRepository _repository;
+    public SongRepository SongRepository { get => _repository; }
+    
+    private readonly AppSettings _settings;
+    public AppSettings AppSettings { get => _settings; }
 
-    public ViewModel()
+    public ViewModel(SongRepository repository, IOptions<AppSettings> opts)
     {
-        var connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
-        var optionsBuilder = new DbContextOptionsBuilder<SongBookDbContext>();
-        optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-        
-        var context = new SongBookDbContext(optionsBuilder.Options);
-        _repository = new SongRepository(context);
+        _repository = repository;
+        _settings = opts.Value;
     }
 
     private string? _sourceSongFilename;

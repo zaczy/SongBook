@@ -1,31 +1,28 @@
 ﻿using MahApps.Metro.Controls;
+using Microsoft.Web.WebView2.Core;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Chords;
 using Zaczy.SongBook.Data;
 
 namespace Zaczy.SongBook.WPF
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
-        public MainWindow()
+        private bool _webViewInitialized;
+        private string? appAssetsPath;
+
+        public MainWindow(ViewModel viewModel)
         {
             InitializeComponent();
 
-            ViewModel = new ViewModel();
+            ViewModel = viewModel;
+            DataContext = this; // albo DataContext = ViewModel jeśli XAML binduje bez "ViewModel."
         }
 
         private ViewModel _viewModel;
@@ -47,6 +44,48 @@ namespace Zaczy.SongBook.WPF
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Załaduj piosenki z DB (ViewModel)
+            await ViewModel.LoadSongsAsync();
+
+            // Inicjalizuj WebView2 jednorazowo
+            await EnsureWebView2InitializedAsync();
+
+        }
+
+        /// <summary>
+        /// Sprawdza i inicjalizuje WebView2 jeśli to konieczne
+        /// </summary>
+        /// <returns></returns>
+        private async Task EnsureWebView2InitializedAsync()
+        {
+            if (_webViewInitialized)
+                return;
+
+            try
+            {
+                // Utwórz CoreWebView2 jeśli jeszcze nie ma
+                await PreviewWebView.EnsureCoreWebView2Async();
+
+                // Mapuj lokalny folder zasobów do wirtualnego hosta, dzięki temu można korzystać z https://appassets/...
+                appAssetsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+                Directory.CreateDirectory(appAssetsPath); // upewnij się, że folder istnieje
+
+                PreviewWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "appassets",
+                    appAssetsPath,
+                    CoreWebView2HostResourceAccessKind.Allow);
+
+                _webViewInitialized = true;
+            }
+            catch
+            {
+                // nie blokujemy aplikacji — brak WebView2 runtime lub inne problemy
+                _webViewInitialized = false;
+            }
         }
 
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
@@ -79,17 +118,60 @@ namespace Zaczy.SongBook.WPF
         }
 
         /// <summary>
-        /// Aktualizuje podgląd piosenki
+        /// Aktualizuje podgląd piosenki (WebView2)
         /// </summary>
-        private void UpdateSongVisualization()
+        private async void UpdateSongVisualization()
         {
-            if (ViewModel?.ConvertedSong != null)
+            if (ViewModel?.ConvertedSong == null)
+                return;
+
+            // Upewnij się, że WebView2 zainicjalizowany
+            await EnsureWebView2InitializedAsync();
+
+            var visualization = new SongVisualization();
+
+            // Przyjmujemy, że lokalne zasoby (css, czcionki) znajdą się w folderze "<app>/assets"
+            // Skopiuj do projektu zasoby np. assets/css/... i ustaw CopyToOutputDirectory=CopyIfNewer
+            var virtualBase = "https://appassets/"; // odpowiada SetVirtualHostNameToFolderMapping
+            visualization.CssFontsPath = new Dictionary<string, string>();
+
+            //string fontFile = "css/Monofonto Regular/Monofonto Regular.ttf";
+            string fontFile = "css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf";
+            if (File.Exists(Path.Combine(appAssetsPath, fontFile))) 
             {
-                var visualization = new SongVisualization();
-                visualization.MonoFontPath = @"css\Monofonto Regular\Monofonto Regular.ttf";
-                PreviewBrowser.NavigateToString(visualization.LyricsHtml(ViewModel!.ConvertedSong));
+                // jeśli pliki istnieją w katalogu assets, użyj ścieżek do nich
+                visualization.CssFontsPath.Add("CustomFixedFont", virtualBase + fontFile);
             }
 
+            fontFile = "css/Roboto/Roboto-VariableFont_wdth,wght.ttf";
+            if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
+            {
+                visualization.CssFontsPath.Add("RobotoVariable", virtualBase + fontFile);
+            }
+
+            fontFile = "css/Poltawski_Nowy/PoltawskiNowy-VariableFont_wght.ttf";
+            if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
+            {
+                visualization.CssFontsPath.Add("PoltawskiVariable", virtualBase + fontFile);
+            }
+
+            var html = visualization.LyricsHtml(ViewModel.ConvertedSong);
+
+            // Jeśli WebView2 jest gotowy, użyj NavigateToString
+            if (_webViewInitialized && PreviewWebView.CoreWebView2 != null)
+            {
+                PreviewWebView.NavigateToString(html);
+                PreviewBrowser.NavigateToString(html);
+            }
+            else
+            {
+                // Fallback: zapisz do pliku i nawiguj (powinno też działać)
+                var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "preview");
+                Directory.CreateDirectory(outDir);
+                var fileName = Path.Combine(outDir, $"{Guid.NewGuid():N}.html");
+                File.WriteAllText(fileName, html, Encoding.UTF8);
+                PreviewWebView.Source = new Uri(fileName);
+            }
         }
 
         /// <summary>
@@ -118,11 +200,6 @@ namespace Zaczy.SongBook.WPF
 
                 }
             }
-        }
-
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            await ViewModel.LoadSongsAsync();
         }
 
         private async void RefreshSongs_Click(object sender, RoutedEventArgs e)
@@ -215,5 +292,15 @@ namespace Zaczy.SongBook.WPF
                 UpdateSongVisualization();
             }
         }
+
+        private async void SyncUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && ViewModel?.SongRepository != null)
+            {
+                SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
+                await songApi.SyncApi(ViewModel!.SongRepository);
+            }
+        }
+
     }
 }

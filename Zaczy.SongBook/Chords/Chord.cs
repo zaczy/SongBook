@@ -37,7 +37,7 @@ public class Chord
         }
 
         // Check for chords with suffixes like 7, maj7, sus4, etc.
-        var chordPattern = @"^[A-Ha-h](#|b)?(m|min|maj|dim|aug)?(2|4|5|6|7|9|11|13)?(sus2|sus4|add9|add11|maj7|min7|dim7|aug7|is)?$";
+        var chordPattern = @"^[A-Ha-h](#|b)?(m|min|maj|dim|aug)?(2|4|5|6|7|9|11|13)?(sus2|sus4|add9|add11|maj7|min7|dim7|aug7|is|\+)?$";
         
         if (Regex.IsMatch(text, chordPattern))
         {

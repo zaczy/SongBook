@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Zaczy.SongBook.WPF"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Loaded="Window_Loaded"
@@ -14,182 +15,181 @@
         WindowStartupLocation="CenterScreen"
         GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
         BorderThickness="1"
-        Background="{DynamicResource MahApps.Brushes.Accent}"
-        >
+        Background="{DynamicResource MahApps.Brushes.Accent}">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*" MinHeight="100"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Menu 
-            Grid.Row="0"
-            Background="{DynamicResource MahApps.Brushes.Accent}"
-            >
-            <MenuItem 
-                Header="_Plik" 
-                Background="{DynamicResource MahApps.Brushes.Accent}"
-                 >
+
+        <!-- Top menu -->
+        <Menu Grid.Row="0" Background="{DynamicResource MahApps.Brushes.Accent}">
+            <MenuItem Header="_Plik" Background="{DynamicResource MahApps.Brushes.Accent}">
                 <MenuItem Header="_Nowy" Click="NewMenuItem_Click"/>
                 <MenuItem Header="_Otwórz z pliku" Click="OpenMenuItem_Click"/>
                 <MenuItem Header="_Zapisz w bazie danych" Click="SaveMenuItem_Click"/>
+                <MenuItem Header="_Synchronizuj z Chmurą" Click="SyncUpButton_Click"/>
                 <Separator/>
                 <MenuItem Header="E_xit"/>
             </MenuItem>
-            <MenuItem 
-                Header="_Help"
-                Background="{DynamicResource MahApps.Brushes.Accent}"
-                >
+            <MenuItem Header="_Help" Background="{DynamicResource MahApps.Brushes.Accent}">
                 <MenuItem Header="_About"/>
             </MenuItem>
         </Menu>
-        <mah:MetroTabControl 
-            Grid.Row="1"
-            FontSize="10"
-            >
-            <mah:MetroTabItem 
-                Header="Zapisane"
-                >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Toolbar z przyciskami -->
-                    <ToolBar Grid.Row="0">
-                        <Button Content="Odśwież" Click="RefreshSongs_Click" Padding="10,2"/>
-                        <Button Content="Usuń" Click="DeleteSong_Click" Padding="10,2"/>
-                    </ToolBar>
-                    
-                    <!-- Tabela piosenek -->
-                    <DataGrid 
-                        Grid.Row="1"
-                        x:Name="SongsDataGrid"
-                        ItemsSource="{Binding ViewModel.Songs}"
-                        AutoGenerateColumns="False"
-                        IsReadOnly="True"
-                        SelectionMode="Single"
-                        CanUserAddRows="False"
-                        CanUserDeleteRows="False"
-                        MouseDoubleClick="SongsDataGrid_MouseDoubleClick"
-                        >
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                            <DataGridTextColumn Header="Tytuł" Binding="{Binding Title}" Width="*"/>
-                            <DataGridTextColumn Header="Artysta" Binding="{Binding Artist}" Width="*"/>
-                            <DataGridTextColumn Header="Dodano" Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
-                            <DataGridTextColumn Header="Zaktualizowano" Binding="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </mah:MetroTabItem>
-            <mah:MetroTabItem Header="Source">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBox 
-                        x:Name="SongTextBox"
-                        Grid.Row="0" 
-                        Margin="5" 
-                        TextWrapping="Wrap" 
-                        AcceptsReturn="True" 
-                        VerticalScrollBarVisibility="Auto"
-                        Text="{Binding Path=ViewModel.SourceSongHtml, Mode=TwoWay}" 
-                        TextChanged="SongTextBox_TextChanged"
-                        />
-                    <Button 
-                        Grid.Row="1"
-                        x:Name="AnalizujBtn" 
-                        Content="Analizuj" 
-                        Width="90"
-                        Height="25"
-                        VerticalAlignment="Bottom"
-                        HorizontalAlignment="Right"
-                        Margin="0,5,20,5"
-                        Click="AnalizujBtn_Click"
-                        Style="{StaticResource MahApps.Styles.Button.Flat}"
-                        />
-                </Grid>
-            </mah:MetroTabItem>
-        </mah:MetroTabControl>
-        
-        <!-- GridSplitter między górną i dolną częścią -->
-        <GridSplitter 
-            Grid.Row="2" 
-            Height="5" 
-            HorizontalAlignment="Stretch" 
-            VerticalAlignment="Center"
-            Background="{DynamicResource MahApps.Brushes.Accent}"
-            ShowsPreview="True"
-            ResizeDirection="Rows"
-            />
-        
-        <mah:MetroTabControl Grid.Row="3">
-            <mah:MetroTabItem Header="Tekst">
-                <Grid Margin="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="30"/>
-                    </Grid.RowDefinitions>
 
-                    <!-- Toolbar z przyciskami -->
-                    <ToolBar Grid.Row="0" Grid.ColumnSpan="2">
-                        <Button Content="Zapis do DB" Click="SaveMenuItem_Click" Padding="10,2"/>
-                        <Button Content="Tonacja +" Click="ToneUpButton_Click" Padding="10,2"/>
-                        <Button Content="Tonacja -" Click="ToneDownButton_Click" Padding="10,2"/>
-                    </ToolBar>
+        <!-- Content: vertical split (left / right) -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="300"/>
+                <ColumnDefinition Width="5"/> <!-- splitter column -->
+                <ColumnDefinition Width="*" MinWidth="500"/>
+            </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="1">Tytuł</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Title}" Grid.Row="1" Grid.Column="1" Height="25" />
+            <!-- Left pane -->
+            <mah:MetroTabControl Grid.Column="0" FontSize="10">
+                <mah:MetroTabItem Header="Zapisane">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <Label Grid.Row="2">Artysta</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Artist}" Grid.Row="2" Grid.Column="1" Height="25"/>
+                        <!-- Toolbar z przyciskami -->
+                        <ToolBar Grid.Row="0">
+                            <Button Content="Odśwież" Click="RefreshSongs_Click" Padding="10,2"/>
+                            <Button Content="Usuń" Click="DeleteSong_Click" Padding="10,2"/>
+                        </ToolBar>
 
-                    <Label Grid.Row="3">Tekst</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.LyricsAuthor}" Grid.Row="3" Grid.Column="1" Height="25"/>
+                        <!-- Tabela piosenek -->
+                        <DataGrid 
+                            Grid.Row="1"
+                            x:Name="SongsDataGrid"
+                            ItemsSource="{Binding ViewModel.Songs}"
+                            AutoGenerateColumns="False"
+                            IsReadOnly="True"
+                            SelectionMode="Single"
+                            CanUserAddRows="False"
+                            CanUserDeleteRows="False"
+                            MouseDoubleClick="SongsDataGrid_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                                <DataGridTextColumn Header="Tytuł" Binding="{Binding Title}" Width="*"/>
+                                <DataGridTextColumn Header="Artysta" Binding="{Binding Artist}" Width="*"/>
+                                <DataGridTextColumn Header="Dodano" Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
+                                <DataGridTextColumn Header="Zaktualizowano" Binding="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </mah:MetroTabItem>
 
-                    <Label Grid.Row="4">Muzyka</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.MusicAuthor}" Grid.Row="4" Grid.Column="1" Height="25"/>
+                <mah:MetroTabItem Header="Source">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <Label Grid.Row="5">Kapo</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Capo}" Grid.Row="5" Grid.Column="1" Height="25"/>
+                        <TextBox 
+                            x:Name="SongTextBox"
+                            Grid.Row="0" 
+                            Margin="5" 
+                            TextWrapping="Wrap" 
+                            AcceptsReturn="True" 
+                            VerticalScrollBarVisibility="Auto"
+                            Text="{Binding Path=ViewModel.SourceSongHtml, Mode=TwoWay}" 
+                            TextChanged="SongTextBox_TextChanged"/>
 
-                    <TextBox
-                        Text="{Binding Path=ViewModel.ConvertedSong.Lyrics}" 
-                        Grid.Column="0" 
-                        Grid.ColumnSpan="2" 
-                        Grid.Row="6"
-                        Padding="10,5,10,5"
-                        FontFamily="Lucida Console"
-                        AcceptsReturn="True"
-                        AcceptsTab="True"
-                        TextWrapping="Wrap"
-                        VerticalScrollBarVisibility="Auto"
-                        />
-                    <Label Grid.Row="7">Niestandardowe wersje chwytów</Label>
-                    <TextBox Text="{Binding Path=ViewModel.ConvertedSong.ChordsVariations}" Grid.Row="7" Grid.Column="1" Height="25"/>
-                </Grid>
-            </mah:MetroTabItem>
-            <mah:MetroTabItem Header="HTML">
-                <WebBrowser 
-                    x:Name="PreviewBrowser" 
-                    Source="about:blank"
-                    />
-            </mah:MetroTabItem>
-        </mah:MetroTabControl>
+                        <Button 
+                            Grid.Row="1"
+                            x:Name="AnalizujBtn" 
+                            Content="Analizuj" 
+                            Width="90"
+                            Height="25"
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Right"
+                            Margin="0,5,20,5"
+                            Click="AnalizujBtn_Click"
+                            Style="{StaticResource MahApps.Styles.Button.Flat}"/>
+                    </Grid>
+                </mah:MetroTabItem>
+            </mah:MetroTabControl>
+
+            <!-- Vertical splitter -->
+            <GridSplitter 
+                Grid.Column="1"
+                Width="5"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource MahApps.Brushes.Accent}"
+                ShowsPreview="True"
+                ResizeDirection="Columns"
+                />
+
+            <!-- Right pane -->
+            <mah:MetroTabControl Grid.Column="2">
+                <mah:MetroTabItem Header="Tekst">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Toolbar z przyciskami -->
+                        <ToolBar Grid.Row="0" Grid.ColumnSpan="2">
+                            <Button Content="Zapis do DB" Click="SaveMenuItem_Click" Padding="10,2"/>
+                            <Button Content="Tonacja +" Click="ToneUpButton_Click" Padding="10,2"/>
+                            <Button Content="Tonacja -" Click="ToneDownButton_Click" Padding="10,2"/>
+                        </ToolBar>
+
+                        <Label Grid.Row="1">Tytuł</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Title}" Grid.Row="1" Grid.Column="1" Height="25" />
+
+                        <Label Grid.Row="2">Artysta</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Artist}" Grid.Row="2" Grid.Column="1" Height="25"/>
+
+                        <Label Grid.Row="3">Tekst</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.LyricsAuthor}" Grid.Row="3" Grid.Column="1" Height="25"/>
+
+                        <Label Grid.Row="4">Muzyka</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.MusicAuthor}" Grid.Row="4" Grid.Column="1" Height="25"/>
+
+                        <Label Grid.Row="5">Kapo</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.Capo}" Grid.Row="5" Grid.Column="1" Height="25"/>
+
+                        <TextBox
+                            Text="{Binding Path=ViewModel.ConvertedSong.Lyrics}" 
+                            Grid.Column="0" 
+                            Grid.ColumnSpan="2" 
+                            Grid.Row="6"
+                            Padding="10,5,10,5"
+                            FontFamily="Lucida Console"
+                            AcceptsReturn="True"
+                            AcceptsTab="True"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto"/>
+
+                        <Label Grid.Row="7">Niestandardowe wersje chwytów</Label>
+                        <TextBox Text="{Binding Path=ViewModel.ConvertedSong.ChordsVariations}" Grid.Row="7" Grid.Column="1" Height="25"/>
+                    </Grid>
+                </mah:MetroTabItem>
+
+                <mah:MetroTabItem Header="HTML">
+                    <WebBrowser x:Name="PreviewBrowser" Source="about:blank" />
+                </mah:MetroTabItem>
+                <mah:MetroTabItem Header="HTML2">
+                    <wv2:WebView2 x:Name="PreviewWebView" Source="about:blank" />
+                </mah:MetroTabItem>
+            </mah:MetroTabControl>
+        </Grid>
     </Grid>
 </mah:MetroWindow>
