@@ -1,11 +1,25 @@
 ﻿using System.ComponentModel;
 using System.Text;
 using Zaczy.SongBook.Chords;
+using Zaczy.SongBook.Data;
 
 namespace Zaczy.SongBook;
 
 public class Song: INotifyPropertyChanged
 {
+    public Song() { }
+
+    public Song(SongEntity entity): this()
+    {
+        Title = entity.Title;
+        Artist = entity.Artist;
+        Capo = entity.Capo;
+        Lyrics = entity.Lyrics;
+        LyricsAuthor = entity.LyricsAuthor;
+        MusicAuthor = entity.MusicAuthor;
+        ChordsVariations = entity.ChordsVariations;
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected virtual void OnPropertyChanged(string propertyName)
     {
@@ -162,8 +176,7 @@ public class Song: INotifyPropertyChanged
         ["Dwunasty próg"] = 12, ["Dwunasty"] = 12, ["12"] = 12
     };
 
-
-     /// <summary>
+    /// <summary>
     /// Zmienia tonację wszystkich akordów w piosence o wskazaną liczbę półtonów
     /// </summary>
     /// <param name="semitones">Liczba półtonów (dodatnia = w górę, ujemna = w dół)</param>

@@ -43,6 +43,10 @@ public class Chord
         {
             return true;
         }
+        else if (Regex.IsMatch(text.Replace("is",""), chordPattern))
+        {
+            return true;
+        }
 
         return false;
     }

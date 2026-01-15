@@ -187,7 +187,19 @@
                     <WebBrowser x:Name="PreviewBrowser" Source="about:blank" />
                 </mah:MetroTabItem>
                 <mah:MetroTabItem Header="HTML2">
-                    <wv2:WebView2 x:Name="PreviewWebView" Source="about:blank" />
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ToolBar Grid.Row="0">
+                            <Button Content="Tonacja +" Click="ToneUpButton_Click" Padding="10,2"/>
+                            <Button Content="Tonacja -" Click="ToneDownButton_Click" Padding="10,2"/>
+                            <Button Content="Wersja HTML" Click="HtmlVersionButton_Click" Padding="10,2"/>
+                        </ToolBar>
+
+                        <wv2:WebView2 x:Name="PreviewWebView" Source="about:blank" Grid.Row="1" />
+                    </Grid>
                 </mah:MetroTabItem>
             </mah:MetroTabControl>
         </Grid>

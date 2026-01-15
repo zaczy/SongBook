@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zaczy.SongBook.MAUI.Pages.SongsPage"
+             Title="Songs">
+
+    <ContentPage.ToolbarItems>
+        <!-- Menu / Toolbar item that triggers import from API -->
+        <ToolbarItem Text="Import" Command="{Binding FetchCommand}" Order="Primary" Priority="0" />
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="12">
+            <!-- Filters -->
+            <StackLayout Orientation="Horizontal" Spacing="8" Grid.Row="0">
+                <Entry Placeholder="Title" HorizontalOptions="FillAndExpand"
+                       Text="{Binding TitleFilter}" />
+                <Entry Placeholder="Artist" HorizontalOptions="FillAndExpand"
+                       Text="{Binding ArtistFilter}" />
+            </StackLayout>
+
+            <StackLayout Orientation="Horizontal" Spacing="8" Grid.Row="1" Margin="0,8,0,12">
+                <Button Text="Filter" Command="{Binding FilterCommand}" HorizontalOptions="Start" />
+                <Button Text="Clear" Command="{Binding ClearCommand}" HorizontalOptions="Start" />
+                <Button Text="Refresh" Command="{Binding LoadCommand}" HorizontalOptions="Start" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="EndAndExpand" />
+            </StackLayout>
+
+            <!-- List -->
+            <CollectionView ItemsSource="{Binding Songs}" SelectionMode="Single" Grid.Row="2" x:Name="SongsCollection">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,4" Padding="10" Stroke="#ddd" StrokeShape="RoundRectangle 6">
+                            <StackLayout>
+                                <Label Text="{Binding Title}" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding Artist}" FontSize="Small" TextColor="Gray" />
+                            </StackLayout>
+
+                            <!-- Tap handler added to root of template. CommandParameter passes the bound SongEntity -->
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" NumberOfTapsRequired="1" CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Grid.Row="3" Text="Tap item to view details" HorizontalOptions="Center" TextColor="Gray" FontSize="Small" Margin="0,8,0,0" />
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
+             Title="{Binding Title}">
+    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <Label Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="20" />
+        <Label Grid.Row="0" 
+               Text="{Binding Artist}" 
+               FontSize="12" 
+               HorizontalOptions="End"
+               TextColor="Gray" 
+               />
+
+        <BoxView Grid.Row="3" HeightRequest="1" BackgroundColor="#ddd" />
+
+        <WebView Grid.Row="4"
+             x:Name="LyricsWebView"
+             HorizontalOptions="FillAndExpand"
+             VerticalOptions="FillAndExpand" />
+
+    <!-- Transparent touch area above the WebView to detect taps at the top of the page.
+         Placed after WebView so it overlays it, and before ControlsPanel so controls remain top-most. -->
+    <BoxView Grid.Row="0"
+             Grid.ColumnSpan="1"
+             Grid.RowSpan="2"
+             HeightRequest="40"
+             VerticalOptions="Start"
+             BackgroundColor="Transparent"
+             x:Name="TopTouchArea">
+      <BoxView.GestureRecognizers>
+        <TapGestureRecognizer Tapped="OnTopTouched" NumberOfTapsRequired="1" />
+      </BoxView.GestureRecognizers>
+    </BoxView>
+
+    <HorizontalStackLayout x:Name="ControlsPanel"
+                           Grid.Row="0"
+                           Grid.RowSpan="5"
+                           Padding="12"
+                           Spacing="12"
+                           HorizontalOptions="FillAndExpand"
+                           VerticalOptions="Start"
+                           BackgroundColor="#80000000"
+                           IsVisible="False"
+                           Opacity="0">
+      <Button Text="Start scroll" Clicked="OnStartScrollClicked" />
+      <Button Text="Stop scroll" Clicked="OnStopScrollClicked" />
+      <Button Text="A+" Clicked="OnIncreaseFontClicked" />
+      <Button Text="A-" Clicked="OnDecreaseFontClicked" />
+      <Button Text="A0" Clicked="OnResetFontClicked" />
+        </HorizontalStackLayout>
+  </Grid>
+</ContentPage>

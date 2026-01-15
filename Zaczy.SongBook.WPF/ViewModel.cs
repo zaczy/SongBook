@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.Enums;
 
 namespace Zaczy.SongBook.WPF;
 
@@ -91,6 +92,24 @@ public class ViewModel : INotifyPropertyChanged
         }
     }
 
+    private LyricsHtmlVersion _lyricsHtmlVersion = LyricsHtmlVersion.Pre;
+    /// <summary>
+    /// Versja HTML tekstów piosenek
+    /// </summary>
+    public LyricsHtmlVersion LyricsHtmlVersion
+    {
+        get { return _lyricsHtmlVersion; }
+        set
+        {
+            if (_lyricsHtmlVersion != value)
+            {
+                _lyricsHtmlVersion = value;
+                OnPropertyChanged(nameof(LyricsHtmlVersion));
+            }
+        }
+    }
+
+
     /// <summary>
     /// Zapisuje aktualną piosenkę do bazy danych
     /// </summary>
@@ -125,16 +144,7 @@ public class ViewModel : INotifyPropertyChanged
     /// </summary>
     public void LoadSongFromEntity(SongEntity entity)
     {
-        ConvertedSong = new Song
-        {
-            Title = entity.Title,
-            Artist = entity.Artist,
-            Capo = entity.Capo,
-            Lyrics = entity.Lyrics,
-            LyricsAuthor = entity.LyricsAuthor,
-            MusicAuthor = entity.MusicAuthor,
-            ChordsVariations = entity.ChordsVariations
-        };
+        ConvertedSong = new Song(entity);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

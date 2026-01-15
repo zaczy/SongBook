@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Chords;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.Enums;
 
 namespace Zaczy.SongBook.WPF
 {
@@ -135,27 +136,30 @@ namespace Zaczy.SongBook.WPF
             var virtualBase = "https://appassets/"; // odpowiada SetVirtualHostNameToFolderMapping
             visualization.CssFontsPath = new Dictionary<string, string>();
 
-            //string fontFile = "css/Monofonto Regular/Monofonto Regular.ttf";
-            string fontFile = "css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf";
-            if (File.Exists(Path.Combine(appAssetsPath, fontFile))) 
+            if (true)
             {
-                // jeśli pliki istnieją w katalogu assets, użyj ścieżek do nich
-                visualization.CssFontsPath.Add("CustomFixedFont", virtualBase + fontFile);
+                //string fontFile = "css/Monofonto Regular/Monofonto Regular.ttf";
+                string fontFile = "css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf";
+                if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
+                {
+                    // jeśli pliki istnieją w katalogu assets, użyj ścieżek do nich
+                    visualization.CssFontsPath.Add("CustomFixedFont", virtualBase + fontFile);
+                }
+
+                fontFile = "css/Roboto/Roboto-VariableFont_wdth,wght.ttf";
+                if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
+                {
+                    visualization.CssFontsPath.Add("RobotoVariable", virtualBase + fontFile);
+                }
+
+                fontFile = "css/Poltawski_Nowy/PoltawskiNowy-VariableFont_wght.ttf";
+                if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
+                {
+                    visualization.CssFontsPath.Add("PoltawskiVariable", virtualBase + fontFile);
+                }
             }
 
-            fontFile = "css/Roboto/Roboto-VariableFont_wdth,wght.ttf";
-            if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
-            {
-                visualization.CssFontsPath.Add("RobotoVariable", virtualBase + fontFile);
-            }
-
-            fontFile = "css/Poltawski_Nowy/PoltawskiNowy-VariableFont_wght.ttf";
-            if (File.Exists(Path.Combine(appAssetsPath, fontFile)))
-            {
-                visualization.CssFontsPath.Add("PoltawskiVariable", virtualBase + fontFile);
-            }
-
-            var html = visualization.LyricsHtml(ViewModel.ConvertedSong);
+            var html = visualization.LyricsHtml(ViewModel.ConvertedSong, ViewModel.LyricsHtmlVersion);
 
             // Jeśli WebView2 jest gotowy, użyj NavigateToString
             if (_webViewInitialized && PreviewWebView.CoreWebView2 != null)
@@ -302,5 +306,18 @@ namespace Zaczy.SongBook.WPF
             }
         }
 
+        private void HtmlVersionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(ViewModel.LyricsHtmlVersion == LyricsHtmlVersion.Pre)
+            {
+                ViewModel.LyricsHtmlVersion = LyricsHtmlVersion.RelativeHtml;
+            }
+            else
+            {
+                ViewModel.LyricsHtmlVersion = LyricsHtmlVersion.Pre;
+            }
+
+            UpdateSongVisualization();
+        }
     }
 }

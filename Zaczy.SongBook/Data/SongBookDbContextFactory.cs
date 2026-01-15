@@ -7,7 +7,7 @@ public class SongBookDbContextFactory : IDesignTimeDbContextFactory<SongBookDbCo
 {
     public SongBookDbContext CreateDbContext(string[] args)
     {
-        var connectionString = "Server=localhost;Database=songbookc;User=songbook;Password=Qaz43210;";
+        var connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
         
         var optionsBuilder = new DbContextOptionsBuilder<SongBookDbContext>();
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));

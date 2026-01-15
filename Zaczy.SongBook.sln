@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.SongBook.WPF", "Zaczy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.RFiD.Reader", "..\RFID\Zaczy.RFiD.Reader\Zaczy.RFiD.Reader.csproj", "{21C78096-C237-67C7-68C1-5EB78D1BCBD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.SongBook.MAUI", "Zaczy.SongBook.MAUI\Zaczy.SongBook.MAUI.csproj", "{59751838-9841-461F-B951-083346D9C22E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,11 @@ Global
 		{21C78096-C237-67C7-68C1-5EB78D1BCBD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21C78096-C237-67C7-68C1-5EB78D1BCBD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21C78096-C237-67C7-68C1-5EB78D1BCBD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
