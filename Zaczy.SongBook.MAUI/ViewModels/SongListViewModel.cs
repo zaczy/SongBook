@@ -140,15 +140,19 @@ namespace Zaczy.SongBook.MAUI.ViewModels
 
                 if (!apiResponse.IsSuccess || apiResponse.Data == null)
                 {
-                    // nothing to import or request failed
+                    System.Diagnostics.Debug.WriteLine($"FetchFromApiAndLoadAsync: API error: {apiResponse.ErrorMessage} {apiResponse.ErrorDetails}");
                     return;
                 }
 
                 var remoteSongs = apiResponse.Data;
 
+                // For diagnostics: count before
+                var before = await _repo.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"FetchFromApiAndLoadAsync: Before import count = {before.Count}");
+
                 foreach (var remote in remoteSongs)
                 {
-                    // Use title+artist exact match helper from repository
+                    // case-insensitive search by title+artist
                     var existing = await _repo.SearchOnlySongAsync(remote.Title ?? string.Empty, remote.Artist ?? string.Empty);
 
                     if (existing != null)
@@ -165,8 +169,16 @@ namespace Zaczy.SongBook.MAUI.ViewModels
                     }
                 }
 
-                // Reload UI collection from local DB (applies filters)
-                await LoadSongsAsync();
+                // Diagnostics: count after DB changes
+                var after = await _repo.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"FetchFromApiAndLoadAsync: After import count = {after.Count}");
+
+                // Ensure the ObservableCollection is updated on the main thread
+                await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    // reload UI collection from local DB (applies filters)
+                    await LoadSongsAsync();
+                });
             }
             finally
             {

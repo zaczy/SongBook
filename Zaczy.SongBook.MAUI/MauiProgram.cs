@@ -87,10 +87,12 @@ namespace Zaczy.SongBook.MAUI
 
             // Register ViewModels and Pages in DI
             builder.Services.AddTransient<SongListViewModel>();
+            builder.Services.AddSingleton<UserViewModel>();
+
             builder.Services.AddTransient<SongsPage>();
             builder.Services.AddTransient<SongDetailsPage>();
+            builder.Services.AddTransient<SettingsPage>();
 
-            builder.Services.AddSingleton<UserViewModel>();
 
 #if DEBUG
             builder.Logging.AddDebug();

@@ -42,7 +42,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	</PropertyGroup>
 
@@ -92,9 +92,27 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="assets\css\Inconsolata\Inconsolata-VariableFont_wdth,wght.ttf" />
+	  <None Remove="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf" />
+	  <None Remove="assets\css\Monofonto Regular\Monofonto Regular.ttf" />
+	  <None Remove="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
+	  <None Remove="assets\ikona256.png" />
+	</ItemGroup>
+
 	<!-- Include appsettings.json as a MAUI asset so it's available in the app package on Android/iOS -->
 	<ItemGroup>
 	  <MauiAsset Include="appsettings.json" />
+	  <MauiAsset Include="assets\css\Inconsolata\Inconsolata-VariableFont_wdth,wght.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <MauiAsset Include="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <MauiAsset Include="assets\css\Monofonto Regular\Monofonto Regular.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <MauiAsset Include="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -107,10 +125,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiAsset Include="assets\ikona256.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\Zaczy.SongBook\Zaczy.SongBook.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Pages\SettingsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\SongDetailsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

@@ -52,7 +52,15 @@ namespace Zaczy.SongBook.MAUI.Data
         // Example of a search method used in your WPF code (adapt to your Song model)
         public Task<SongEntity?> SearchOnlySongAsync(string title, string artist)
         {
-            var found = _col.FindOne(x => x.Title == title && x.Artist == artist);
+            // use case-insensitive comparison to avoid duplicates differing only by case/whitespace
+            var t = (title ?? string.Empty).Trim();
+            var a = (artist ?? string.Empty).Trim();
+
+            var found = _col.FindOne(x =>
+                (x.Title ?? string.Empty).Trim().Equals(t, StringComparison.OrdinalIgnoreCase)
+                && (x.Artist ?? string.Empty).Trim().Equals(a, StringComparison.OrdinalIgnoreCase)
+            );
+
             return Task.FromResult(found);
         }
 
@@ -61,10 +69,8 @@ namespace Zaczy.SongBook.MAUI.Data
         {
             if (_col.Count() > 0) return;
 
-            var defaultSongs = new[]
+            var defaultSongs = new SongEntity[]
             {
-                new SongEntity { Title = "Sample Song", Artist = "Unknown",  Lyrics = "<p>Sample</p>" },
-                new SongEntity { Title = "Hello", Artist = "World", Lyrics = "<p>Hello World</p>" }
             };
 
             _col.InsertBulk(defaultSongs);

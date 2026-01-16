@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
+             Title="Settings">
+    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12">
+        <Label Grid.Row="0" Text="User preferences" FontAttributes="Bold" FontSize="22" />
+
+        <StackLayout Grid.Row="1" Spacing="6">
+            <Label Text="Base font size adjustment (px)" />
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Slider x:Name="FontSizeSlider"
+                Minimum="-10"
+                Maximum="20"
+                Value="{Binding FontSizeAdjustment, Mode=TwoWay}"
+                VerticalOptions="Center" />
+                <Label Text="{Binding FontSizeAdjustment, StringFormat='{}{0:F1} px'}"
+               Grid.Column="1"
+               VerticalOptions="Center"
+               Margin="8,0,0,0" />
+            </Grid>
+        </StackLayout>
+
+        <StackLayout Grid.Row="2" Spacing="6">
+            <Label Text="Auto-scroll speed (px/sec)" />
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Entry x:Name="AutoScrollEntry"
+               Keyboard="Numeric"
+               Placeholder="e.g. 50"
+               VerticalOptions="Center"
+               WidthRequest="120"
+               TextChanged="OnAutoScrollSpeedTextChanged" />
+                <Label x:Name="AutoScrollHint"
+               Grid.Column="1"
+               VerticalOptions="Center"
+               Margin="8,0,0,0"
+               Text="(set to 0 to disable)" />
+            </Grid>
+        </StackLayout>
+
+        <!-- New control: select LyricsHtmlVersion -->
+        <StackLayout Grid.Row="3" Spacing="6">
+            <Label Text="Lyrics HTML version" />
+            <Picker x:Name="LyricsVersionPicker"
+                    Title="Select version"
+                    SelectedIndexChanged="OnLyricsVersionChanged">
+                <Picker.Items>
+                    <x:String>Pre</x:String>
+                    <x:String>RelativeHtml</x:String>
+                </Picker.Items>
+            </Picker>
+        </StackLayout>
+
+        <StackLayout Grid.Row="4" Orientation="Horizontal" Spacing="12">
+            <Button Text="Resetuj" Clicked="OnResetClicked" />
+            <Button Text="Close" Clicked="OnCloseClicked" HorizontalOptions="EndAndExpand" />
+        </StackLayout>
+
+    </Grid>
+</ContentPage>

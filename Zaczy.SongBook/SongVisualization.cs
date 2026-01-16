@@ -17,7 +17,24 @@ public class SongVisualization
 
     private Dictionary<LyricLineBlockType, int>? _blockTypeCounters;
     
-    
+    public bool IncludeFontsAsBase64 { get; set; } = true;
+
+    private VisualizationCssOptions? _visualizationCssOptions;
+
+    public VisualizationCssOptions VisualizationCssOptions
+    {
+        get 
+        {
+            if (_visualizationCssOptions == null)
+                _visualizationCssOptions = new VisualizationCssOptions();
+
+            return _visualizationCssOptions; 
+        }
+        set { _visualizationCssOptions = value; }
+    }
+
+
+
     /// <summary>
     /// Ładuje czcionkę z pliku i konwertuje do Base64
     /// </summary>
@@ -39,7 +56,7 @@ public class SongVisualization
     /// <param name="version"></param>
     /// <param name="skipHeaders"></param>
     /// <returns></returns>
-    public string LyricsHtml(Song song, LyricsHtmlVersion version = LyricsHtmlVersion.Pre, bool skipHeaders=false)
+    public string LyricsHtml(Song song, LyricsHtmlVersion version = LyricsHtmlVersion.Pre, bool skipHeaders = false)
     {
         if (song.Lines == null || song.Lines.Count == 0)
             return string.Empty;
@@ -56,35 +73,42 @@ public class SongVisualization
         {
             foreach (var font in CssFontsPath)
             {
-                var fontBase64 = GetFontBase64(font.Value);
-                if (!string.IsNullOrEmpty(fontBase64))
+                if (IncludeFontsAsBase64)
                 {
-                    sb.AppendLine($@"
+                    var fontBase64 = GetFontBase64(font.Value);
+                    if (!string.IsNullOrEmpty(fontBase64))
+                    {
+                        sb.AppendLine($@"
                     @font-face {{
                         font-family: '{font.Key}';
                         src: url(data:font/truetype;base64,{fontBase64}) format('truetype');
                         font-weight: normal;
                         font-style: normal;
                     }}");
+                    }
                 }
-                sb.AppendLine($@"
+                else
+                {
+                    sb.AppendLine($@"
                     @font-face {{
                         font-family: '{font.Key}_beta';
                         src: url('{font.Value}') format('truetype');
                         font-weight: normal;
                         font-style: normal;
                     }}");
+                }
             }
         }
 
+        string? customValue = VisualizationCssOptions?.CssValue("pre", "font-family");
         sb.AppendLine(@"
             pre {
-                font-family: 'CustomFixedFont_beta', Roboto, Consolas, monospace;
+                font-family: 'InconsolataVariable', Roboto, Consolas, monospace;
                 line-height: 1em;
                 font-size: 1.1em;
                 white-space: pre-wrap;
                 word-wrap: break-word;
-                font-weight: 500;
+                font-weight: 600;
                 font-stretch: 93%;
             }
             .chords { 
@@ -92,15 +116,13 @@ public class SongVisualization
                 font-weight: 700; 
             }");
 
-        sb.AppendLine("H1 { font-family: RobotoVariable_beta; font-stretch: 100%; color: #b62610; }");
-        sb.AppendLine("H1 .artist { font-family: RobotoVariable_beta; color: #CCC; font-size: 0.6em; }");
-        sb.AppendLine("H2 { font-family: PoltawskiVariable_beta; font-weight: 600; }");
-        sb.AppendLine("H2 .artist { color: #CCC; font-size: 0.6em; }");
+        sb.AppendLine("H1 { font-family: InconsolataVariable, RobotoVariable_beta; font-stretch: 100%; color: #b62610; }");
+        sb.AppendLine("H1 .artist { font-family: InconsolataVariable, RobotoVariable_beta; color: #CCC; font-size: 0.6em; }");
 
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
-
-        sb.AppendLine(".lyrics-line { position: relative; font-family: PoltawskiVariable_beta; font-weight: 500; display: inline-block; }");
+        customValue = VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable_beta'; font-weight: 500; display: inline-block; }");
         sb.AppendLine(".lyrics-line.annotated { height: 1.2em; margin-top: 0.8em; }");
         //sb.AppendLine(".lyrics-line.annotated .chords { position: relative; top: -1.5em; }");
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.9em; }");
@@ -117,16 +139,23 @@ public class SongVisualization
         sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
 
         sb.AppendLine("@media (max-width: 576px) {");
-        sb.AppendLine(".block-zwrotka { margin-left: 5px; }");
-        //sb.AppendLine(".block-zwrotka .block-header { font-size: 0.8em; color: #CCC; position: absolute; display: inline-block; transform: translateX(-0.3em) translateY(0.2em); }");
-        sb.AppendLine(".block-zwrotka .block-header { font-size: 0.7em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.5em) translateY(-0.3em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
+        sb.AppendLine("     .block-zwrotka { margin-left: 5px; }");
+        sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
         
         
-        sb.AppendLine(".block-refren { margin-left: 10px; border-left: 8px solid #F0F0F0; padding-left: 10px; }");
-        sb.AppendLine(".block-refren .block-header { display: none; }");
+        sb.AppendLine("     .block-refren { margin-left: 10px; border-left: 8px solid #F0F0F0; padding-left: 10px; }");
+        sb.AppendLine("     .block-refren .block-header { display: none; }");
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
+
+        if (VisualizationCssOptions != null)
+        {
+            sb.AppendLine("<style>");
+            sb.AppendLine(VisualizationCssOptions.GenerateCss());
+            sb.AppendLine("</style>");
+        }
+
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
         if(!skipHeaders)

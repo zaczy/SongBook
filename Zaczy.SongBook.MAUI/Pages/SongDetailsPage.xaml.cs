@@ -1,10 +1,15 @@
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
+using Microsoft.Maui.Devices;
 using Zaczy.SongBook.Data;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 using Zaczy.SongBook.MAUI.ViewModels;
+using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Zaczy.SongBook.MAUI.Pages
 {
@@ -13,16 +18,39 @@ namespace Zaczy.SongBook.MAUI.Pages
         private readonly Timer _hideControlsTimer;
         private readonly UserViewModel _userViewModel;
 
+        // store injected song entity and helpers so we can regenerate HTML later
+        private readonly SongEntity _songEntity;
+        private readonly SongVisualization _visualization;
+        private readonly string _autoScrollJs;
+
+        private bool _isSubscribed;
+        private VisualizationCssOptions _visualizationCssOptions;
+
+        // remember previous KeepScreenOn value so we restore it on exit
+        private bool _previousKeepScreenOn;
+
+        // Expose the UserViewModel as a public property so XAML can bind to it via x:Reference
+        public UserViewModel UserViewModel => _userViewModel;
+
         public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel)
         {
+            _userViewModel = userViewModel;
+            _songEntity = songEntity ?? new SongEntity();
+            _visualizationCssOptions = new VisualizationCssOptions();
+            _visualization = new SongVisualization() {  IncludeFontsAsBase64 = true, VisualizationCssOptions = _visualizationCssOptions };
+
             InitializeComponent();
 
-            _userViewModel = userViewModel;
+            _visualizationCssOptions.Add(".lyrics-line", "font-family", "PoltawskiVariable");
+            _visualizationCssOptions.Add(".lyrics-line", "font-size", "2em");
+
+            // prepare auto-scroll JS once
+            _autoScrollJs = SongPreviewJavascript.JavascriptTxt();
 
             NavigationPage.SetHasNavigationBar(this, false);
             NavigationPage.SetHasBackButton(this, false);
 
-            BindingContext = songEntity ?? new SongEntity();
+            BindingContext = _songEntity;
 
             _hideControlsTimer = new Timer(3000) { AutoReset = false };
             _hideControlsTimer.Elapsed += (s, e) =>
@@ -30,109 +58,180 @@ namespace Zaczy.SongBook.MAUI.Pages
                 MainThread.BeginInvokeOnMainThread(() => ControlsPanel.IsVisible = false);
             };
 
-            var visualization = new SongVisualization();
+            // ensure we react when the WebView finishes loading
+            LyricsWebView.Navigating += LyricsWebView_Navigating;
+            LyricsWebView.Navigated += OnLyricsWebViewNavigated;
 
-            if (songEntity != null)
+            // initialize fonts and then generate initial HTML
+            _ = InitializeAsync();
+        }
+
+        // Initialize fonts (copy packaged assets to a physical path WebView can access) then render HTML.
+        private async Task InitializeAsync()
+        {
+            try
             {
-                var song = new Song(songEntity);
-                string htmlDocument = visualization.LyricsHtml(song, Enums.LyricsHtmlVersion.RelativeHtml, skipHeaders: true);
-
-                var autoScrollJs = @"
-<script>
-(function(){
-  var rafId = null;
-  var pos = 0;
-  var speed = 50;
-  var last = 0;
-
-  // keep pos updated on manual scroll
-  window.addEventListener('scroll', function(){
-    pos = window.scrollY || window.pageYOffset || 0;
-  }, { passive: true });
-
-  // show controls when user touches near top (mobile)
-  function maybeShowControls(evt){
-    var y = (evt.touches && evt.touches[0] && evt.touches[0].clientY) || (evt.clientY || 0);
-    if(y <= 120){ // threshold in px
-      // navigate to custom scheme to notify native
-      window.location.href = 'app://showControls';
-    }
-  }
-  //window.addEventListener('touchstart', maybeShowControls, {passive:true});
-  //window.addEventListener('mousedown', maybeShowControls, {passive:true}); // desktop/testing
-
-  // base font size helpers
-  window.getBaseFontSize = function(){
-    var fs = window.getComputedStyle(document.documentElement).fontSize;
-    return parseFloat(fs) || 17;
-  };
-  window.setBaseFontSize = function(px){
-    px = Number(px) || 17;
-    document.documentElement.style.fontSize = px + 'px';
-    return px;
-  };
-  window.changeBaseFontSize = function(delta){
-    var cur = window.getBaseFontSize();
-    var next = Math.max(8, Math.min(72, cur + Number(delta)));
-    window.setBaseFontSize(next);
-    return next;
-  };
-
-  window.getScrollPosition = function(){
-    return window.scrollY || window.pageYOffset || 0;
-  };
-
-  window.setScrollPosition = function(y){
-    pos = Number(y) || 0;
-    window.scrollTo(0, pos);
-  };
-
-  // startAutoScroll(pxPerSec, optionalStartY)
-  window.startAutoScroll = function(pxPerSec, startY){
-    speed = Number(pxPerSec) || 50;
-    if (typeof startY === 'number') pos = startY;
-    else pos = window.scrollY || window.pageYOffset || pos || 0;
-
-    if(rafId) return;
-    last = performance.now();
-
-    // ensure initial position applied
-    window.scrollTo(0, pos);
-
-    function step(now){
-      var dt = (now - last)/1000;
-      last = now;
-      pos += speed * dt;
-      window.scrollTo(0, pos);
-      if(window.innerHeight + pos >= document.body.scrollHeight - 1){
-        window.stopAutoScroll();
-        return;
-      }
-      rafId = requestAnimationFrame(step);
-    }
-    rafId = requestAnimationFrame(step);
-  };
-
-  window.stopAutoScroll = function(){
-    if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
-  };
-
-})();
-</script>
-";
-                var insertAt = htmlDocument.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
-                if (insertAt >= 0)
-                    htmlDocument = htmlDocument.Insert(insertAt, autoScrollJs);
-                else
-                    htmlDocument += autoScrollJs;
-
-                LyricsWebView.Source = new HtmlWebViewSource { Html = htmlDocument };
-
-                // intercept custom scheme navigations from JS
-                LyricsWebView.Navigating += LyricsWebView_Navigating;
-                LyricsWebView.Navigated += OnLyricsWebViewNavigated;
+                await EnsureFontsAvailableAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"EnsureFontsAvailableAsync failed: {ex.Message}");
             }
 
+            // generate initial HTML after fonts are available
+            await RegenerateHtmlAsync();
+        }
+
+        // Copy packaged font assets to AppData (if present) and register paths in SongVisualization.CssFontsPath.
+        // SongVisualization will embed base64 if the file exists.
+        private async Task EnsureFontsAvailableAsync()
+        {
+            // List of relative asset paths inside the app package (adjust to actual paths in your project)
+            var fontAssets = new Dictionary<string, string?>
+            {
+                { "InconsolataVariable", "assets/css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf" },
+                //{ "RobotoVariable",  "css/Roboto/Roboto-VariableFont_wdth,wght.ttf" },
+                { "PoltawskiVariable", "assets/css/Poltawski_Nowy/PoltawskiNowy-VariableFont_wght.ttf" }
+            };
+
+            var appData = FileSystem.AppDataDirectory;
+
+            foreach (var kv in fontAssets)
+            {
+                var fontKey = kv.Key;
+                var assetRelative = kv.Value;
+                if (string.IsNullOrEmpty(assetRelative))
+                    continue;
+
+                try
+                {
+                    // destination path in AppData (preserve subfolders)
+                    var destPath = Path.Combine(appData, assetRelative.Replace('/', Path.DirectorySeparatorChar));
+                    var destDir = Path.GetDirectoryName(destPath);
+                    if (!Directory.Exists(destDir))
+                        Directory.CreateDirectory(destDir!);
+
+                    // if missing, try to copy from app package (Resources/Raw or MauiAsset)
+                    if (!File.Exists(destPath))
+                    {
+                        try
+                        {
+                            using var stream = await FileSystem.OpenAppPackageFileAsync(assetRelative);
+                            using var outFs = File.Create(destPath);
+                            await stream.CopyToAsync(outFs);
+                        }
+                        catch (Exception)
+                        {
+                            // asset not found in package — skip this font
+                            System.Diagnostics.Debug.WriteLine($"Font asset not found in package: {assetRelative}");
+                            continue;
+                        }
+                    }
+
+                    // register for visualization — SongVisualization will embed base64 when it finds the file
+                    if (_visualization.CssFontsPath == null)
+                        _visualization.CssFontsPath = new Dictionary<string, string>();
+
+                    // Use the physical file path; SongVisualization.GetFontBase64 will read it and embed
+                    _visualization.CssFontsPath[fontKey] = destPath;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to prepare font {assetRelative}: {ex.Message}");
+                }
+            }
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // subscribe to user prefs changes when page is visible
+            if (!_isSubscribed && _userViewModel != null)
+            {
+                _userViewModel.PropertyChanged += UserViewModel_PropertyChanged;
+                _isSubscribed = true;
+            }
+
+            // keep screen on while this page is visible (Android)
+            try
+            {
+                _previousKeepScreenOn = DeviceDisplay.KeepScreenOn;
+                if (OperatingSystem.IsAndroid())
+                    DeviceDisplay.KeepScreenOn = true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to set KeepScreenOn: {ex.Message}");
+            }
+
+            // always regenerate on appearing to catch changes made while page was not visible
+            _ = RegenerateHtmlAsync();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            // restore previous KeepScreenOn value
+            try
+            {
+                if (OperatingSystem.IsAndroid())
+                    DeviceDisplay.KeepScreenOn = _previousKeepScreenOn;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to restore KeepScreenOn: {ex.Message}");
+            }
+
+            // unsubscribe WebView events to avoid duplicate handlers and leaks
+            LyricsWebView.Navigated -= OnLyricsWebViewNavigated;
+            LyricsWebView.Navigating -= LyricsWebView_Navigating;
+
+            // unsubscribe to avoid leaks and to stop receiving events while page is not visible
+            if (_isSubscribed && _userViewModel != null)
+            {
+                _userViewModel.PropertyChanged -= UserViewModel_PropertyChanged;
+                _isSubscribed = false;
+            }
+        }
+
+        private void UserViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e == null) return;
+
+            // regenerate HTML when relevant user prefs change
+            if (e.PropertyName == nameof(UserViewModel.LyricsHtmlVersion)
+                || e.PropertyName == nameof(UserViewModel.FontSizeAdjustment))
+            {
+                MainThread.BeginInvokeOnMainThread(async () => await RegenerateHtmlAsync());
+            }
+        }
+
+        /// <summary>
+        /// Regenerates the HTML source for the WebView using current user preferences.
+        /// Do not attempt to evaluate JS immediately — wait for Navigated (OnLyricsWebViewNavigated).
+        /// </summary>
+        private async Task RegenerateHtmlAsync()
+        {
+            try
+            {
+                var song = new Song(_songEntity);
+                string htmlDocument = _visualization.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
+
+                var insertAt = htmlDocument.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
+                if (insertAt >= 0)
+                    htmlDocument = htmlDocument.Insert(insertAt, _autoScrollJs);
+                else
+                    htmlDocument += _autoScrollJs;
+
+                // set the HTML; wait for Navigated event to apply font-size via JS
+                LyricsWebView.Source = new HtmlWebViewSource { Html = htmlDocument };
+            }
+            catch
+            {
+                // ignore for robustness; you may add logging here
+            }
         }
 
         /// <summary>
@@ -171,12 +270,9 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
-        // If you create pages through DI you can instead use:
-        // public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel) { _userViewModel = userViewModel; ... }
-        // and then you can remove the service-resolve fallback in the handler below.
-
         private async void OnLyricsWebViewNavigated(object? sender, WebNavigatedEventArgs e)
         {
+            // Apply font size after navigation completes.
             await SetAbsoluteFontSize();
         }
 
@@ -194,7 +290,16 @@ namespace Zaczy.SongBook.MAUI.Pages
 
                 var basePx = 17.0 + userVm.FontSizeAdjustment;
 
-                await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
+                // Evaluate JS and observe potential errors if JS function is missing.
+                try
+                {
+                    await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
+                }
+                catch (Exception ex)
+                {
+                    // swallow but optionally log; JS may not be ready or function missing
+                    System.Diagnostics.Debug.WriteLine($"SetAbsoluteFontSize JS error: {ex.Message}");
+                }
             }
             catch
             {
@@ -217,13 +322,6 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-            LyricsWebView.Navigated -= OnLyricsWebViewNavigated;
-        }
-
-
         // Start auto-scroll at ~50 px/sec (adjust as needed).
         // Before starting, query current scroll position so auto-scroll begins exactly where user left it.
         private async void OnStartScrollClicked(object sender, EventArgs e)
@@ -239,6 +337,7 @@ namespace Zaczy.SongBook.MAUI.Pages
                 {
                     await LyricsWebView.EvaluateJavaScriptAsync("startAutoScroll(50);");
                 }
+                _userViewModel.ScrollingInProgress = true;
                 ShowControls();
             }
             catch (Exception) { /* handle or log if needed */ }
@@ -249,6 +348,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             try
             {
                 await LyricsWebView.EvaluateJavaScriptAsync("stopAutoScroll();");
+                _userViewModel.ScrollingInProgress = false;
                 ShowControls();
             }
             catch (Exception) { /* handle or log if needed */ }
@@ -304,6 +404,41 @@ namespace Zaczy.SongBook.MAUI.Pages
             _userViewModel.FontSizeAdjustment = 0;
             await this.SetAbsoluteFontSize();
 
+        }
+
+        private async void OnSettingsClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var mauiContext = Application.Current?.Handler?.MauiContext;
+                var services = mauiContext?.Services;
+                if (services == null)
+                    return;
+
+                // resolve SettingsPage from DI (registered in MauiProgram)
+                var page = services.GetService(typeof(SettingsPage)) as Page;
+                if (page == null)
+                    return;
+
+                await Navigation.PushAsync(page);
+            }
+            catch (Exception)
+            {
+                // ignore/navigation failure
+            }
+
+            // Alternatywnie
+            // await Navigation.PushAsync(serviceProvider.GetRequiredService<SettingsPage>());
+        }
+
+        private void OnScrollToggleClicked(object sender, EventArgs e)
+        {
+            if (_userViewModel.ScrollingInProgress == true)
+                this.OnStopScrollClicked(sender, e);
+            else
+                this.OnStartScrollClicked(sender, e);
+
+            OnPropertyChanged(nameof(UserViewModel));
         }
     }
 }

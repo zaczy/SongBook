@@ -2,9 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
+             x:Name="Root"
+             BackgroundColor="White"
              Title="{Binding Title}">
-    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*">
-        <Label Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="20" />
+    <Grid Padding="12,12,12,0" RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <Label Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="20" TextColor="#666" />
         <Label Grid.Row="0" 
                Text="{Binding Artist}" 
                FontSize="12" 
@@ -38,16 +40,23 @@
                            Grid.RowSpan="5"
                            Padding="12"
                            Spacing="12"
-                           HorizontalOptions="FillAndExpand"
                            VerticalOptions="Start"
                            BackgroundColor="#80000000"
                            IsVisible="False"
                            Opacity="0">
-      <Button Text="Start scroll" Clicked="OnStartScrollClicked" />
-      <Button Text="Stop scroll" Clicked="OnStopScrollClicked" />
+        <!-- bind to the UserViewModel exposed on the page with x:Reference -->
+        <Button 
+            x:Name ="ScrollToggle"
+            Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingText}"
+            Clicked="OnScrollToggleClicked" />
       <Button Text="A+" Clicked="OnIncreaseFontClicked" />
       <Button Text="A-" Clicked="OnDecreaseFontClicked" />
       <Button Text="A0" Clicked="OnResetFontClicked" />
-        </HorizontalStackLayout>
+      <!-- Gear button: uses unicode gear ⚙. Replace with ImageButton if you have an icon asset. -->
+      <Button Text="⚙" Clicked="OnSettingsClicked"
+              AutomationProperties.HelpText="Settings"
+              WidthRequest="44"
+              HeightRequest="44" />
+    </HorizontalStackLayout>
   </Grid>
 </ContentPage>
