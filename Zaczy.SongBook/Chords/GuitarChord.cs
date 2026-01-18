@@ -306,8 +306,10 @@ public class GuitarChord
             
             int x1 = marginLeft + (6 - maxString) * stringSpacing;
             int x2 = marginLeft + (6 - minString) * stringSpacing;
-            
-            svg.AppendLine($@"  <rect x=""{x1 - circleRadius}"" y=""{y - circleRadius}"" width=""{x2 - x1 + circleRadius * 2}"" height=""{circleRadius * 2}"" rx=""{circleRadius}"" fill=""black""/>");
+
+            var barreRadius = circleRadius - 2;
+
+            svg.AppendLine($@"  <rect x=""{x1 - barreRadius}"" y=""{y - barreRadius}"" width=""{x2 - x1 + barreRadius * 2}"" height=""{barreRadius * 2}"" rx=""{barreRadius}"" fill=""black""/>");
         }
         
         // Rysuj palce (czarne kółka z numerami)
@@ -503,7 +505,11 @@ public class GuitarChord
         }
 
         if (!hasBarr)
+        {
             Tones.Add(new GuitarChordTone(semitones));
+            MutedStrings.Clear();
+            OpenStrings.Clear();
+        }
     }
 
 

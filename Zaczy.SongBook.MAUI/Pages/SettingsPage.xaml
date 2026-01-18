@@ -2,58 +2,85 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
-             Title="Settings">
-    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12">
-        <Label Grid.Row="0" Text="User preferences" FontAttributes="Bold" FontSize="22" />
+             Title="Ustawienia">
+    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*"  ColumnDefinitions="150,*" RowSpacing="12">
+        <Label Grid.Row="0" Text="Preferencje użytkownika" FontAttributes="Bold" FontSize="20" Grid.ColumnSpan="2" />
 
-        <StackLayout Grid.Row="1" Spacing="6">
-            <Label Text="Base font size adjustment (px)" />
-            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+            <Label Text="Modyfikacja wielkości czcionki (px)" 
+                   Grid.Row="1"
+                   Grid.Column="0" 
+                   FontSize="12"
+                   Margin="0,25,0,5"
+                   />
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center"
+                Grid.Row="1"
+                Grid.Column="2" 
+                >
+
                 <Slider x:Name="FontSizeSlider"
-                Minimum="-10"
-                Maximum="20"
-                Value="{Binding FontSizeAdjustment, Mode=TwoWay}"
-                VerticalOptions="Center" />
+                        Minimum="-10"
+                        Maximum="20"
+                        Value="{Binding FontSizeAdjustment, Mode=TwoWay}"
+                        VerticalOptions="Center" />
                 <Label Text="{Binding FontSizeAdjustment, StringFormat='{}{0:F1} px'}"
-               Grid.Column="1"
-               VerticalOptions="Center"
-               Margin="8,0,0,0" />
+                       Grid.Column="1"
+                       VerticalOptions="Center"
+                       Margin="8,0,0,0" />
             </Grid>
-        </StackLayout>
 
-        <StackLayout Grid.Row="2" Spacing="6">
-            <Label Text="Auto-scroll speed (px/sec)" />
-            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+            <Label 
+                Text="Szybkość przewijania automatycznego tekstu" 
+                Grid.Row="2"
+                Grid.Column="0" 
+                FontSize="12"
+                Margin="0,15,0,20"
+               />
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center" Grid.Column="1" Grid.Row="2">
                 <Entry x:Name="AutoScrollEntry"
-               Keyboard="Numeric"
-               Placeholder="e.g. 50"
-               VerticalOptions="Center"
-               WidthRequest="120"
-               TextChanged="OnAutoScrollSpeedTextChanged" />
+                       Keyboard="Numeric"
+                       Placeholder="e.g. 50"
+                       VerticalOptions="Center"
+                       WidthRequest="120"
+                       TextChanged="OnAutoScrollSpeedTextChanged" />
                 <Label x:Name="AutoScrollHint"
-               Grid.Column="1"
-               VerticalOptions="Center"
-               Margin="8,0,0,0"
-               Text="(set to 0 to disable)" />
+                       Grid.Column="1"
+                       VerticalOptions="Center"
+                       Margin="8,0,0,0"
+                       Text="( 0 aby wyłączyć)" 
+                       FontSize="12"
+                       TextColor="#999"
+                       />
             </Grid>
-        </StackLayout>
 
-        <!-- New control: select LyricsHtmlVersion -->
-        <StackLayout Grid.Row="3" Spacing="6">
-            <Label Text="Lyrics HTML version" />
-            <Picker x:Name="LyricsVersionPicker"
-                    Title="Select version"
-                    SelectedIndexChanged="OnLyricsVersionChanged">
-                <Picker.Items>
-                    <x:String>Pre</x:String>
-                    <x:String>RelativeHtml</x:String>
-                </Picker.Items>
-            </Picker>
-        </StackLayout>
+            <Label 
+                Text="Prezentacja tekstu piosenki" 
+                Grid.Row="3"
+                Grid.Column="0" 
+                FontSize="12"
+                Margin="0,10,1,20"
+                />
+            <StackLayout 
+                VerticalOptions="Center"
+                Grid.Row="3"                   
+                Grid.Column="1"
+                >
+                <RadioButton x:Name="RadioPre"
+                             Content="Stała szerokość"
+                             FontSize="11"
+                             CheckedChanged="OnLyricsVersionRadioChanged" 
+                             Margin="0"
+                             />
+                <RadioButton x:Name="RadioRelative"
+                             FontSize="11"
+                             Content="Html formatowany"
+                             CheckedChanged="OnLyricsVersionRadioChanged" 
+                             Margin="0,-15,0,0"
+                             />
+            </StackLayout>
 
-        <StackLayout Grid.Row="4" Orientation="Horizontal" Spacing="12">
+        <StackLayout Grid.Row="4" Orientation="Horizontal" VerticalOptions="End" Spacing="12" HorizontalOptions="Center" Grid.ColumnSpan="2" Margin="0,0,0,20">
             <Button Text="Resetuj" Clicked="OnResetClicked" />
-            <Button Text="Close" Clicked="OnCloseClicked" HorizontalOptions="EndAndExpand" />
+            <Button Text="Zamknij" Clicked="OnCloseClicked"  />
         </StackLayout>
 
     </Grid>

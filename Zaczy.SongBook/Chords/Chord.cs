@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Zaczy.SongBook.Extensions;
 
 namespace Zaczy.SongBook.Chords;
 
@@ -137,6 +138,9 @@ public class Chord
     /// <returns></returns>
     public static bool IsChordLine(string line)
     {
+        if(string.IsNullOrWhiteSpace(line))
+            return false;
+
         var tokens = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length == 0)
             return false;
@@ -146,6 +150,27 @@ public class Chord
                 return false;
         }
         return true;
+    }
+
+    /// <summary>
+    ///  Pobiera unikalne akordy z linii tekstu
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public static HashSet<string> ExtractChordsFromLine(string line)
+    {
+        int chordsStart = ChordPartStart(line);
+
+        var chords = new HashSet<string>();
+        var tokens = line.SubstringSafe(chordsStart, line.Length).Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var token in tokens)
+        {
+            if (!string.IsNullOrWhiteSpace(token) && IsChord(token) && !chords.Contains(token))
+            {
+                chords.Add(token);
+            }
+        }
+        return chords;
     }
 
     /// <summary>

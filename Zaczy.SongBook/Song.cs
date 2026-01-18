@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text;
+using System.Text.Json.Serialization;
 using Zaczy.SongBook.Chords;
 using Zaczy.SongBook.Data;
 
@@ -54,6 +55,7 @@ public class Song: INotifyPropertyChanged
     }
 
     private string? _lyricsAuthor;
+    [JsonPropertyName("lyrics_author")]
     public string? LyricsAuthor
     {
         get => _lyricsAuthor;
@@ -67,6 +69,7 @@ public class Song: INotifyPropertyChanged
         }
     }
 
+    [JsonPropertyName("music_author")]
     private string? _musicAuthor;
     public string? MusicAuthor
     {
@@ -113,6 +116,7 @@ public class Song: INotifyPropertyChanged
     /// <summary>
     /// Wykaz niestandardowych wersji akordów
     /// </summary>
+    [JsonPropertyName("chords_variations")]
     public string? ChordsVariations
     {
         get { return _chordsVariations; }
@@ -260,5 +264,10 @@ public class Song: INotifyPropertyChanged
             MusicAuthor = converter.GetMusicAuthor()
         };
         return song;
+    }
+
+    public override string ToString()
+    {
+        return $"{Title} - {Artist}";
     }
 }

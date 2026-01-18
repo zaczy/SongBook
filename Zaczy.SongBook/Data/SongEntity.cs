@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Zaczy.SongBook.Data;
 
@@ -20,10 +21,12 @@ public class SongEntity
     public string? Artist { get; set; }
 
     [Column("lyrics_author")]
+    [JsonPropertyName("lyrics_author")]
     [MaxLength(255)]
     public string? LyricsAuthor { get; set; }
 
     [Column("music_author")]
+    [JsonPropertyName("music_author")]
     [MaxLength(255)]
     public string? MusicAuthor { get; set; }
 
@@ -38,6 +41,7 @@ public class SongEntity
     public string? Comments { get; set; }
 
     [Column("chords_variations")]
+    [JsonPropertyName("chords_variations")]
     public string? ChordsVariations { get; set; }
 
     [Column("created_at")]
@@ -55,5 +59,10 @@ public class SongEntity
         LyricsAuthor = song.LyricsAuthor;
         MusicAuthor = song.MusicAuthor;
         ChordsVariations = song.ChordsVariations;
+    }
+
+    public override string ToString()
+    {
+        return $"{Title} ({Id})";
     }
 }

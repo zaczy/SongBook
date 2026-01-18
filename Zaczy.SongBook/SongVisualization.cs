@@ -61,6 +61,8 @@ public class SongVisualization
         if (song.Lines == null || song.Lines.Count == 0)
             return string.Empty;
 
+        SongInternalDetails? songInternalDetails = SongInternalDetails.AnalyseSong(song);
+
         var sb = new StringBuilder();
 
         sb.AppendLine($"<html><head>");
@@ -137,9 +139,10 @@ public class SongVisualization
         sb.AppendLine(".block-refren .block-header { display: none; }");
 
         sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
+        sb.AppendLine(".lyrics-author, .music-author { color: #AAA; font-size: 0.8em; margin-top: 5px; }");
 
         sb.AppendLine("@media (max-width: 576px) {");
-        sb.AppendLine("     .block-zwrotka { margin-left: 5px; }");
+        sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
         
         
@@ -171,7 +174,7 @@ public class SongVisualization
             string lyrics = string.Empty;
             foreach (var line in song.Lines)
             {
-                var blockType = RecognizeBlockType(line);
+                var blockType = SongInternalDetails.RecognizeBlockType(line);
 
                 if(blockType != LyricLineBlockType.Inne)
                 {
@@ -221,6 +224,32 @@ public class SongVisualization
             sb.AppendLine(TransformToVariableFontVersion(song));
         }
 
+        if(song.LyricsAuthor != null)
+        {
+            sb.AppendLine("<br/>");
+            sb.AppendLine($"<div class=\"lyrics-author\">Tekst: {song.LyricsAuthor}</div>");
+        }
+        if(song.MusicAuthor != null)
+        {
+            sb.AppendLine($"<div class=\"music-author\">Muzyka: {song.MusicAuthor}</div>");
+        }
+
+        if (songInternalDetails?.Chords?.Count > 0)
+        {
+            sb.AppendLine("<br/><br/>");
+            sb.AppendLine("<div class=\"chord-list\">");
+            foreach (var chord in songInternalDetails.Chords.OrderBy(c => c))
+            {
+                var chordSuggestion = songInternalDetails.GetChordSuggestion(chord);
+                var guitarChord = ChordsLibrary.StandardChord(chord, chordSuggestion);
+                if (guitarChord != null)
+                {
+                     sb.AppendLine(guitarChord.ToSvgHorizontal());
+                }
+            }
+            sb.AppendLine("</div>");
+        }
+
         sb.AppendLine("</body></html>");
 
         return sb.ToString();
@@ -237,6 +266,8 @@ public class SongVisualization
 
         if (song?.Lines == null)
             return string.Empty;
+
+        _blockTypeCounters = new Dictionary<LyricLineBlockType, int>();
 
         LyricLineBlockType currentBlockType = LyricLineBlockType.Inne;
         LyricLineBlockType? previousBlockType = null;
@@ -272,7 +303,7 @@ public class SongVisualization
                 emptyLineCounter = 0;
             }
 
-            var blockType = RecognizeBlockType(line);
+            var blockType = SongInternalDetails.RecognizeBlockType(line);
 
             if (blockType != LyricLineBlockType.Inne)
             {
@@ -387,7 +418,7 @@ public class SongVisualization
             else
             {
                 string? nextLine = i < song.Lines.Count - 1 ? song.Lines[i + 1] : null;
-                blockType = RecognizeBlockType(nextLine!);
+                blockType = SongInternalDetails.RecognizeBlockType(nextLine!);
 
                 int chordStart = Chord.ChordPartStart(line);
 
@@ -527,66 +558,6 @@ public class SongVisualization
         }
 
         return -1;
-    }
-
-    /// <summary>
-    /// Rozpoznaje typ bloku linii tekstu piosenki.
-    /// Zwraca Zwrotka dla: "zwr.", "zwrotka" lub pojedynczej liczby naturalnej (np. "1" lub "1.")
-    /// Zwraca Refren dla: "ref.", "refren"
-    /// W przeciwnym wypadku zwraca Inne.
-    /// Dodatkowo obsługuje wieloczęściowe linie rozdzielone znakiem '|' np. "Zwrotka 1|Zwrotka 2".
-    /// </summary>
-    public LyricLineBlockType RecognizeBlockType(string line)
-    {
-        if (string.IsNullOrWhiteSpace(line))
-            return LyricLineBlockType.Inne;
-
-        var trimmed = line.Trim();
-        var normalized = trimmed.NormalizeInlineWhitespace().ToLowerInvariant();
-        normalized = normalized.Replace(".", "").Replace(";", "").Replace(":", "");
-
-        // handle pipe-separated sequences like "zwrotka 1|zwrotka 2"
-        if (normalized.Contains('|'))
-        {
-            var parts = normalized.Split('|').Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
-            if (parts.Length > 0)
-            {
-                if (parts.All(IsZwrotkaSegment))
-                    return LyricLineBlockType.Zwrotka;
-                if (parts.All(IsRefrenSegment))
-                    return LyricLineBlockType.Refren;
-            }
-        }
-
-        if (IsZwrotkaSegment(normalized))
-            return LyricLineBlockType.Zwrotka;
-
-        if (IsRefrenSegment(normalized))
-            return LyricLineBlockType.Refren;
-
-        // single natural number, allow optional trailing dot (e.g. "1" or "1.")
-        if (Regex.IsMatch(normalized, @"^\d+\.?$"))
-            return LyricLineBlockType.Zwrotka;
-
-        return LyricLineBlockType.Inne;
-
-        static bool IsZwrotkaSegment(string s)
-        {
-            if (string.IsNullOrEmpty(s)) return false;
-            if (s == "zwr" || s == "zwrotka") return true;
-            if (Regex.IsMatch(s, @"^zwrotka\s*\d+\.?$")) return true;
-            if (Regex.IsMatch(s, @"^\d+\s*zwrotka\s*\.?$")) return true;
-            if (Regex.IsMatch(s, @"^\d+\.?$")) return true; 
-            return false;
-        }
-
-        static bool IsRefrenSegment(string s)
-        {
-            if (string.IsNullOrEmpty(s)) return false;
-            if (s == "ref" || s == "refren") return true;
-            if (Regex.IsMatch(s, @"^refren\s*\d+\.?$")) return true; // "refren 1"
-            return false;
-        }
     }
 
     /// <summary>

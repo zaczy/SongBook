@@ -42,7 +42,8 @@ namespace Zaczy.SongBook.MAUI.Pages
             InitializeComponent();
 
             _visualizationCssOptions.Add(".lyrics-line", "font-family", "PoltawskiVariable");
-            _visualizationCssOptions.Add(".lyrics-line", "font-size", "2em");
+            //_visualizationCssOptions.Add(".lyrics-line", "font-size", "2em");
+            _visualizationCssOptions.Add("pre", "font-weight", "600");
 
             // prepare auto-scroll JS once
             _autoScrollJs = SongPreviewJavascript.JavascriptTxt();
@@ -50,7 +51,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             NavigationPage.SetHasNavigationBar(this, false);
             NavigationPage.SetHasBackButton(this, false);
 
-            BindingContext = _songEntity;
+            BindingContext = _songEntity; // keep original binding
 
             _hideControlsTimer = new Timer(3000) { AutoReset = false };
             _hideControlsTimer.Elapsed += (s, e) =>
@@ -59,6 +60,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             };
 
             // ensure we react when the WebView finishes loading
+            // attach here, but we will re-attach in OnAppearing to handle navigation round-trips
             LyricsWebView.Navigating += LyricsWebView_Navigating;
             LyricsWebView.Navigated += OnLyricsWebViewNavigated;
 
@@ -146,6 +148,17 @@ namespace Zaczy.SongBook.MAUI.Pages
         {
             base.OnAppearing();
 
+            // re-subscribe WebView handlers (safe: remove then add to avoid duplicates)
+            try
+            {
+                LyricsWebView.Navigating -= LyricsWebView_Navigating;
+                LyricsWebView.Navigated -= OnLyricsWebViewNavigated;
+
+                LyricsWebView.Navigating += LyricsWebView_Navigating;
+                LyricsWebView.Navigated += OnLyricsWebViewNavigated;
+            }
+            catch { /* ignore if control not ready */ }
+
             // subscribe to user prefs changes when page is visible
             if (!_isSubscribed && _userViewModel != null)
             {
@@ -185,8 +198,12 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
 
             // unsubscribe WebView events to avoid duplicate handlers and leaks
-            LyricsWebView.Navigated -= OnLyricsWebViewNavigated;
-            LyricsWebView.Navigating -= LyricsWebView_Navigating;
+            try
+            {
+                LyricsWebView.Navigated -= OnLyricsWebViewNavigated;
+                LyricsWebView.Navigating -= LyricsWebView_Navigating;
+            }
+            catch { /* ignore if already removed */ }
 
             // unsubscribe to avoid leaks and to stop receiving events while page is not visible
             if (_isSubscribed && _userViewModel != null)
@@ -331,11 +348,11 @@ namespace Zaczy.SongBook.MAUI.Pages
                 var posStr = await LyricsWebView.EvaluateJavaScriptAsync("window.getScrollPosition().toString();");
                 if (double.TryParse(posStr?.Trim('"'), out var pos))
                 {
-                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll(50, {pos});");
+                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({UserViewModel?.AutoScrollSpeed ?? 30}, {pos});");
                 }
                 else
                 {
-                    await LyricsWebView.EvaluateJavaScriptAsync("startAutoScroll(50);");
+                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({UserViewModel?.AutoScrollSpeed ?? 30});");
                 }
                 _userViewModel.ScrollingInProgress = true;
                 ShowControls();
@@ -354,56 +371,38 @@ namespace Zaczy.SongBook.MAUI.Pages
             catch (Exception) { /* handle or log if needed */ }
         }
 
-        // Increase base HTML font size by ~2px
+        // Increase base HTML font size by 1px (applies absolute font to JS to avoid stale state)
         private async void OnIncreaseFontClicked(object sender, EventArgs e)
         {
             try
             {
                 _userViewModel.FontSizeAdjustment += 2;
-                await LyricsWebView.EvaluateJavaScriptAsync("changeBaseFontSize(2);");
+                var basePx = 17.0 + _userViewModel.FontSizeAdjustment;
+                await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
                 // keep controls visible briefly
                 ShowControls();
             }
             catch { /* ignore */ }
         }
 
-        // Decrease base HTML font size by ~2px
+        // Decrease base HTML font size by 1px
         private async void OnDecreaseFontClicked(object sender, EventArgs e)
         {
             try
             {
                 _userViewModel.FontSizeAdjustment -= 2;
-                await LyricsWebView.EvaluateJavaScriptAsync("changeBaseFontSize(-2);");
+                var basePx = 17.0 + _userViewModel.FontSizeAdjustment;
+                await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
                 ShowControls();
             }
             catch { /* ignore */ }
         }
 
-        // Handler for the transparent top touch area
-        private void OnTopTouched(object sender, EventArgs e)
-        {
-            _ = ShowControlsAsync();
-        }
-
-        // Async show/hide helpers (used previously)
-        private async Task ShowControlsAsync()
-        {
-            try
-            {
-                ControlsPanel.IsVisible = true;
-                ControlsPanel.Opacity = 0;
-                await ControlsPanel.FadeTo(1, 200);
-                _hideControlsTimer.Stop();
-                _hideControlsTimer.Start();
-            }
-            catch { /* ignore animation errors */ }
-        }
-
+        // Reset font (already called setAbsolute)
         private async void OnResetFontClicked(object sender, EventArgs e)
         {
             _userViewModel.FontSizeAdjustment = 0;
-            await this.SetAbsoluteFontSize();
-
+            await SetAbsoluteFontSize();
         }
 
         private async void OnSettingsClicked(object sender, EventArgs e)
@@ -429,6 +428,26 @@ namespace Zaczy.SongBook.MAUI.Pages
 
             // Alternatywnie
             // await Navigation.PushAsync(serviceProvider.GetRequiredService<SettingsPage>());
+        }
+
+        // Handler for the transparent top touch area
+        private void OnTopTouched(object sender, EventArgs e)
+        {
+            _ = ShowControlsAsync();
+        }
+
+        // Async show/hide helpers (used previously)
+        private async Task ShowControlsAsync()
+        {
+            try
+            {
+                ControlsPanel.IsVisible = true;
+                ControlsPanel.Opacity = 0;
+                await ControlsPanel.FadeTo(1, 200);
+                _hideControlsTimer.Stop();
+                _hideControlsTimer.Start();
+            }
+            catch { /* ignore animation errors */ }
         }
 
         private void OnScrollToggleClicked(object sender, EventArgs e)

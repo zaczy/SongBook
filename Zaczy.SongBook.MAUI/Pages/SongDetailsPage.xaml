@@ -9,9 +9,10 @@
         <Label Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="20" TextColor="#666" />
         <Label Grid.Row="0" 
                Text="{Binding Artist}" 
-               FontSize="12" 
+               FontSize="14" 
                HorizontalOptions="End"
                TextColor="Gray" 
+               Padding="0,0,0,0"
                />
 
         <BoxView Grid.Row="3" HeightRequest="1" BackgroundColor="#ddd" />
