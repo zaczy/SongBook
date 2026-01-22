@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
              x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
+             x:DataType="vm:UserViewModel"
              Title="Ustawienia">
     <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*"  ColumnDefinitions="150,*" RowSpacing="12">
         <Label Grid.Row="0" Text="Preferencje użytkownika" FontAttributes="Bold" FontSize="20" Grid.ColumnSpan="2" />

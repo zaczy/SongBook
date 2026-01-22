@@ -50,6 +50,15 @@ public class SongEntity
     [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
 
+    [Column("scrolling_delay")]
+    public int ScrollingDelay { get; set; }
+
+    [Column("scrolling_tempo")]
+    public int? ScrollingTempo { get; set; }
+
+    [Column("spotify_link")]
+    public string? SpotifyLink { get; set; }
+
     public void initFromSong(Song song)
     {
         Title = song.Title;
@@ -59,6 +68,9 @@ public class SongEntity
         LyricsAuthor = song.LyricsAuthor;
         MusicAuthor = song.MusicAuthor;
         ChordsVariations = song.ChordsVariations;
+        ScrollingDelay = song.ScrollingDelay;
+        ScrollingTempo = song.ScrollingTempo;
+        SpotifyLink = song.SpotifyLink;
     }
 
     public override string ToString()

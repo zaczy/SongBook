@@ -9,12 +9,10 @@ public class SongBookDbContext : DbContext
     public SongBookDbContext(DbContextOptions<SongBookDbContext> options) 
         : base(options)
     {
-        string a = "";
     }
 
     public SongBookDbContext()
     {
-        string a = "";
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

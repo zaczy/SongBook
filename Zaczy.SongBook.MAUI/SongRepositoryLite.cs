@@ -26,9 +26,10 @@ namespace Zaczy.SongBook.MAUI.Data
             return Task.FromResult(_col.FindAll().ToList());
         }
 
-        public Task<SongEntity?> GetByIdAsync(int id)
+        public Task<SongEntity>? GetByIdAsync(int id)
         {
-            return Task.FromResult(_col.FindById(id));
+            var result = Task.FromResult(_col.FindById(id));
+            return result;
         }
 
         public Task AddAsync(SongEntity entity)
@@ -50,7 +51,7 @@ namespace Zaczy.SongBook.MAUI.Data
         }
 
         // Example of a search method used in your WPF code (adapt to your Song model)
-        public Task<SongEntity?> SearchOnlySongAsync(string title, string artist)
+        public Task<SongEntity>? SearchOnlySongAsync(string? title, string? artist)
         {
             // use case-insensitive comparison to avoid duplicates differing only by case/whitespace
             var t = (title ?? string.Empty).Trim();

@@ -41,6 +41,9 @@ namespace Zaczy.SongBook.MAUI.ViewModels
         public ObservableCollection<SongEntity> Songs { get; } = new();
 
         private string? _titleFilter;
+        /// <summary>
+        /// Tytu³ utworu
+        /// </summary>
         public string? TitleFilter
         {
             get => _titleFilter;
@@ -55,6 +58,9 @@ namespace Zaczy.SongBook.MAUI.ViewModels
         }
 
         private string? _artistFilter;
+        /// <summary>
+        /// Wykonawca
+        /// </summary>
         public string? ArtistFilter
         {
             get => _artistFilter;
@@ -87,6 +93,10 @@ namespace Zaczy.SongBook.MAUI.ViewModels
         public ICommand ClearCommand { get; }
         public ICommand FetchCommand { get; }
 
+        /// <summary>
+        /// Pobierz listê utworów z bazy lokalnej (z uwzglêdnieniem filtrów)
+        /// </summary>
+        /// <returns></returns>
         public async Task LoadSongsAsync()
         {
             if (IsBusy) return;
@@ -100,14 +110,9 @@ namespace Zaczy.SongBook.MAUI.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(TitleFilter))
                 {
-                    query = query.Where(s => !string.IsNullOrEmpty(s.Title) &&
-                                              s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (!string.IsNullOrWhiteSpace(ArtistFilter))
-                {
-                    query = query.Where(s => !string.IsNullOrEmpty(s.Artist) &&
-                                              s.Artist.Contains(ArtistFilter, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(s => (!string.IsNullOrEmpty(s.Title) && s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                            || (!string.IsNullOrEmpty(s.Artist) && s.Artist.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                            );
                 }
 
                 var ordered = query.OrderBy(s => s.Title ?? string.Empty).ToList();
@@ -153,18 +158,20 @@ namespace Zaczy.SongBook.MAUI.ViewModels
                 foreach (var remote in remoteSongs)
                 {
                     // case-insensitive search by title+artist
-                    var existing = await _repo.SearchOnlySongAsync(remote.Title ?? string.Empty, remote.Artist ?? string.Empty);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    var existing = await _repo.SearchOnlySongAsync(remote!.Title , remote!.Artist);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                     if (existing != null)
                     {
-                        existing.initFromSong(remote);
+                        existing.initFromSong(remote!);
                         existing.UpdatedAt = DateTime.UtcNow;
                         await _repo.UpdateAsync(existing);
                     }
                     else
                     {
                         var entity = new SongEntity();
-                        entity.initFromSong(remote);
+                        entity.initFromSong(remote!);
                         await _repo.AddAsync(entity);
                     }
                 }

@@ -19,6 +19,9 @@ public class Song: INotifyPropertyChanged
         LyricsAuthor = entity.LyricsAuthor;
         MusicAuthor = entity.MusicAuthor;
         ChordsVariations = entity.ChordsVariations;
+        ScrollingDelay = entity.ScrollingDelay;
+        ScrollingTempo = entity.ScrollingTempo;
+        SpotifyLink = entity.SpotifyLink;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -123,6 +126,30 @@ public class Song: INotifyPropertyChanged
         set { _chordsVariations = value; }
     }
 
+
+    private int _scrollingDelay;
+    [JsonPropertyName("scrolling_delay")]
+    public int ScrollingDelay
+    {
+        get { return _scrollingDelay; }
+        set { _scrollingDelay = value; }
+    }
+
+    private int? _scrollingTempo;
+    [JsonPropertyName("scrolling_tempo")]
+    public int? ScrollingTempo
+    {
+        get { return _scrollingTempo; }
+        set { _scrollingTempo = value; }
+    }
+
+    private string? _spotifyLink;
+    [JsonPropertyName("spotify_link")]
+    public string? SpotifyLink
+    {
+        get { return _spotifyLink; }
+        set { _spotifyLink = value; }
+    }
 
     private List<string>? _lines;
     /// <summary>
@@ -261,7 +288,9 @@ public class Song: INotifyPropertyChanged
             Artist = converter.GetArtist(),
             Capo = converter.GetCapoInfo(),
             LyricsAuthor = converter.GetLyricsAuthor(),
-            MusicAuthor = converter.GetMusicAuthor()
+            MusicAuthor = converter.GetMusicAuthor(),
+            ScrollingDelay = 0,
+            ScrollingTempo = null
         };
         return song;
     }

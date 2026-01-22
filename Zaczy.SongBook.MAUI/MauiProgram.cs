@@ -1,14 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using LiteDB;
+using MauiIcons.FontAwesome.Solid;
+using MauiIcons.Fluent;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
-using LiteDB;
+using System.Collections.Generic;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Pages;
 using Zaczy.SongBook.MAUI.ViewModels;
-using Zaczy.SongBook.MAUI.Data;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
 
 namespace Zaczy.SongBook.MAUI
 {
@@ -19,6 +21,8 @@ namespace Zaczy.SongBook.MAUI
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseFontAwesomeSolidMauiIcons()
+                .UseFluentMauiIcons()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -65,10 +69,12 @@ namespace Zaczy.SongBook.MAUI
                 if (!string.IsNullOrEmpty(apiBase) && apiBase.Contains("zaczy-api.local"))
                 {
                     apiBase = apiBase.Replace("zaczy-api.local", "10.0.2.2");
-                    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+                    var dict = new Dictionary<string, string>
                     {
                         ["Settings:ApiBaseUrl"] = apiBase
-                    });
+                    };
+
+                    builder.Configuration.AddInMemoryCollection(dict!);
                 }
             }
 

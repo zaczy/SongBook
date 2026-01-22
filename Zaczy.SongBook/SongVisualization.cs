@@ -141,11 +141,16 @@ public class SongVisualization
         sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
         sb.AppendLine(".lyrics-author, .music-author { color: #AAA; font-size: 0.8em; margin-top: 5px; }");
 
+        sb.AppendLine(".debug-log  {font-family: 'InconsolataVariable', Roboto, Consolas, monospace; line-height: 1em; font-size: 0.8em;white-space: pre-wrap;word-wrap: break-word; font-weight: 400; }"); 
+
         sb.AppendLine("@media (max-width: 576px) {");
+        sb.AppendLine("body { margin: 0; margin-top: 8px; } ");
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
-        
-        
+        sb.AppendLine("     .lyrics-line.annotated { height: 1.1em; margin-top: 0.7em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 {  color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
+
+
         sb.AppendLine("     .block-refren { margin-left: 10px; border-left: 8px solid #F0F0F0; padding-left: 10px; }");
         sb.AppendLine("     .block-refren .block-header { display: none; }");
         sb.AppendLine("}");
@@ -250,6 +255,7 @@ public class SongVisualization
             sb.AppendLine("</div>");
         }
 
+        sb.AppendLine(@"<div id=""debugLog"" class=""debug-log""></div>");
         sb.AppendLine("</body></html>");
 
         return sb.ToString();
@@ -488,8 +494,11 @@ public class SongVisualization
         if (string.IsNullOrEmpty(lyricLine))
             return true;
 
-        chordLine = chordLine.Trim().NormalizeInlineWhitespace();
-        lyricLine = lyricLine.Trim().NormalizeInlineWhitespace();
+        if(string.IsNullOrEmpty(chordLine))
+            return false;
+
+        chordLine = chordLine?.Trim().NormalizeInlineWhitespace() ?? string.Empty;
+        lyricLine = lyricLine.Trim().NormalizeInlineWhitespace() ?? string.Empty;
 
         double percent = 100 * ((double)chordLine.Length / (double)lyricLine.Length);
         if (percent > acceptedPercent)

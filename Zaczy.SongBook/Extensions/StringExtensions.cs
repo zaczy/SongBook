@@ -50,7 +50,7 @@ public static class StringExtensions
         return text.Substring(0, 1).ToLowerInvariant() + text.Substring(1, text.Length - 1);
     }
 
-    public static string NormalizeInlineWhitespace(this string input)
+    public static string? NormalizeInlineWhitespace(this string input)
     {
         if (input == null) return null;
         // [^\S\r\n] = whitespace z WYŁĄCZENIEM CR i LF

@@ -84,8 +84,13 @@ public class SongInternalDetails
     /// </summary>
     /// <param name="song"></param>
     /// <returns></returns>
-    public static Dictionary<string, string> ChordsSuggestions(Song song)
+    public static Dictionary<string, string> ChordsSuggestions(Song? song)
     {
+        if(song == null)
+        {
+            return new Dictionary<string, string>();
+        }
+
         var suggestions = new Dictionary<string, string>();
 
         if(!string.IsNullOrEmpty(song?.ChordsVariations))
@@ -123,8 +128,8 @@ public class SongInternalDetails
         if (string.IsNullOrWhiteSpace(line))
             return LyricLineBlockType.Inne;
 
-        var trimmed = line.Trim();
-        var normalized = trimmed.NormalizeInlineWhitespace().ToLowerInvariant();
+        var trimmed = (line?.Trim() ?? string.Empty);
+        var normalized = trimmed?.NormalizeInlineWhitespace()?.ToLowerInvariant() ?? string.Empty;
         normalized = normalized.Replace(".", "").Replace(";", "").Replace(":", "");
 
         // handle pipe-separated sequences like "zwrotka 1|zwrotka 2"

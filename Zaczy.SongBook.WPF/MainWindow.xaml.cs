@@ -22,7 +22,7 @@ namespace Zaczy.SongBook.WPF
         {
             InitializeComponent();
 
-            ViewModel = viewModel;
+            _viewModel = viewModel;
             DataContext = this; // albo DataContext = ViewModel jeśli XAML binduje bez "ViewModel."
         }
 
@@ -136,7 +136,7 @@ namespace Zaczy.SongBook.WPF
             var virtualBase = "https://appassets/"; // odpowiada SetVirtualHostNameToFolderMapping
             visualization.CssFontsPath = new Dictionary<string, string>();
 
-            if (true)
+            if (!string.IsNullOrEmpty(appAssetsPath))
             {
                 //string fontFile = "css/Monofonto Regular/Monofonto Regular.ttf";
                 string fontFile = "css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf";
