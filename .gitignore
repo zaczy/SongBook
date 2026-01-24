@@ -482,3 +482,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+/Zaczy.SongBook.MAUI/publish-pass.ps1
