@@ -419,6 +419,12 @@ namespace Zaczy.SongBook.MAUI.Pages
 
         private void ModifyTapAreaForBackButton(bool reset=false)
         {
+            var m = TopTouchArea.Margin;
+            TopTouchArea.Margin = new Thickness(reset ? 0 : 35, m.Top, m.Right, m.Bottom);
+        }
+
+        private void ModifyTapAreaForBackButton(bool reset=false)
+        {
             //var m = TopTouchArea.Margin;
             //TopTouchArea.Margin = new Thickness(reset ? 0 : 35, m.Top, m.Right, m.Bottom);
         }
@@ -562,7 +568,7 @@ namespace Zaczy.SongBook.MAUI.Pages
         {
             try
             {
-                _userViewModel.FontSizeAdjustment += 2;
+                _userViewModel.FontSizeAdjustment += 1;
                 var basePx = 17.0 + _userViewModel.FontSizeAdjustment;
                 await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
                 // keep controls visible briefly
@@ -576,7 +582,7 @@ namespace Zaczy.SongBook.MAUI.Pages
         {
             try
             {
-                _userViewModel.FontSizeAdjustment -= 2;
+                _userViewModel.FontSizeAdjustment -= 1;
                 var basePx = 17.0 + _userViewModel.FontSizeAdjustment;
                 await LyricsWebView.EvaluateJavaScriptAsync($"setBaseFontSize({basePx});");
                 ShowControls();

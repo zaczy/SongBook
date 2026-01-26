@@ -81,6 +81,27 @@
         <!-- mi:MauiIcon.Value="{mi:FontAwesomeSolid Icon=Play}" -->
 
 
+        <Button 
+            Grid.Row="0"
+            WidthRequest="24"
+            HeightRequest="24" 
+            x:Name ="ScrollToggleQuick"
+            Clicked="OnScrollToggleClicked"
+            Background="Transparent"
+            TextColor="Black"
+            FontSize="10"
+            Padding="0,0,0,0"
+            HorizontalOptions="End"
+            Margin="0,-10,-10,0"
+            mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.PlayIcon}"
+            MinimumHeightRequest="30"
+            MinimumWidthRequest="30"
+            />
+        </HorizontalStackLayout>
+        <!--             Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingTextShort}" -->
+        <!-- mi:MauiIcon.Value="{mi:FontAwesomeSolid Icon=Play}" -->
+
+
         <BoxView Grid.Row="3" HeightRequest="1" BackgroundColor="#ddd" />
 
         <WebView Grid.Row="4"

@@ -66,5 +66,13 @@ namespace Zaczy.SongBook.MAUI.Pages
                 vm.PageCommand.Execute(null);
             }
         }
+
+        private void OnTitleFilterCompleted(object sender, EventArgs e)
+        {
+            if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
+            {
+                vm.FilterCommand.Execute(null);
+            }
+        }
     }
 }
