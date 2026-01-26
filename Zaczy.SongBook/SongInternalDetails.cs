@@ -84,8 +84,13 @@ public class SongInternalDetails
     /// </summary>
     /// <param name="song"></param>
     /// <returns></returns>
-    public static Dictionary<string, string> ChordsSuggestions(Song song)
+    public static Dictionary<string, string> ChordsSuggestions(Song? song)
     {
+        if(song == null)
+        {
+            return new Dictionary<string, string>();
+        }
+
         var suggestions = new Dictionary<string, string>();
 
         if(!string.IsNullOrEmpty(song?.ChordsVariations))
@@ -118,13 +123,18 @@ public class SongInternalDetails
     /// W przeciwnym wypadku zwraca Inne.
     /// Dodatkowo obsługuje wieloczęściowe linie rozdzielone znakiem '|' np. "Zwrotka 1|Zwrotka 2".
     /// </summary>
-    public static LyricLineBlockType RecognizeBlockType(string line)
+    public static LyricLineBlockType RecognizeBlockType(List<string> lines, int i)
     {
+        if(i>=lines.Count || i<0)
+            return LyricLineBlockType.Inne;
+
+        string line = lines[i];
+
         if (string.IsNullOrWhiteSpace(line))
             return LyricLineBlockType.Inne;
 
-        var trimmed = line.Trim();
-        var normalized = trimmed.NormalizeInlineWhitespace().ToLowerInvariant();
+        var trimmed = (line?.Trim() ?? string.Empty);
+        var normalized = trimmed?.NormalizeInlineWhitespace()?.ToLowerInvariant() ?? string.Empty;
         normalized = normalized.Replace(".", "").Replace(";", "").Replace(":", "");
 
         // handle pipe-separated sequences like "zwrotka 1|zwrotka 2"
@@ -140,6 +150,7 @@ public class SongInternalDetails
             }
         }
 
+
         if (IsZwrotkaSegment(normalized))
             return LyricLineBlockType.Zwrotka;
 
@@ -149,6 +160,19 @@ public class SongInternalDetails
         // single natural number, allow optional trailing dot (e.g. "1" or "1.")
         if (Regex.IsMatch(normalized, @"^\d+\.?$"))
             return LyricLineBlockType.Zwrotka;
+
+        if (IsTabulaturaSegment(lines, i))
+            return LyricLineBlockType.Tabulatura;
+
+        if(normalized == "solo")
+            return LyricLineBlockType.Solo;
+
+        if (normalized == "wstęp")
+            return LyricLineBlockType.Solo;
+
+        if (normalized == "recytacja")
+            return LyricLineBlockType.Recytacja;
+
 
         return LyricLineBlockType.Inne;
 
@@ -169,5 +193,38 @@ public class SongInternalDetails
             if (Regex.IsMatch(s, @"^refren\s*\d+\.?$")) return true; // "refren 1"
             return false;
         }
+    }
+
+    private static bool IsTabulaturaSegment(List<string> lines, int i)
+    {
+        if (lines == null || i < 0 || i >= lines.Count)
+            return false;
+
+        int tabuLines = TabulaturaSucceedingLines(lines, i);
+
+        return tabuLines >= 3;
+    }
+
+    public static int TabulaturaSucceedingLines(List<string> lines, int i)
+    {
+        var tabStartRegex = new Regex(@"^[A-Ha-h][0-9~|-]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        int tabuLines = 0;
+
+        for (int struna = 0; struna < 6; struna++)
+        {
+            var line = i + struna < lines.Count ? lines[i + struna] : string.Empty;
+
+            var trimmedStart = line.TrimStart();
+            if (string.IsNullOrEmpty(trimmedStart))
+                break;
+
+            if (tabStartRegex.IsMatch(trimmedStart))
+                tabuLines++;
+            else
+                break;
+        }
+
+        return tabuLines;
     }
 }

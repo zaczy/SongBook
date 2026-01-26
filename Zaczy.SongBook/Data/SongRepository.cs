@@ -73,4 +73,12 @@ public class SongRepository
             .Where(s => s.Title!.Contains(query) || s.Artist!.Contains(query))
             .ToListAsync();
     }
+
+    public async Task<SongEntity?> SearchIdAsync(int id)
+    {
+        return await _context.Songs
+            .Where(s => s.Id == id)
+            .FirstOrDefaultAsync();
+    }
+
 }

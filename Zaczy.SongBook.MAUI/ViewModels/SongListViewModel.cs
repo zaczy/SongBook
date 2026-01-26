@@ -26,9 +26,10 @@ namespace Zaczy.SongBook.MAUI.ViewModels
             ClearCommand = new Command(async () =>
             {
                 TitleFilter = string.Empty;
-                ArtistFilter = string.Empty;
+                PageFilter = string.Empty;
                 await LoadSongsAsync();
             });
+            PageCommand = new Command(async () => await LoadSongsByPageAsync());
 
             // Command to import from API and refresh local DB/UI
             FetchCommand = new Command(async () => await FetchFromApiAndLoadAsync());
@@ -41,6 +42,9 @@ namespace Zaczy.SongBook.MAUI.ViewModels
         public ObservableCollection<SongEntity> Songs { get; } = new();
 
         private string? _titleFilter;
+        /// <summary>
+        /// Tytu³ utworu
+        /// </summary>
         public string? TitleFilter
         {
             get => _titleFilter;
@@ -54,16 +58,19 @@ namespace Zaczy.SongBook.MAUI.ViewModels
             }
         }
 
-        private string? _artistFilter;
-        public string? ArtistFilter
+        private string? _pageFilter;
+        /// <summary>
+        /// Wykonawca
+        /// </summary>
+        public string? PageFilter
         {
-            get => _artistFilter;
+            get => _pageFilter;
             set
             {
-                if (_artistFilter != value)
+                if (_pageFilter != value)
                 {
-                    _artistFilter = value;
-                    OnPropertyChanged(nameof(ArtistFilter));
+                    _pageFilter = value;
+                    OnPropertyChanged(nameof(PageFilter));
                 }
             }
         }
@@ -86,13 +93,24 @@ namespace Zaczy.SongBook.MAUI.ViewModels
         public ICommand FilterCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand FetchCommand { get; }
+        public ICommand PageCommand { get; }
 
+        /// <summary>
+        /// Pobierz listê utworów z bazy lokalnej (z uwzglêdnieniem filtrów)
+        /// </summary>
+        /// <returns></returns>
         public async Task LoadSongsAsync()
         {
             if (IsBusy) return;
 
             try
             {
+                if(string.IsNullOrEmpty(TitleFilter) && !string.IsNullOrEmpty(PageFilter))
+                {
+                    await this.LoadSongsByPageAsync();
+                    return;
+                }
+
                 IsBusy = true;
 
                 var all = await _repo.GetAllAsync();
@@ -100,14 +118,9 @@ namespace Zaczy.SongBook.MAUI.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(TitleFilter))
                 {
-                    query = query.Where(s => !string.IsNullOrEmpty(s.Title) &&
-                                              s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (!string.IsNullOrWhiteSpace(ArtistFilter))
-                {
-                    query = query.Where(s => !string.IsNullOrEmpty(s.Artist) &&
-                                              s.Artist.Contains(ArtistFilter, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(s => (!string.IsNullOrEmpty(s.Title) && s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                            || (!string.IsNullOrEmpty(s.Artist) && s.Artist.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                            );
                 }
 
                 var ordered = query.OrderBy(s => s.Title ?? string.Empty).ToList();
@@ -121,6 +134,57 @@ namespace Zaczy.SongBook.MAUI.ViewModels
                 IsBusy = false;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadSongsByPageAsync()
+        {
+            if(_pageFilter == null)
+                return;
+
+            int pageNumber = int.Parse(_pageFilter);
+
+            if (IsBusy) return;
+            try
+            {
+                IsBusy = true;
+                var all = await _repo.GetAllAsync();
+                var query = all.AsEnumerable();
+                query = query.Where(s => s.Id == pageNumber);
+                var ordered = query.OrderBy(s => s.Title ?? string.Empty).ToList();
+                Songs.Clear();
+                foreach (var s in ordered)
+                    Songs.Add(s);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task GoToSongByPageAsync()
+        {
+            if (_pageFilter == null)
+                return;
+
+            int pageNumber = int.Parse(_pageFilter);
+
+            if (IsBusy) return;
+            try
+            {
+                IsBusy = true;
+                var all = await _repo.GetAllAsync();
+                var query = all.AsEnumerable();
+                var song = query.Where(s => s.Id == pageNumber).FirstOrDefault();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
 
         /// <summary>
         /// Fetches all songs from {_apiBaseUrl}/songs/all, persists them into local LiteDB
@@ -153,18 +217,20 @@ namespace Zaczy.SongBook.MAUI.ViewModels
                 foreach (var remote in remoteSongs)
                 {
                     // case-insensitive search by title+artist
-                    var existing = await _repo.SearchOnlySongAsync(remote.Title ?? string.Empty, remote.Artist ?? string.Empty);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    var existing = await _repo.SearchOnlySongAsync(remote!.Title , remote!.Artist);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                     if (existing != null)
                     {
-                        existing.initFromSong(remote);
+                        existing.initFromSong(remote!);
                         existing.UpdatedAt = DateTime.UtcNow;
                         await _repo.UpdateAsync(existing);
                     }
                     else
                     {
                         var entity = new SongEntity();
-                        entity.initFromSong(remote);
+                        entity.initFromSong(remote!);
                         await _repo.AddAsync(entity);
                     }
                 }

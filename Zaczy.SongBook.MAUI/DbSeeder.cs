@@ -9,8 +9,11 @@ public static class DbSeeder
 
         var json = ReadEmbeddedResource("Zaczy.SongBook.Data.seed_songs.json");
         var songs = System.Text.Json.JsonSerializer.Deserialize<List<SongEntity>>(json);
-        db.Songs.AddRange(songs);
-        db.SaveChanges();
+        if (songs != null)
+        {
+            db.Songs.AddRange(songs);
+            db.SaveChanges();
+        }
     }
 
     private static string ReadEmbeddedResource(string name)

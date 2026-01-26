@@ -1,6 +1,10 @@
-﻿using System.ComponentModel;
+﻿using LiteDB;
+using MauiIcons.Core;
+using MauiIcons.Core.Base;
+using MauiIcons.Fluent;
+using MauiIcons.FontAwesome.Solid;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using LiteDB;
 using Zaczy.SongBook.Enums;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
@@ -112,14 +116,74 @@ public class UserViewModel : INotifyPropertyChanged
                 _scrollingInProgress = value;
                 OnPropertyChanged(nameof(ScrollingInProgress));
                 OnPropertyChanged(nameof(ScrollingText));
+                OnPropertyChanged(nameof(ScrollingTextShort));
+                OnPropertyChanged(nameof(ToggleIcon));
+                OnPropertyChanged(nameof(PlayIcon));
             }
         }
     }
+
+    private bool _enablePinchGestures = true;
+    /// <summary>
+    /// Możliwość zmiany rozmiaru czcionki przez gesty
+    /// </summary>
+    public bool EnablePinchGestures
+    {
+        get { return _enablePinchGestures; }
+        set 
+        {
+            if (_enablePinchGestures != value)
+            {
+                _enablePinchGestures = value;
+                OnPropertyChanged(nameof(EnablePinchGestures));
+            }
+        }
+    }
+
 
     public string ScrollingText
     {
         get => ScrollingInProgress ? "■ Zatrzymaj" : "Przewijanie ▶";
     }
+
+    public string ScrollingTextShort
+    {
+        get => ScrollingInProgress ? "\u23F8" : "▶";
+    }
+
+    
+    public BaseIcon PlayIcon 
+    {
+        get
+        {
+            return  new BaseIcon() 
+            {
+                Icon = (ScrollingInProgress ? MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Pause : MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Play),
+                IconSize = 15,
+                IconColor = Microsoft.Maui.Graphics.Colors.DarkGray 
+            };
+
+        }
+    }
+
+    // BaseIcon instances for toggle (MVVM-friendly)
+    private readonly BaseIcon _playToggle = new BaseIcon
+    {
+        Icon = FluentIcons.Play20,
+        IconSize = 28,
+        IconColor = Colors.White
+    };
+
+    private readonly BaseIcon _pauseToggle = new BaseIcon
+    {
+        Icon = FluentIcons.Pause20,
+        IconSize = 28,
+        IconColor = Colors.White
+    };
+
+    // Exposed icon that the view can bind to (mi:MauiIcon.Value)
+    public BaseIcon ToggleIcon => ScrollingInProgress ? _pauseToggle : _playToggle;
+
 
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

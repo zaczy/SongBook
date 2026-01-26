@@ -22,8 +22,10 @@ namespace Zaczy.SongBook.WPF
         {
             InitializeComponent();
 
-            ViewModel = viewModel;
-            DataContext = this; // albo DataContext = ViewModel jeśli XAML binduje bez "ViewModel."
+            _viewModel = viewModel;
+
+            // Set DataContext to the ViewModel instance so XAML bindings can be simple (e.g. {Binding Songs})
+            DataContext = _viewModel;
         }
 
         private ViewModel _viewModel;
@@ -136,7 +138,7 @@ namespace Zaczy.SongBook.WPF
             var virtualBase = "https://appassets/"; // odpowiada SetVirtualHostNameToFolderMapping
             visualization.CssFontsPath = new Dictionary<string, string>();
 
-            if (true)
+            if (!string.IsNullOrEmpty(appAssetsPath))
             {
                 //string fontFile = "css/Monofonto Regular/Monofonto Regular.ttf";
                 string fontFile = "css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf";
@@ -185,9 +187,11 @@ namespace Zaczy.SongBook.WPF
         /// <param name="e"></param>
         private async void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var factory = new SongBookDbContextFactory();
+            if(string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
+                throw new InvalidOperationException("Brak ustawień połączenia do bazy danych.");
 
-            var songRepository = new SongRepository(factory.CreateDbContext(new string[] { }));
+            var factory = new SongBookDbContextFactory();
+            var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
 
             if (ViewModel.ConvertedSong != null)
             {
@@ -200,6 +204,7 @@ namespace Zaczy.SongBook.WPF
                     songEntity.initFromSong(ViewModel.ConvertedSong);
                     await songRepository.UpdateAsync(songEntity);
 
+                    ViewModel.Songs.Clear();
                     await ViewModel.LoadSongsAsync();
 
                 }
@@ -234,12 +239,12 @@ namespace Zaczy.SongBook.WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SongsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void SongsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (SongsDataGrid.SelectedItem is SongEntity selectedSong)
             {
                 // Załaduj wybraną piosenkę do edycji
-                ViewModel.LoadSongFromEntity(selectedSong);
+                await ViewModel.LoadSongFromEntity(selectedSong);
                 UpdateSongVisualization();
             }
         }
@@ -299,10 +304,14 @@ namespace Zaczy.SongBook.WPF
 
         private async void SyncUpButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && ViewModel?.SongRepository != null)
+            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
             {
                 SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
-                await songApi.SyncApi(ViewModel!.SongRepository);
+
+                var factory = new SongBookDbContextFactory();
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+
+                await songApi.SyncApi(songRepository);
             }
         }
 

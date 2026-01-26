@@ -17,6 +17,7 @@ public class SongPreviewJavascript
   var pos = 0;
   var speed = 50;
   var last = 0;
+  var scrollDelay = 0;
 
   // keep pos updated on manual scroll
   window.addEventListener('scroll', function(){
@@ -59,7 +60,16 @@ public class SongPreviewJavascript
   };
 
   // startAutoScroll(pxPerSec, optionalStartY)
-  window.startAutoScroll = function(pxPerSec, startY){
+  window.startAutoScroll = function(pxPerSec, startY, scrollDelay){
+
+    delay = Number(scrollDelay) || 0;
+    if(delay > 0 && startY ==0) {
+      setTimeout(function(){
+        window.startAutoScroll(pxPerSec, startY);
+      }, delay * 1000);
+      return;
+    }
+
     speed = Number(pxPerSec) || 50;
     if (typeof startY === 'number') pos = startY;
     else pos = window.scrollY || window.pageYOffset || pos || 0;
@@ -89,6 +99,13 @@ public class SongPreviewJavascript
   };
 
 })();
+
+  var addToLog = function(msg){
+    //console.log('SongPreviewJavascript: ' + msg);
+    //var logEl = document.getElementById('debugLog');
+    //if(logEl) logEl.innerHTML += '<div>' + msg + '</div>';
+  };
+
 </script>
 ";
         return autoScrollJs;

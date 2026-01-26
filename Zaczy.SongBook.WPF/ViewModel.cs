@@ -14,15 +14,15 @@ namespace Zaczy.SongBook.WPF;
 
 public class ViewModel : INotifyPropertyChanged
 {
-    private readonly SongRepository _repository;
-    public SongRepository SongRepository { get => _repository; }
+    //private readonly SongRepository _repository;
+    //public SongRepository SongRepository { get => _repository; }
     
     private readonly AppSettings _settings;
     public AppSettings AppSettings { get => _settings; }
 
-    public ViewModel(SongRepository repository, IOptions<AppSettings> opts)
+    public ViewModel(IOptions<AppSettings> opts)
     {
-        _repository = repository;
+        //_repository = repository;
         _settings = opts.Value;
     }
 
@@ -118,8 +118,20 @@ public class ViewModel : INotifyPropertyChanged
         if (string.IsNullOrEmpty(SourceSongHtml))
             return;
 
+        this.CheckDbSettingsValid();
+
         var song = Song.CreateFromW(SourceSongHtml);
-        await _repository.AddAsync(song, SourceSongHtml);
+
+        var factory = new SongBookDbContextFactory();
+        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings.ConnectionStrings.SongBookDb));
+
+        await songRepository.AddAsync(song, SourceSongHtml);
+    }
+
+    private void CheckDbSettingsValid()
+    {
+        if (string.IsNullOrEmpty(AppSettings.ConnectionStrings.SongBookDb))
+            throw new InvalidOperationException("Connection string for SongBookDb is not set.");
     }
 
     /// <summary>
@@ -127,8 +139,14 @@ public class ViewModel : INotifyPropertyChanged
     /// </summary>
     public async Task LoadSongsAsync()
     {
-        var songs = await _repository.GetAllAsync();
+        this.CheckDbSettingsValid();
+
+        var factory = new SongBookDbContextFactory();
+        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
+
+        var songs = await songRepository.GetAllAsync();
         Songs = new ObservableCollection<SongEntity>(songs);
+        OnPropertyChanged(nameof(Songs));
     }
 
     /// <summary>
@@ -136,15 +154,30 @@ public class ViewModel : INotifyPropertyChanged
     /// </summary>
     public async Task DeleteSongAsync(int id)
     {
-        await _repository.DeleteAsync(id);
+        this.CheckDbSettingsValid();
+
+        var factory = new SongBookDbContextFactory();
+        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
+
+        await songRepository.DeleteAsync(id);
     }
 
     /// <summary>
     /// Ładuje piosenkę z encji do edycji
     /// </summary>
-    public void LoadSongFromEntity(SongEntity entity)
+    public async Task LoadSongFromEntity(SongEntity entity)
     {
-        ConvertedSong = new Song(entity);
+        this.CheckDbSettingsValid();
+
+        var factory = new SongBookDbContextFactory();
+        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
+
+        var song = await songRepository.SearchIdAsync(entity.Id);
+
+        if(song!=null)
+            ConvertedSong = new Song(song);
+        else
+            ConvertedSong = new Song();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

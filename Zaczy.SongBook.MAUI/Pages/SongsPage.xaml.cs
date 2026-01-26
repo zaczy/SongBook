@@ -1,7 +1,8 @@
-using System;
+using MauiIcons.Core;
 using Microsoft.Maui.Controls;
-using Zaczy.SongBook.MAUI.ViewModels;
+using System;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages
 {
@@ -13,6 +14,9 @@ namespace Zaczy.SongBook.MAUI.Pages
         // ViewModel is injected from DI
         public SongsPage(SongListViewModel vm, UserViewModel viewModel)
         {
+            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ArrowClockwise20, IconColor = Colors.Green };
+            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
+
             InitializeComponent();
 
             _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
@@ -44,6 +48,22 @@ namespace Zaczy.SongBook.MAUI.Pages
                 {
                     await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel));
                 }
+            }
+        }
+
+        private void OnTitleFilterCompleted(object sender, EventArgs e)
+        {
+            if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
+            {
+                vm.FilterCommand.Execute(null);
+            }
+        }
+
+        private void OnPageFilterCompleted(object sender, EventArgs e)
+        {
+            if (BindingContext is SongListViewModel vm && vm.PageCommand != null && vm.PageCommand.CanExecute(null))
+            {
+                vm.PageCommand.Execute(null);
             }
         }
     }

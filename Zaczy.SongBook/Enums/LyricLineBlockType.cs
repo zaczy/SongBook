@@ -12,5 +12,9 @@ public enum LyricLineBlockType
     Zwrotka,
     Refren,
     Bridge,
-    Inne
+    Tabulatura,
+    Solo,
+    Wstęp,
+    Inne,
+    Recytacja
 }

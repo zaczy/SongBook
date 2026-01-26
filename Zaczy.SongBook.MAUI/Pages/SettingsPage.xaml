@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
              x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
+             x:DataType="vm:UserViewModel"
              Title="Ustawienia">
-    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*"  ColumnDefinitions="150,*" RowSpacing="12">
+    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,*"  ColumnDefinitions="4*,6*" RowSpacing="12">
         <Label Grid.Row="0" Text="Preferencje użytkownika" FontAttributes="Bold" FontSize="20" Grid.ColumnSpan="2" />
 
             <Label Text="Modyfikacja wielkości czcionki (px)" 
                    Grid.Row="1"
                    Grid.Column="0" 
-                   FontSize="12"
+                   FontSize="{OnIdiom 12, Tablet=16 }"
                    Margin="0,25,0,5"
                    />
             <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center"
@@ -32,11 +34,11 @@
                 Text="Szybkość przewijania automatycznego tekstu" 
                 Grid.Row="2"
                 Grid.Column="0" 
-                FontSize="12"
+                FontSize="{OnIdiom 12, Tablet=16 }"
                 Margin="0,15,0,20"
                />
             <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center" Grid.Column="1" Grid.Row="2">
-                <Entry x:Name="AutoScrollEntry"
+                <!--Entry x:Name="AutoScrollEntry"
                        Keyboard="Numeric"
                        Placeholder="e.g. 50"
                        VerticalOptions="Center"
@@ -49,14 +51,19 @@
                        Text="( 0 aby wyłączyć)" 
                        FontSize="12"
                        TextColor="#999"
-                       />
+                       /-->
+                <Slider x:Name="ScrollSpeedSlider"
+                            Minimum="0"
+                            Maximum="50"
+                            Value="{Binding AutoScrollSpeed, Mode=TwoWay}"
+                            VerticalOptions="Center" />
             </Grid>
 
             <Label 
                 Text="Prezentacja tekstu piosenki" 
                 Grid.Row="3"
                 Grid.Column="0" 
-                FontSize="12"
+                FontSize="{OnIdiom 12, Tablet=16 }"
                 Margin="0,10,1,20"
                 />
             <StackLayout 
@@ -66,15 +73,15 @@
                 >
                 <RadioButton x:Name="RadioPre"
                              Content="Stała szerokość"
-                             FontSize="11"
+                            FontSize="{OnIdiom 12, Tablet=16 }"
                              CheckedChanged="OnLyricsVersionRadioChanged" 
                              Margin="0"
                              />
                 <RadioButton x:Name="RadioRelative"
-                             FontSize="11"
+                            FontSize="{OnIdiom 12, Tablet=16 }"
                              Content="Html formatowany"
                              CheckedChanged="OnLyricsVersionRadioChanged" 
-                             Margin="0,-15,0,0"
+                             Margin="0,-5,0,0"
                              />
             </StackLayout>
 

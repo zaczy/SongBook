@@ -7,13 +7,24 @@ public class SongBookDbContextFactory : IDesignTimeDbContextFactory<SongBookDbCo
 {
     public SongBookDbContext CreateDbContext(string[] args)
     {
-        var connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
+        string connectionString = string.Empty; // "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
         
+        if (args?.Length > 0)
+        {
+            return CreateDbContext(args[0]);
+        }
+
+        return null!;
+    }
+
+    public SongBookDbContext CreateDbContext(string connectionString)
+    {
         var optionsBuilder = new DbContextOptionsBuilder<SongBookDbContext>();
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
         return new SongBookDbContext(optionsBuilder.Options);
     }
+
 }
 /*
  * dotnet ef migrations add AuthorsColumn

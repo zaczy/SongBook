@@ -1,36 +1,105 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
-             x:Name="Root"
-             BackgroundColor="White"
-             Title="{Binding Title}">
-    <Grid Padding="12,12,12,0" RowDefinitions="Auto,Auto,Auto,Auto,*">
-        <Label Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="20" TextColor="#666" />
-        <Label Grid.Row="0" 
-               Text="{Binding Artist}" 
-               FontSize="14" 
-               HorizontalOptions="End"
-               TextColor="Gray" 
-               Padding="0,0,0,0"
-               />
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
+    xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
+    x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
+    x:Name="Root"
+    x:DataType="data:SongEntity"
+    BackgroundColor="White"
+    Title="{Binding Title}">
+    
+    <Grid Padding="12,0,12,0" RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <Grid Grid.Row="0" Padding="0,3,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{OnIdiom 20, Tablet=40}" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="{OnIdiom 20, Tablet=40}" />
+            </Grid.ColumnDefinitions>
+
+            <Button 
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    x:Name="BackButton"
+                    Text="&#xFFE9;"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    Clicked="OnBackClicked"
+                    Background="Transparent"
+                    FontSize="{OnIdiom 30, Tablet=36}"
+                    Padding="0"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    TextColor="#AAA"
+                    IsVisible="True" 
+                    Margin="{OnIdiom '-17,-3,0,0', Tablet='-5,-15,0,0'}"
+                    />
+                <Label 
+                    x:Name="TitleLabel" 
+                    Grid.Row="0" 
+                    Text="{Binding Title}" 
+                    VerticalOptions="Center"
+                    Grid.Column="1"
+                    FontAttributes="Bold" 
+                    Margin="{OnIdiom 0, Tablet='0,5,0,10'}"
+                    FontSize="{OnIdiom Phone=20, Tablet=24, Desktop=24}"
+                    TextColor="#962610" />
+            <Label 
+                Grid.Row="0" 
+                Grid.Column="2"
+                VerticalOptions="Center"
+                Text="{Binding Artist}" 
+                FontSize="{OnIdiom Phone=12, Tablet=18, Desktop=20}"
+               
+                TextColor="Gray" 
+                Padding="0,0,-5,0"
+                />
+
+            <Button 
+                Grid.Row="0"
+                Grid.Column="3"
+                WidthRequest="24"
+                HeightRequest="24" 
+                x:Name ="ScrollToggleQuick"
+                Clicked="OnScrollToggleClicked"
+                Background="Transparent"
+                VerticalOptions="Center"
+                TextColor="Black"
+                FontSize="10"
+                Padding="0,0,0,0"
+                HorizontalOptions="End"
+                Margin="{OnIdiom '0,0,-12,0'}"
+                mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.PlayIcon}"
+                MinimumHeightRequest="30"
+                MinimumWidthRequest="30"
+                />
+        </Grid>
+        <!--             Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingTextShort}" -->
+        <!-- mi:MauiIcon.Value="{mi:FontAwesomeSolid Icon=Play}" -->
+
 
         <BoxView Grid.Row="3" HeightRequest="1" BackgroundColor="#ddd" />
 
         <WebView Grid.Row="4"
              x:Name="LyricsWebView"
-             HorizontalOptions="FillAndExpand"
-             VerticalOptions="FillAndExpand" />
+             />
 
     <!-- Transparent touch area above the WebView to detect taps at the top of the page.
          Placed after WebView so it overlays it, and before ControlsPanel so controls remain top-most. -->
-    <BoxView Grid.Row="0"
-             Grid.ColumnSpan="1"
-             Grid.RowSpan="2"
-             HeightRequest="40"
-             VerticalOptions="Start"
-             BackgroundColor="Transparent"
-             x:Name="TopTouchArea">
+    <BoxView 
+        x:Name="TopTouchArea"
+        Grid.Row="0"
+        Grid.ColumnSpan="1"
+        Grid.RowSpan="3"
+        HeightRequest="{OnIdiom 45, Tablet=53}"
+        VerticalOptions="StartAndExpand"
+        BackgroundColor="Transparent"
+        Opacity="0.6"
+        Margin="{OnIdiom '20,0,30,0', Tablet='40,0,30,0'}"
+        >
       <BoxView.GestureRecognizers>
         <TapGestureRecognizer Tapped="OnTopTouched" NumberOfTapsRequired="1" />
       </BoxView.GestureRecognizers>
@@ -46,18 +115,39 @@
                            IsVisible="False"
                            Opacity="0">
         <!-- bind to the UserViewModel exposed on the page with x:Reference -->
-        <Button 
-            x:Name ="ScrollToggle"
-            Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingText}"
-            Clicked="OnScrollToggleClicked" />
-      <Button Text="A+" Clicked="OnIncreaseFontClicked" />
-      <Button Text="A-" Clicked="OnDecreaseFontClicked" />
-      <Button Text="A0" Clicked="OnResetFontClicked" />
-      <!-- Gear button: uses unicode gear ⚙. Replace with ImageButton if you have an icon asset. -->
-      <Button Text="⚙" Clicked="OnSettingsClicked"
-              AutomationProperties.HelpText="Settings"
-              WidthRequest="44"
-              HeightRequest="44" />
-    </HorizontalStackLayout>
+        <ImageButton
+            x:Name="ScrollToggle"
+            Clicked="OnScrollTogglePanelClicked"
+            BackgroundColor="Transparent"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.ToggleIcon}" />
+        
+        <ImageButton 
+            Source="{mi:Fluent FontIncrease24, IconSize=30, IconColor=#FFF}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            Clicked="OnIncreaseFontClicked" 
+            />
+        <ImageButton 
+            Source="{mi:Fluent FontDecrease24, IconSize=30, IconColor=#FFF}"
+            MinimumHeightRequest="{OnIdiom Default=25, Phone=16}"
+            MinimumWidthRequest="{OnIdiom Default=25, Phone=1}"
+            Clicked="OnDecreaseFontClicked" />
+        <ImageButton 
+            Source="{mi:Fluent ApprovalsApp20, IconSize=30, IconColor=#FFF}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            Clicked="OnResetFontClicked" 
+            />
+
+        <ImageButton
+            Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
+            Clicked="OnSettingsClicked"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+        />
+
+        </HorizontalStackLayout>
   </Grid>
 </ContentPage>

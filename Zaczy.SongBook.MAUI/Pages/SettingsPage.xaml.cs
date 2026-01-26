@@ -17,7 +17,7 @@ public partial class SettingsPage : ContentPage
         BindingContext = _userViewModel;
 
         // initialize AutoScrollEntry text from ViewModel
-        AutoScrollEntry.Text = _userViewModel.AutoScrollSpeed?.ToString() ?? string.Empty;
+        //AutoScrollEntry.Text = _userViewModel.AutoScrollSpeed?.ToString() ?? string.Empty;
 
         // initialize radio buttons from current preference
         RadioPre.IsChecked = _userViewModel.LyricsHtmlVersion == LyricsHtmlVersion.Pre;
@@ -35,24 +35,24 @@ public partial class SettingsPage : ContentPage
             _userViewModel.LyricsHtmlVersion = LyricsHtmlVersion.RelativeHtml;
     }
 
-    private void OnAutoScrollSpeedTextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrWhiteSpace(e.NewTextValue))
-        {
-            _userViewModel.AutoScrollSpeed = null;
-            return;
-        }
+    //private void OnAutoScrollSpeedTextChanged(object sender, TextChangedEventArgs e)
+    //{
+    //    if (string.IsNullOrWhiteSpace(e.NewTextValue))
+    //    {
+    //        _userViewModel.AutoScrollSpeed = null;
+    //        return;
+    //    }
 
-        if (int.TryParse(e.NewTextValue, out var val))
-        {
-            _userViewModel.AutoScrollSpeed = val;
-        }
-        else
-        {
-            // revert invalid input
-            AutoScrollEntry.Text = _userViewModel.AutoScrollSpeed?.ToString() ?? string.Empty;
-        }
-    }
+    //    if (int.TryParse(e.NewTextValue, out var val))
+    //    {
+    //        _userViewModel.AutoScrollSpeed = val;
+    //    }
+    //    else
+    //    {
+    //        // revert invalid input
+    //        AutoScrollEntry.Text = _userViewModel.AutoScrollSpeed?.ToString() ?? string.Empty;
+    //    }
+    //}
 
     private async void OnCloseClicked(object sender, EventArgs e)
     {
@@ -63,7 +63,6 @@ public partial class SettingsPage : ContentPage
     {
         _userViewModel.FontSizeAdjustment = 0;
         _userViewModel.AutoScrollSpeed = null;
-        AutoScrollEntry.Text = string.Empty;
 
         // reset radios
         RadioPre.IsChecked = _userViewModel.LyricsHtmlVersion == LyricsHtmlVersion.Pre;

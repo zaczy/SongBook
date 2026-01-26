@@ -43,7 +43,8 @@ public partial class App : Application
 
                 // register repositories, viewmodels, windows
                 services.AddSingleton<ViewModel>();
-                services.AddSingleton<SongRepository>();
+                //services.AddSingleton<SongRepository>();
+                services.AddTransient<SongRepository>();
                 services.AddSingleton<MainWindow>();
 
                 // other services

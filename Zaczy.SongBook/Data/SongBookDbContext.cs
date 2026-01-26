@@ -9,19 +9,17 @@ public class SongBookDbContext : DbContext
     public SongBookDbContext(DbContextOptions<SongBookDbContext> options) 
         : base(options)
     {
-        string a = "";
     }
 
     public SongBookDbContext()
     {
-        string a = "";
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
-            var connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz432101;";
+            var connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
     }
