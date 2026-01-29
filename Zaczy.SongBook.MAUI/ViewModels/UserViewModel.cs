@@ -115,8 +115,6 @@ public class UserViewModel : INotifyPropertyChanged
             {
                 _scrollingInProgress = value;
                 OnPropertyChanged(nameof(ScrollingInProgress));
-                OnPropertyChanged(nameof(ScrollingText));
-                OnPropertyChanged(nameof(ScrollingTextShort));
                 OnPropertyChanged(nameof(ToggleIcon));
                 OnPropertyChanged(nameof(PlayIcon));
             }
@@ -140,18 +138,29 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
-
-    public string ScrollingText
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool ShowOnlyCustomChords
     {
-        get => ScrollingInProgress ? "■ Zatrzymaj" : "Przewijanie ▶";
+        get { return _prefs?.ShowOnlyCustomChords ?? false; }
+        set 
+        {
+            if (_prefs!= null && _prefs.ShowOnlyCustomChords != value)
+            {
+                _prefs.ShowOnlyCustomChords = value;
+                Save();
+                OnPropertyChanged(nameof(ShowOnlyCustomChords));
+                OnPropertyChanged(nameof(ShowOnlyCustomChordsTxt));
+            }
+        }
+    }
+    public string ShowOnlyCustomChordsTxt
+    {
+        get => _prefs?.ShowOnlyCustomChords == true ? "wyświetlaj diagramy tylko dla niestandardowych przewrotów akordów wykorzystanych w piosence" : "pokazuj diagramy wszystkich chwytów";
     }
 
-    public string ScrollingTextShort
-    {
-        get => ScrollingInProgress ? "\u23F8" : "▶";
-    }
 
-    
     public BaseIcon PlayIcon 
     {
         get

@@ -167,7 +167,7 @@ namespace Zaczy.SongBook.WPF
             if (_webViewInitialized && PreviewWebView.CoreWebView2 != null)
             {
                 PreviewWebView.NavigateToString(html);
-                PreviewBrowser.NavigateToString(html);
+                //PreviewBrowser.NavigateToString(html);
             }
             else
             {

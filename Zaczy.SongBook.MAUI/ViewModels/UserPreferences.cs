@@ -16,4 +16,6 @@ public class UserPreferences
 
     public LyricsHtmlVersion LyricsHtmlVersion { get; set; } = Enums.LyricsHtmlVersion.RelativeHtml;
 
+    public bool ShowOnlyCustomChords { get; set; } = false;
+
 }

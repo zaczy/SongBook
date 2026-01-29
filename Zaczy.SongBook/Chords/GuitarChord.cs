@@ -362,14 +362,14 @@ public class GuitarChord
     /// <param name="width">Szerokość diagramu</param>
     /// <param name="height">Wysokość diagramu</param>
     /// <returns>String zawierający kod SVG</returns>
-    public string ToSvgHorizontal(int width = 120, int height = 80)
+    public string ToSvgHorizontal(int width = 100, int height = 80)
     {
         var svg = new StringBuilder();
         
         // Wymiary i marginesy
         int marginTop = 20;
-        int marginLeft = 25;
-        int marginRight = 15;
+        int marginLeft = 7;
+        int marginRight = 5;
         int marginBottom = 15;
         
         int gridWidth = width - marginLeft - marginRight;
@@ -383,7 +383,7 @@ public class GuitarChord
         int startFret = GetStartFret(fretCount);
         
         // Nagłówek SVG
-        svg.AppendLine($@"<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"" viewBox=""0 0 {width} {height}"">");
+        svg.AppendLine($@"<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"" viewBox=""0 0 {width} {height}"" fill=""#777"">");
         
         // Nazwa akordu
         if (!string.IsNullOrEmpty(Name))
@@ -469,8 +469,8 @@ public class GuitarChord
         {
             // Struna 1 na górze (index 0), struna 6 na dole (index 5)
             int stringIndex = stringNum - 1;
-            int x = marginLeft - 10;
-            int y = marginTop + stringIndex * stringSpacing + 4;
+            int x = marginLeft - 10 + 5;
+            int y = marginTop + stringIndex * stringSpacing + 4 - 1;
             
             if (MutedStrings.Contains(stringNum))
             {

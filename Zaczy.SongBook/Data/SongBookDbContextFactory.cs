@@ -5,16 +5,17 @@ namespace Zaczy.SongBook.Data;
 
 public class SongBookDbContextFactory : IDesignTimeDbContextFactory<SongBookDbContext>
 {
+    // Default connection string used at design-time
+    private const string DefaultConnectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
+
     public SongBookDbContext CreateDbContext(string[] args)
     {
-        string connectionString = string.Empty; // "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
-        
-        if (args?.Length > 0)
-        {
-            return CreateDbContext(args[0]);
-        }
+        // If EF supplies a connection string via args, use it; otherwise use the default.
+        var connectionString = (args?.Length > 0 && !string.IsNullOrWhiteSpace(args[0]))
+            ? args[0]
+            : DefaultConnectionString;
 
-        return null!;
+        return CreateDbContext(connectionString);
     }
 
     public SongBookDbContext CreateDbContext(string connectionString)
@@ -24,7 +25,6 @@ public class SongBookDbContextFactory : IDesignTimeDbContextFactory<SongBookDbCo
 
         return new SongBookDbContext(optionsBuilder.Options);
     }
-
 }
 /*
  * dotnet ef migrations add AuthorsColumn

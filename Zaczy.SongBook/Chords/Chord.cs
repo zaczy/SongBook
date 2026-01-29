@@ -157,7 +157,7 @@ public class Chord
     /// </summary>
     /// <param name="line"></param>
     /// <returns></returns>
-    public static HashSet<string> ExtractChordsFromLine(string line)
+    public static HashSet<string> ExtractChordsFromLine(string line, bool? customChordsOnly)
     {
         int chordsStart = ChordPartStart(line);
 
@@ -167,10 +167,22 @@ public class Chord
         {
             if (!string.IsNullOrWhiteSpace(token) && IsChord(token) && !chords.Contains(token))
             {
-                chords.Add(token);
+                if(customChordsOnly != true || !Chord.IsStandardChord(token))
+                    chords.Add(token);
             }
         }
         return chords;
+    }
+
+    /// <summary>
+    /// Niestandardowy akord (wart wyświetlania w sugestiach)
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    private static bool IsStandardChord(string token)
+    {
+        bool nonStandard = Regex.IsMatch(token, @"[2-9]|maj|min|dim|aug|sus|add|\+|\*", RegexOptions.IgnoreCase);
+        return !nonStandard;
     }
 
     /// <summary>

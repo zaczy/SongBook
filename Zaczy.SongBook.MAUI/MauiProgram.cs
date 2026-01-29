@@ -1,6 +1,6 @@
 ﻿using LiteDB;
-using MauiIcons.FontAwesome.Solid;
 using MauiIcons.Fluent;
+using MauiIcons.FontAwesome.Solid;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Pages;
+using Zaczy.SongBook.MAUI.Spotify;
 using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI
@@ -38,6 +39,9 @@ namespace Zaczy.SongBook.MAUI
             {
                 // ignore; fallback below will try stream load
             }
+
+            //builder.Services.AddSingleton<ISpotifyRemoteService, SpotifyRemoteService>();
+
 
             try
             {

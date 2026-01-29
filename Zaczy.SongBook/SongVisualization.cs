@@ -19,21 +19,7 @@ public class SongVisualization
     
     public bool IncludeFontsAsBase64 { get; set; } = true;
 
-    private VisualizationCssOptions? _visualizationCssOptions;
-
-    public VisualizationCssOptions VisualizationCssOptions
-    {
-        get 
-        {
-            if (_visualizationCssOptions == null)
-                _visualizationCssOptions = new VisualizationCssOptions();
-
-            return _visualizationCssOptions; 
-        }
-        set { _visualizationCssOptions = value; }
-    }
-
-
+    public SongVisualizationOptions? VisualizationOptions { get; set; }
 
     /// <summary>
     /// Ładuje czcionkę z pliku i konwertuje do Base64
@@ -61,7 +47,7 @@ public class SongVisualization
         if (song.Lines == null || song.Lines.Count == 0)
             return string.Empty;
 
-        SongInternalDetails? songInternalDetails = SongInternalDetails.AnalyseSong(song);
+        SongInternalDetails? songInternalDetails = SongInternalDetails.AnalyseSong(song, VisualizationOptions);
 
         var sb = new StringBuilder();
 
@@ -103,7 +89,7 @@ public class SongVisualization
             }
         }
 
-        string? customValue = VisualizationCssOptions?.CssValue("pre", "font-family");
+        string? customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("pre", "font-family");
         sb.AppendLine(@"
             pre {
                 font-family: 'InconsolataVariable', Roboto, Consolas, monospace;
@@ -124,7 +110,7 @@ public class SongVisualization
 
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
-        customValue = VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
+        customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
         sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable_beta'; font-weight: 500; display: inline-block; }");
         sb.AppendLine(".lyrics-line.annotated { height: 1.2em; margin-top: 0.8em; }");
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.9em; }");
@@ -141,6 +127,7 @@ public class SongVisualization
 
         sb.AppendLine(".block-recytacja { font-style: italic; }");
 
+        sb.AppendLine(".block-bridge { margin-left: 20px; }");
 
         sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
         sb.AppendLine(".lyrics-author, .music-author { color: #AAA; font-size: 0.8em; margin-top: 5px; }");
@@ -157,14 +144,15 @@ public class SongVisualization
 
         sb.AppendLine("     .block-refren { margin-left: 10px; border-left: 8px solid #F0F0F0; padding-left: 10px; }");
         sb.AppendLine("     .block-refren .block-header { display: none; }");
+        sb.AppendLine("     .block-bridge { margin-left: 10px; }");
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
 
-        if (VisualizationCssOptions != null)
+        if (VisualizationOptions?.VisualizationCssOptions != null)
         {
             sb.AppendLine("<style>");
-            sb.AppendLine(VisualizationCssOptions.GenerateCss());
+            sb.AppendLine(VisualizationOptions.VisualizationCssOptions.GenerateCss());
             sb.AppendLine("</style>");
         }
 
@@ -186,7 +174,7 @@ public class SongVisualization
                 string line = song.Lines[i];
                 var blockType = SongInternalDetails.RecognizeBlockType(song.Lines,i);
 
-                if(blockType != LyricLineBlockType.Inne)
+                if(blockType != LyricLineBlockType.Inne && blockType != LyricLineBlockType.Tabulatura)
                 {
                     currentBlockType = blockType;
                     continue;
@@ -208,6 +196,23 @@ public class SongVisualization
                     }
                 }
 
+                if(blockType == LyricLineBlockType.Tabulatura)
+                {
+                    lyrics += $@"<div class=""block-{blockType}"">";
+
+                    int c = SongInternalDetails.TabulaturaSucceedingLines(song.Lines, i);
+                    for (int j = 0; j < c; j++)
+                    {
+                        if (i + j < song.Lines.Count)
+                        {
+                            string tabLine = song.Lines[i + j];
+                            lyrics += $@"{clearLyricsForHtml(tabLine)}<br/>";
+                        }
+                    }
+                    lyrics += $@"</div><!-- Tabulatura --><br />";
+                    i += c;
+                    continue;
+                }
                 if (Chord.IsChordLine(line))
                 {
                     lyrics += $"<span class=\"chords\">{spacesBefore}{line}</span>\n";
@@ -254,7 +259,21 @@ public class SongVisualization
                 var guitarChord = ChordsLibrary.StandardChord(chord, chordSuggestion);
                 if (guitarChord != null)
                 {
-                     sb.AppendLine(guitarChord.ToSvgHorizontal());
+                    sb.AppendLine(guitarChord.ToSvgHorizontal());
+                }
+            }
+            sb.AppendLine("</div>");
+        }
+        else if(songInternalDetails?.SpecialChordsSuggestions?.Count > 0)
+        {
+            sb.AppendLine("<br/><br/>");
+            sb.AppendLine("<div class=\"chord-list\">");
+            foreach (var suggestion in songInternalDetails.SpecialChordsSuggestions)
+            {
+                var guitarChord = ChordsLibrary.StandardChord(suggestion.Key, suggestion.Value);
+                if (guitarChord != null)
+                {
+                    sb.AppendLine(guitarChord.ToSvgHorizontal());
                 }
             }
             sb.AppendLine("</div>");

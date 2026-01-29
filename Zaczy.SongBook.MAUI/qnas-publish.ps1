@@ -20,7 +20,7 @@ $proj = $projFile.FullName
 $out  = "\\qnas\homes\zaczy\Android\"
 
 
-dotnet publish $proj -f net9.0-android -c Debug `
+dotnet publish $proj -f net9.0-android -c Release `
   -p:AndroidPackageFormat=apk `
   -p:AndroidKeyStore=true `
   -p:AndroidSigningKeyStore="C:\Users\Rafal.Zak\AppData\Local\Xamarin\Mono for Android\Keystore\zaczy\zaczy.keystore" `

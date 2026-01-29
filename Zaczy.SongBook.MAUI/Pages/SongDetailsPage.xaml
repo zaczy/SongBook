@@ -5,13 +5,14 @@
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
     xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
+    xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages"
     x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
     x:Name="Root"
-    x:DataType="data:SongEntity"
+    x:DataType="pages:SongDetailsPage"
     BackgroundColor="White"
-    Title="{Binding Title}">
-    
-    <Grid Padding="12,0,12,0" RowDefinitions="Auto,Auto,Auto,Auto,*">
+    Title="{Binding Source={x:Reference Root}, Path=Song.Title}">
+
+    <Grid Padding="12,0,12,0" RowDefinitions="Auto,Auto,Auto,Auto,*" x:DataType="data:SongEntity">
         <Grid Grid.Row="0" Padding="0,3,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{OnIdiom 20, Tablet=40}" />
@@ -53,7 +54,6 @@
                 VerticalOptions="Center"
                 Text="{Binding Artist}" 
                 FontSize="{OnIdiom Phone=12, Tablet=18, Desktop=20}"
-               
                 TextColor="Gray" 
                 Padding="0,0,-5,0"
                 />
@@ -72,35 +72,12 @@
                 Padding="0,0,0,0"
                 HorizontalOptions="End"
                 Margin="{OnIdiom '0,0,-12,0'}"
+                x:DataType="pages:SongDetailsPage"
                 mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.PlayIcon}"
                 MinimumHeightRequest="30"
                 MinimumWidthRequest="30"
                 />
         </Grid>
-        <!--             Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingTextShort}" -->
-        <!-- mi:MauiIcon.Value="{mi:FontAwesomeSolid Icon=Play}" -->
-
-
-        <Button 
-            Grid.Row="0"
-            WidthRequest="24"
-            HeightRequest="24" 
-            x:Name ="ScrollToggleQuick"
-            Clicked="OnScrollToggleClicked"
-            Background="Transparent"
-            TextColor="Black"
-            FontSize="10"
-            Padding="0,0,0,0"
-            HorizontalOptions="End"
-            Margin="0,-10,-10,0"
-            mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.PlayIcon}"
-            MinimumHeightRequest="30"
-            MinimumWidthRequest="30"
-            />
-        </HorizontalStackLayout>
-        <!--             Text="{Binding Source={x:Reference Root}, Path=UserViewModel.ScrollingTextShort}" -->
-        <!-- mi:MauiIcon.Value="{mi:FontAwesomeSolid Icon=Play}" -->
-
 
         <BoxView Grid.Row="3" HeightRequest="1" BackgroundColor="#ddd" />
 
@@ -116,7 +93,7 @@
         Grid.ColumnSpan="1"
         Grid.RowSpan="3"
         HeightRequest="{OnIdiom 45, Tablet=53}"
-        VerticalOptions="StartAndExpand"
+        VerticalOptions="Start"
         BackgroundColor="Transparent"
         Opacity="0.6"
         Margin="{OnIdiom '20,0,30,0', Tablet='40,0,30,0'}"
@@ -138,6 +115,7 @@
         <!-- bind to the UserViewModel exposed on the page with x:Reference -->
         <ImageButton
             x:Name="ScrollToggle"
+            x:DataType="pages:SongDetailsPage"
             Clicked="OnScrollTogglePanelClicked"
             BackgroundColor="Transparent"
             MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
@@ -151,9 +129,11 @@
             Clicked="OnIncreaseFontClicked" 
             />
         <ImageButton 
-            Source="{mi:Fluent FontDecrease24, IconSize=30, IconColor=#FFF}"
-            MinimumHeightRequest="{OnIdiom Default=25, Phone=16}"
-            MinimumWidthRequest="{OnIdiom Default=25, Phone=1}"
+            Source="{mi:Fluent FontDecrease24, IconSize={OnIdiom 25, Phone=18}, IconColor=#FFF}"
+            HeightRequest="{OnIdiom Default=25, Phone=18}"
+            WidthRequest="{OnIdiom Default=25, Phone=18}"
+            MinimumHeightRequest="{OnIdiom Default=25, Phone=18}"
+            MinimumWidthRequest="{OnIdiom Default=25, Phone=18}"
             Clicked="OnDecreaseFontClicked" />
         <ImageButton 
             Source="{mi:Fluent ApprovalsApp20, IconSize=30, IconColor=#FFF}"
@@ -161,13 +141,30 @@
             MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
             Clicked="OnResetFontClicked" 
             />
+            <ImageButton
+                Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FFF}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                IsVisible="Hidden"
+                Clicked="OnPlayMusicClicked" 
+                >
+                <ImageButton.Triggers>
+                    <DataTrigger 
+                        TargetType="ImageButton"
+                        Binding="{Binding HasSpotifyLink}"
+                        Value="True">
+                        <Setter Property="IsVisible" Value="Visible" />
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
 
-        <ImageButton
-            Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
-            Clicked="OnSettingsClicked"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-        />
+
+            <ImageButton
+                Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
+                Clicked="OnSettingsClicked"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                />
 
         </HorizontalStackLayout>
   </Grid>

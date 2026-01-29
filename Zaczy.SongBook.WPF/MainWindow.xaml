@@ -131,6 +131,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -153,14 +155,27 @@
                         <Label Grid.Row="1">Tytuł</Label>
                         <TextBox Text="{Binding ConvertedSong.Title, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Height="25" />
 
+                        <Label Grid.Row="1" Grid.Column="2">Szybkość przewijania</Label>
+                        <TextBox Text="{Binding ConvertedSong.ScrollingTempo, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="3" Height="25" />
+
                         <Label Grid.Row="2">Artysta</Label>
                         <TextBox Text="{Binding ConvertedSong.Artist, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Height="25"/>
+
+                        <Label Grid.Row="2" Grid.Column="2">Opóźnienie przewijania</Label>
+                        <TextBox Text="{Binding ConvertedSong.ScrollingDelay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="3" Height="25" />
 
                         <Label Grid.Row="3">Tekst</Label>
                         <TextBox Text="{Binding ConvertedSong.LyricsAuthor, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Height="25"/>
 
+                        <Label Grid.Row="3" Grid.Column="2">Spotify</Label>
+                        <TextBox Text="{Binding ConvertedSong.SpotifyLink, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="3" Height="25" />
+
                         <Label Grid.Row="4">Muzyka</Label>
                         <TextBox Text="{Binding ConvertedSong.MusicAuthor, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Height="25"/>
+
+                        <Label Grid.Row="4" Grid.Column="2">Niestandardowe chwyty</Label>
+                        <TextBox Text="{Binding ConvertedSong.ChordsVariations, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="3" Height="25"/>
+
 
                         <Label Grid.Row="5">Kapo</Label>
                         <TextBox Text="{Binding ConvertedSong.Capo, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Height="25"/>
@@ -168,7 +183,7 @@
                         <TextBox
                             Text="{Binding ConvertedSong.Lyrics, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                             Grid.Column="0" 
-                            Grid.ColumnSpan="2" 
+                            Grid.ColumnSpan="4" 
                             Grid.Row="6"
                             Padding="10,5,10,5"
                             FontFamily="Lucida Console"
@@ -177,14 +192,9 @@
                             TextWrapping="Wrap"
                             VerticalScrollBarVisibility="Auto"/>
 
-                        <Label Grid.Row="7">Niestandardowe wersje chwytów</Label>
-                        <TextBox Text="{Binding ConvertedSong.ChordsVariations, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Height="25"/>
                     </Grid>
                 </mah:MetroTabItem>
 
-                <mah:MetroTabItem Header="HTML">
-                    <WebBrowser x:Name="PreviewBrowser" Source="about:blank" />
-                </mah:MetroTabItem>
                 <mah:MetroTabItem Header="HTML2">
                     <Grid>
                         <Grid.RowDefinitions>

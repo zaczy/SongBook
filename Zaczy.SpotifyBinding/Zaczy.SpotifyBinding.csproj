@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Use matching MonoAndroid target (adjust version if needed) -->
+		<TargetFramework>monoandroid13.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- place the AAR at Zaczy.SpotifyBinding\libs\spotify-app-remote-release.aar -->
+		<AndroidAar Include="libs\spotify-app-remote-release.aar" />
+	</ItemGroup>
+	
+</Project>

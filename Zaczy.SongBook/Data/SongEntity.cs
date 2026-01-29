@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Zaczy.SongBook.Data;
@@ -38,10 +39,12 @@ public class SongEntity
     public string? Lyrics { get; set; }
 
     [Column("comments")]
+    [MaxLength(255)]
     public string? Comments { get; set; }
 
     [Column("chords_variations")]
     [JsonPropertyName("chords_variations")]
+    [MaxLength(140)]
     public string? ChordsVariations { get; set; }
 
     [Column("created_at")]
@@ -51,14 +54,39 @@ public class SongEntity
     public DateTime? UpdatedAt { get; set; }
 
     [Column("scrolling_delay")]
+    [JsonPropertyName("scrolling_delay")]
     public int ScrollingDelay { get; set; }
 
     [Column("scrolling_tempo")]
+    [JsonPropertyName("scrolling_tempo")]
     public int? ScrollingTempo { get; set; }
 
     [Column("spotify_link")]
+    [JsonPropertyName("spotify_link")]
+    [MaxLength(120)]
     public string? SpotifyLink { get; set; }
 
+    [JsonIgnore]
+    [NotMapped]
+    public bool HasSpotifyLink
+    {
+        get => !string.IsNullOrEmpty(SpotifyLink);
+    }
+
+    [JsonPropertyName("more_info")]
+    [Column("more_info")]
+    [MaxLength(255)]
+    public string? MoreInfo { get; internal set; }
+
+    [JsonPropertyName("source")]
+    [Column("source")]
+    [MaxLength(40)]
+    public string? Source { get; set; }
+
+    /// <summary>
+    /// Inicjalizuje obiekt SongEntity na podstawie obiektu Song
+    /// </summary>
+    /// <param name="song"></param>
     public void initFromSong(Song song)
     {
         Title = song.Title;
@@ -71,6 +99,8 @@ public class SongEntity
         ScrollingDelay = song.ScrollingDelay;
         ScrollingTempo = song.ScrollingTempo;
         SpotifyLink = song.SpotifyLink;
+        MoreInfo = song.MoreInfo;
+        Source = song.Source;
     }
 
     public override string ToString()

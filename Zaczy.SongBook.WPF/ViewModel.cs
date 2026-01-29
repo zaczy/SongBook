@@ -123,7 +123,7 @@ public class ViewModel : INotifyPropertyChanged
         var song = Song.CreateFromW(SourceSongHtml);
 
         var factory = new SongBookDbContextFactory();
-        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings.ConnectionStrings.SongBookDb));
+        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
 
         await songRepository.AddAsync(song, SourceSongHtml);
     }
@@ -145,7 +145,7 @@ public class ViewModel : INotifyPropertyChanged
         var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
 
         var songs = await songRepository.GetAllAsync();
-        Songs = new ObservableCollection<SongEntity>(songs);
+        Songs = new ObservableCollection<SongEntity>(songs.OrderBy(s=>s.Title));
         OnPropertyChanged(nameof(Songs));
     }
 

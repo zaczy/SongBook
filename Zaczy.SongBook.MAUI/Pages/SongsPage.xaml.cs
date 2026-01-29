@@ -2,6 +2,7 @@ using MauiIcons.Core;
 using Microsoft.Maui.Controls;
 using System;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook;
 using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages
@@ -64,14 +65,6 @@ namespace Zaczy.SongBook.MAUI.Pages
             if (BindingContext is SongListViewModel vm && vm.PageCommand != null && vm.PageCommand.CanExecute(null))
             {
                 vm.PageCommand.Execute(null);
-            }
-        }
-
-        private void OnTitleFilterCompleted(object sender, EventArgs e)
-        {
-            if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
-            {
-                vm.FilterCommand.Execute(null);
             }
         }
     }

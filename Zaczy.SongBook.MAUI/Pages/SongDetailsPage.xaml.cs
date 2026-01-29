@@ -1,7 +1,6 @@
 using MauiIcons.Core;
-using MauiIcons.FontAwesome;
 using MauiIcons.Fluent;
-
+using MauiIcons.FontAwesome;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
@@ -11,6 +10,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.Extensions;
 using Zaczy.SongBook.MAUI.ViewModels;
 using Timer = System.Timers.Timer;
 
@@ -35,10 +35,10 @@ namespace Zaczy.SongBook.MAUI.Pages
         // Expose the UserViewModel as a public property so XAML can bind to it via x:Reference
         public UserViewModel UserViewModel => _userViewModel;
 
-        private bool _suppressTopTouch;
+        // expose strongly-typed Song for XAML compiled bindings (avoid BindingContext.Title lookup)
+        public SongEntity Song => _songEntity;
 
-        // add fields near other private fields
-        //private double _pinchScale;
+        private bool _suppressTopTouch;
 
         public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel)
         {
@@ -47,23 +47,27 @@ namespace Zaczy.SongBook.MAUI.Pages
             _songEntity.ScrollingDelay = 10;
 
             _visualizationCssOptions = new VisualizationCssOptions();
-            _visualization = new SongVisualization() {  IncludeFontsAsBase64 = true, VisualizationCssOptions = _visualizationCssOptions };
+            _visualization = new SongVisualization() 
+            { 
+                IncludeFontsAsBase64 = true, 
+                VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions) 
+                {  
+                    CustomChordsOnly = UserViewModel.ShowOnlyCustomChords 
+                }
+            };
 
-            _ = new MauiIcon();
-            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.Search20, IconColor = Colors.Green };
-
-
+            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Music, IconColor = Colors.Green }; ;
+            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.MusicNote2Play20, IconColor = Colors.Green };
+            
             InitializeComponent();
 
             _visualizationCssOptions.Add(".lyrics-line", "font-family", "PoltawskiVariable");
-            //_.visualizationCssOptions.Add(".lyrics-line", "font-size", "2em");
             _visualizationCssOptions.Add("pre", "font-weight", "600");
 
             if(DeviceInfo.Idiom == DeviceIdiom.Tablet)
             {
                 _visualizationCssOptions.Add("body", "padding-top", "30px");
             }
-
 
             // prepare auto-scroll JS once
             _autoScrollJs = SongPreviewJavascript.JavascriptTxt();
@@ -143,6 +147,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             NavigationPage.SetHasNavigationBar(this, false);
             NavigationPage.SetHasBackButton(this, false);
 
+            // set the page BindingContext to the SongEntity (UI labels use data:SongEntity)
             BindingContext = _songEntity;
 
             _hideControlsTimer = new Timer(3000) { AutoReset = false };
@@ -178,8 +183,8 @@ namespace Zaczy.SongBook.MAUI.Pages
         }
 
         /// <summary>
-        // Copy packaged font assets to AppData (if present) and register paths in SongVisualization.CssFontsPath.
-        // SongVisualization will embed base64 if the file exists.
+        /// Copy packaged font assets to AppData (if present) and register paths in SongVisualization.CssFontsPath.
+        /// SongVisualization will embed base64 if the file exists.
         /// </summary>
         /// <returns></returns>
         private async Task EnsureFontsAvailableAsync()
@@ -332,8 +337,13 @@ namespace Zaczy.SongBook.MAUI.Pages
         {
             try
             {
+                if (_visualization?.VisualizationOptions != null)
+                {
+                    _visualization.VisualizationOptions.CustomChordsOnly = UserViewModel?.ShowOnlyCustomChords ?? false;
+                }
+
                 var song = new Song(_songEntity);
-                string htmlDocument = _visualization.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
+                string htmlDocument = _visualization!.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
 
                 var insertAt = htmlDocument.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
                 if (insertAt >= 0)
@@ -382,7 +392,7 @@ namespace Zaczy.SongBook.MAUI.Pages
                     }
                     else if (command == "hidecontrols")
                     {
-                        MainThread.BeginInvokeOnMainThread(() => { ControlsPanel.IsVisible = false; ModifyTapAreaForBackButton(true); });
+                        MainThread.BeginInvokeOnMainThread(() => { ControlsPanel.IsVisible = false; });
                     }
                     //else if (command == "showback")
                     //{
@@ -417,18 +427,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
-        private void ModifyTapAreaForBackButton(bool reset=false)
-        {
-            var m = TopTouchArea.Margin;
-            TopTouchArea.Margin = new Thickness(reset ? 0 : 35, m.Top, m.Right, m.Bottom);
-        }
-
-        private void ModifyTapAreaForBackButton(bool reset=false)
-        {
-            //var m = TopTouchArea.Margin;
-            //TopTouchArea.Margin = new Thickness(reset ? 0 : 35, m.Top, m.Right, m.Bottom);
-        }
-
+        /// <summary>
+        /// Nawigacja
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void OnLyricsWebViewNavigated(object? sender, WebNavigatedEventArgs e)
         {
             // Apply font size after navigation completes.
@@ -483,8 +486,8 @@ namespace Zaczy.SongBook.MAUI.Pages
         }
 
         /// <summary>
-        // Start auto-scroll at ~50 px/sec (adjust as needed).
-        // Before starting, query current scroll position so auto-scroll begins exactly where user left it.
+        /// Start auto-scroll at ~50 px/sec (adjust as needed).
+        /// Before starting, query current scroll position so auto-scroll begins exactly where user left it.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -494,8 +497,8 @@ namespace Zaczy.SongBook.MAUI.Pages
         }
 
         /// <summary>
-        // Start auto-scroll at ~50 px/sec (adjust as needed).
-        // Before starting, query current scroll position so auto-scroll begins exactly where user left it.
+        /// Start auto-scroll at ~50 px/sec (adjust as needed).
+        /// Before starting, query current scroll position so auto-scroll begins exactly where user left it.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -670,7 +673,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             OnPropertyChanged(nameof(UserViewModel));
         }
 
-        // new back handler
+        /// <summary>
+        /// Wróæ do poprzedniej strony
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void OnBackClicked(object sender, EventArgs e)
         {
             try
@@ -696,5 +703,25 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
+        /// <summary>
+        /// Odtwórz muzê
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnPlayMusicClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_songEntity.SpotifyLink))
+                {
+                    var id = SpotifyExtensions.ExtractSpotifyTrackId(_songEntity.SpotifyLink);
+
+                    var uri = DeviceInfo.Platform == DevicePlatform.Android ? $"spotify:track:{id}" : $"{_songEntity.SpotifyLink}";
+
+                    await Launcher.OpenAsync(uri);
+                }
+            }
+            catch { }
+        }
     }
 }

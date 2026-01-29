@@ -22,6 +22,8 @@ public class Song: INotifyPropertyChanged
         ScrollingDelay = entity.ScrollingDelay;
         ScrollingTempo = entity.ScrollingTempo;
         SpotifyLink = entity.SpotifyLink;
+        MoreInfo = entity.MoreInfo;
+        Source = entity.Source;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -172,6 +174,26 @@ public class Song: INotifyPropertyChanged
         }
     }
 
+    [JsonIgnore]
+    public List<string>? LinesLazyLoad
+    {
+        get
+        {
+            if (_lines == null)
+            {
+                _lines = new List<string>();
+            }
+
+            return _lines;
+        }
+    }
+
+    [JsonPropertyName("more_info")]
+    public string? MoreInfo { get; internal set; }
+
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
+
     // Słownik mapujący numery progów na polskie nazwy
     private static readonly Dictionary<int, string> FretNames = new()
     {
@@ -290,7 +312,9 @@ public class Song: INotifyPropertyChanged
             LyricsAuthor = converter.GetLyricsAuthor(),
             MusicAuthor = converter.GetMusicAuthor(),
             ScrollingDelay = 0,
-            ScrollingTempo = null
+            ScrollingTempo = null,
+            MoreInfo = string.Empty,
+            Source = "Wywrota"
         };
         return song;
     }

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.SongBook.WPF", "Zaczy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.SongBook.MAUI", "Zaczy.SongBook.MAUI\Zaczy.SongBook.MAUI.csproj", "{59751838-9841-461F-B951-083346D9C22E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zaczy.SpotifyBinding", "Zaczy.SpotifyBinding\Zaczy.SpotifyBinding.csproj", "{EBFF59CC-E8ED-45E8-A639-5D4A3FC86DC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,11 @@ Global
 		{59751838-9841-461F-B951-083346D9C22E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{59751838-9841-461F-B951-083346D9C22E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59751838-9841-461F-B951-083346D9C22E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59751838-9841-461F-B951-083346D9C22E}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{EBFF59CC-E8ED-45E8-A639-5D4A3FC86DC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBFF59CC-E8ED-45E8-A639-5D4A3FC86DC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBFF59CC-E8ED-45E8-A639-5D4A3FC86DC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBFF59CC-E8ED-45E8-A639-5D4A3FC86DC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

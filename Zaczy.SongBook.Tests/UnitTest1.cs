@@ -1,4 +1,7 @@
-﻿using Zaczy.SongBook.Chords;
+﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Zaczy.SongBook.Chords;
+using Zaczy.SongBook.Data;
 
 namespace Zaczy.SongBook.Tests
 {
@@ -230,6 +233,42 @@ namespace Zaczy.SongBook.Tests
             }
 
             Assert.Pass();
+        }
+
+        [Test]
+        public async Task SpiewnikZaczy_ImportFromWord_ParsesTxt()
+        {
+            // Given
+            string connectionString = "Server=localhost;Database=songbook;User=songbook;Password=Qaz43210;";
+            string filename = "C:\\Users\\Rafal.Zak\\Dropbox\\Worek\\Spiewnik_content.docx";
+
+            // When
+            WordParser wordParser = new WordParser();
+            var songs = wordParser.ParseFile(filename);
+
+            var factory = new SongBookDbContextFactory();
+            var songRepository = new SongRepository(factory.CreateDbContext(connectionString));
+
+
+            foreach (var s in songs)
+            {
+                if(s.Lines?.Count == 0)
+                    continue;
+
+                s.Lyrics = string.Join("\n", s.Lines!);
+
+                var songEntity = await songRepository.SearchOnlySongAsync(s);
+
+                if (songEntity == null)
+                    await songRepository.AddAsync(s);
+                else
+                {
+                    songEntity.initFromSong(s);
+                    await songRepository.UpdateAsync(songEntity);
+                }
+            }
+
+                Assert.That(songs?.Count > 190);
         }
 
 

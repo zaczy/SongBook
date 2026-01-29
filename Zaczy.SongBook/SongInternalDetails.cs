@@ -19,7 +19,7 @@ public class SongInternalDetails
     public int ChordLinesAboveLyricsCount { get; set; }
     public int ChordLinesAfterText { get; set; }
 
-    Dictionary<string, string> SpecialChordsSuggestions { get; set; } = new();
+    public Dictionary<string, string> SpecialChordsSuggestions { get; set; } = new();
     public void AddChords(IEnumerable<string> chords)
     {
         foreach (var chord in chords)
@@ -34,7 +34,7 @@ public class SongInternalDetails
     /// </summary>
     /// <param name="song"></param>
     /// <returns></returns>
-    public static SongInternalDetails? AnalyseSong(Song song)
+    public static SongInternalDetails? AnalyseSong(Song song, SongVisualizationOptions? visualizationOptions)
     {
         if(song == null || song.Lines == null || song.Lines.Count == 0)
         {
@@ -42,6 +42,7 @@ public class SongInternalDetails
         }
 
         var songInternalDetails = new SongInternalDetails();
+
 
         if (song?.Lines != null)
         {
@@ -52,13 +53,13 @@ public class SongInternalDetails
 
                 if (Chord.IsChordLine(line) && !Chord.IsChordLine(nextLine))
                 {
-                    var chords = Chord.ExtractChordsFromLine(line);
+                    var chords = Chord.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);
                     songInternalDetails.ChordLinesAboveLyricsCount++;
                 }
                 else if (Chord.ChordPartStart(line) > 1)
                 {
-                    var chords = Chord.ExtractChordsFromLine(line);
+                    var chords = Chord.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);
                     songInternalDetails.ChordLinesAfterText++;
                 }
@@ -106,7 +107,8 @@ public class SongInternalDetails
                         var chordDiagram = parts[1].Trim() ?? String.Empty;
                         if (!string.IsNullOrEmpty(chordName) && !string.IsNullOrEmpty(chordDiagram) && Chord.IsChord(chordName))
                         {
-                            suggestions.Add(chordName, chordDiagram);
+                            if(!suggestions.ContainsKey(chordName))
+                                suggestions.Add(chordName, chordDiagram);
                         }
                     }
                 });
@@ -135,7 +137,7 @@ public class SongInternalDetails
 
         var trimmed = (line?.Trim() ?? string.Empty);
         var normalized = trimmed?.NormalizeInlineWhitespace()?.ToLowerInvariant() ?? string.Empty;
-        normalized = normalized.Replace(".", "").Replace(";", "").Replace(":", "");
+        normalized = normalized.Replace(".", "").Replace(";", "").Replace(":", "").Replace("[","").Replace("]","");
 
         // handle pipe-separated sequences like "zwrotka 1|zwrotka 2"
         if (normalized.Contains('|'))
@@ -164,13 +166,17 @@ public class SongInternalDetails
         if (IsTabulaturaSegment(lines, i))
             return LyricLineBlockType.Tabulatura;
 
-        if(normalized == "solo")
+        if (normalized == "bridge")
+            return LyricLineBlockType.Bridge;
+
+
+        if (normalized == "solo" || normalized == "solo gitara")
             return LyricLineBlockType.Solo;
 
         if (normalized == "wstęp")
             return LyricLineBlockType.Solo;
 
-        if (normalized == "recytacja")
+        if (normalized == "recytacja" || normalized == "rec")
             return LyricLineBlockType.Recytacja;
 
 
