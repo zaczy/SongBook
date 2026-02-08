@@ -10,6 +10,8 @@ public class Song: INotifyPropertyChanged
 {
     public Song() { }
 
+    public int? ServerId { get; set; }
+
     public Song(SongEntity entity): this()
     {
         Title = entity.Title;
@@ -20,10 +22,11 @@ public class Song: INotifyPropertyChanged
         MusicAuthor = entity.MusicAuthor;
         ChordsVariations = entity.ChordsVariations;
         ScrollingDelay = entity.ScrollingDelay;
-        ScrollingTempo = entity.ScrollingTempo;
+        SongDuration = entity.SongDuration;
         SpotifyLink = entity.SpotifyLink;
         MoreInfo = entity.MoreInfo;
         Source = entity.Source;
+        ServerId = entity.Id;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -129,20 +132,20 @@ public class Song: INotifyPropertyChanged
     }
 
 
-    private int _scrollingDelay;
+    private int? _scrollingDelay;
     [JsonPropertyName("scrolling_delay")]
-    public int ScrollingDelay
+    public int? ScrollingDelay
     {
         get { return _scrollingDelay; }
         set { _scrollingDelay = value; }
     }
 
-    private int? _scrollingTempo;
-    [JsonPropertyName("scrolling_tempo")]
-    public int? ScrollingTempo
+    private int? _songDuration;
+    [JsonPropertyName("song_duration")]
+    public int? SongDuration
     {
-        get { return _scrollingTempo; }
-        set { _scrollingTempo = value; }
+        get { return _songDuration; }
+        set { _songDuration = value; }
     }
 
     private string? _spotifyLink;
@@ -312,7 +315,7 @@ public class Song: INotifyPropertyChanged
             LyricsAuthor = converter.GetLyricsAuthor(),
             MusicAuthor = converter.GetMusicAuthor(),
             ScrollingDelay = 0,
-            ScrollingTempo = null,
+            SongDuration = null,
             MoreInfo = string.Empty,
             Source = "Wywrota"
         };

@@ -111,6 +111,8 @@
                            VerticalOptions="Start"
                            BackgroundColor="#80000000"
                            IsVisible="False"
+                           Margin="{OnPlatform  WinUI='-10', Default='-15,0,-15,0'}"
+                           HeightRequest="{OnPlatform WinUI=70, Default=60}"
                            Opacity="0">
         <!-- bind to the UserViewModel exposed on the page with x:Reference -->
         <ImageButton
@@ -120,51 +122,63 @@
             BackgroundColor="Transparent"
             MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
             MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            VerticalOptions="Start"
             mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.ToggleIcon}" />
         
         <ImageButton 
             Source="{mi:Fluent FontIncrease24, IconSize=30, IconColor=#FFF}"
+            BackgroundColor="Transparent"
             MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
             MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            VerticalOptions="Start"
             Clicked="OnIncreaseFontClicked" 
+            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
             />
         <ImageButton 
             Source="{mi:Fluent FontDecrease24, IconSize={OnIdiom 25, Phone=18}, IconColor=#FFF}"
+            BackgroundColor="Transparent"
             HeightRequest="{OnIdiom Default=25, Phone=18}"
             WidthRequest="{OnIdiom Default=25, Phone=18}"
             MinimumHeightRequest="{OnIdiom Default=25, Phone=18}"
             MinimumWidthRequest="{OnIdiom Default=25, Phone=18}"
+            VerticalOptions="Start"
             Clicked="OnDecreaseFontClicked" />
         <ImageButton 
             Source="{mi:Fluent ApprovalsApp20, IconSize=30, IconColor=#FFF}"
             MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            BackgroundColor="Transparent"
             MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
             Clicked="OnResetFontClicked" 
+            VerticalOptions="Start"
             />
-            <ImageButton
-                Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FFF}"
-                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-                IsVisible="Hidden"
-                Clicked="OnPlayMusicClicked" 
-                >
-                <ImageButton.Triggers>
-                    <DataTrigger 
-                        TargetType="ImageButton"
-                        Binding="{Binding HasSpotifyLink}"
-                        Value="True">
-                        <Setter Property="IsVisible" Value="Visible" />
-                    </DataTrigger>
-                </ImageButton.Triggers>
-            </ImageButton>
-
-
-            <ImageButton
-                Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
-                Clicked="OnSettingsClicked"
-                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-                />
+        <ImageButton
+            Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FFF}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            BackgroundColor="Transparent"
+            IsVisible="Hidden"
+            VerticalOptions="Start"
+            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+            Clicked="OnPlayMusicClicked" 
+            >
+            <ImageButton.Triggers>
+                <DataTrigger 
+                    TargetType="ImageButton"
+                    Binding="{Binding HasSpotifyLink}"
+                    Value="True">
+                    <Setter Property="IsVisible" Value="Visible" />
+                </DataTrigger>
+            </ImageButton.Triggers>
+        </ImageButton>
+        <ImageButton
+            Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
+            BackgroundColor="Transparent"
+            Clicked="OnSettingsClicked"
+            VerticalOptions="Start"
+            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            />
 
         </HorizontalStackLayout>
   </Grid>

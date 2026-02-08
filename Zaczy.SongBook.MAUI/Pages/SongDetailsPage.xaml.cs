@@ -23,8 +23,9 @@ namespace Zaczy.SongBook.MAUI.Pages
 
         // store injected song entity and helpers so we can regenerate HTML later
         private readonly SongEntity _songEntity;
-        private readonly SongVisualization _visualization;
+        private SongVisualization _visualization;
         private readonly string _autoScrollJs;
+        private int _currentSongScrollSpeed;
 
         private bool _isSubscribed;
         private VisualizationCssOptions _visualizationCssOptions;
@@ -47,14 +48,18 @@ namespace Zaczy.SongBook.MAUI.Pages
             _songEntity.ScrollingDelay = 10;
 
             _visualizationCssOptions = new VisualizationCssOptions();
-            _visualization = new SongVisualization() 
-            { 
-                IncludeFontsAsBase64 = true, 
-                VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions) 
-                {  
-                    CustomChordsOnly = UserViewModel.ShowOnlyCustomChords 
-                }
-            };
+            //_visualization = new SongVisualization() 
+            //{ 
+            //    IncludeFontsAsBase64 = true, 
+            //    VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions) 
+            //    {  
+            //        CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
+            //        SkipLyricChords = UserViewModel.SkipLyricChords,
+            //        SkipTabulatures = UserViewModel.SkipTabulatures
+            //    }
+            //};
+
+            _visualization = this.CreateVisualicationOptions();
 
             _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Music, IconColor = Colors.Green }; ;
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.MusicNote2Play20, IconColor = Colors.Green };
@@ -137,6 +142,127 @@ namespace Zaczy.SongBook.MAUI.Pages
     }
     lastScale = 1;
   }, { passive: true });
+})();
+
+(function(){
+  // getTopLine(): returns JSON string { index: number, text: string, lineHeight?: number, top?: number }
+  window.getTopLine = function() {
+    try {
+      var paddingTop = 0; // jeœli masz sta³y nag³ówek w body, ustaw tu offset w px
+      var x = Math.max(1, Math.floor(window.innerWidth / 2));
+      var y = 1 + paddingTop; // punkt tu¿ przy górnej krawêdzi viewportu
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+      // Preferowane: linie jako elementy .lyrics-line
+      var lines = document.querySelectorAll('.lyrics-line');
+      if (lines && lines.length) {
+        for (var i = 0; i < lines.length; i++) {
+          var r = lines[i].getBoundingClientRect();
+          // pierwszy element którego dó³ jest > 0 (czyli czêœæ widoczna) lub którego top >= 0
+          if (r.bottom > 0) {
+            return JSON.stringify({ index: i, text: (lines[i].innerText || lines[i].textContent || '').trim(), top: Math.round(r.top), scrollTop: Math.round(scrollTop), totalLines: lines.length  });
+          }
+        }
+      }
+
+      // Fallback: <pre> z tekstem wiersz-po-wierszu
+      var pre = document.querySelector('pre');
+      if (pre) {
+        var style = window.getComputedStyle(pre);
+        var lineHeight = parseFloat(style.lineHeight);
+        if (isNaN(lineHeight) || lineHeight === 0) {
+          var fs = parseFloat(style.fontSize) || 16;
+          lineHeight = fs * 1.2;
+        }
+        var preRect = pre.getBoundingClientRect();
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+        var preTopInDoc = preRect.top + scrollTop;
+        var relative = scrollTop - preTopInDoc;
+        var index = Math.max(0, Math.floor(relative / lineHeight));
+        var textLines = (pre.innerText || '').split(/\r?\n/);
+        var text = textLines[index] || '';
+        return JSON.stringify({ index: index, text: text.trim(), lineHeight: Math.round(lineHeight), scrollTop: Math.round(scrollTop), totalLines: lines.length });
+      }
+
+      // Ostateczny fallback — element pod punktem (x,y)
+      var el = document.elementFromPoint(x, y);
+      if (el) {
+        var parent = el.closest('.lyrics-line') || el.closest('pre') || el;
+        var all = Array.from(document.querySelectorAll('.lyrics-line'));
+        var idx = all.indexOf(parent);
+        if (idx !== -1) {
+          return JSON.stringify({ index: idx, text: (parent.innerText || parent.textContent || '').trim(), scrollTop: Math.round(scrollTop), totalLines: lines.length });
+        }
+      }
+
+      return JSON.stringify({ index: -1, text: '', scrollTop: Math.round(scrollTop) });
+    } catch (e) {
+      return JSON.stringify({ index: -1, text: '', error: (e && e.message) ? e.message : 'unknown' });
+    }
+  };
+})();
+</script>
+
+<script>
+(function(){
+  window.getRemainingScrollInfo = function(){
+    try {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+      var viewport = window.innerHeight || document.documentElement.clientHeight || 0;
+      var docHeight = Math.max(
+        document.body.scrollHeight, document.documentElement.scrollHeight,
+        document.body.offsetHeight, document.documentElement.offsetHeight,
+        document.body.clientHeight, document.documentElement.clientHeight
+      );
+
+      var remainingPx = Math.max(0, docHeight - (scrollTop + viewport));
+      // percent of the total scrollable distance remaining (0..100)
+      var totalScrollable = Math.max(0, docHeight - viewport);
+      var remainingPercent = totalScrollable > 0 ? Math.round(remainingPx / totalScrollable * 100) : 0;
+
+      // remaining lines estimation for variable-font mode (.lyrics-line) or pre-mode
+      var remainingLines = -1;
+
+      var lines = document.querySelectorAll('.lyrics-line');
+      if (lines && lines.length) {
+        remainingLines = 0;
+        for (var i = 0; i < lines.length; i++) {
+          var r = lines[i].getBoundingClientRect();
+          // count lines whose top is below the viewport bottom (not visible)
+          if (r.top >= viewport - 1) {
+            remainingLines++;
+          }
+        }
+      } else {
+        var pre = document.querySelector('pre');
+        if (pre) {
+          var textLines = (pre.innerText || '').split(/\r?\n/);
+          var style = window.getComputedStyle(pre);
+          var lineHeight = parseFloat(style.lineHeight);
+          if (isNaN(lineHeight) || lineHeight === 0) {
+            var fs = parseFloat(style.fontSize) || 16;
+            lineHeight = fs * 1.2;
+          }
+          var preRect = pre.getBoundingClientRect();
+          var preTopInDoc = preRect.top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+          var firstVisibleLine = Math.max(0, Math.floor(((window.pageYOffset || document.documentElement.scrollTop || 0) - preTopInDoc) / lineHeight));
+          var visibleLines = Math.ceil(viewport / lineHeight);
+          remainingLines = Math.max(0, textLines.length - (firstVisibleLine + visibleLines));
+        }
+      }
+
+      return JSON.stringify({
+        remainingPx: Math.round(remainingPx),
+        remainingPercent: remainingPercent,
+        remainingLines: remainingLines,
+        docHeight: Math.round(docHeight),
+        viewport: Math.round(viewport),
+        scrollTop: Math.round(scrollTop)
+      });
+    } catch (e) {
+      return JSON.stringify({ error: (e && e.message) ? e.message : 'unknown' });
+    }
+  };
 })();
 </script>
 ";
@@ -342,6 +468,8 @@ namespace Zaczy.SongBook.MAUI.Pages
                     _visualization.VisualizationOptions.CustomChordsOnly = UserViewModel?.ShowOnlyCustomChords ?? false;
                 }
 
+                _visualization = this.CreateVisualicationOptions();
+
                 var song = new Song(_songEntity);
                 string htmlDocument = _visualization!.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
 
@@ -514,18 +642,42 @@ namespace Zaczy.SongBook.MAUI.Pages
         /// <returns></returns>
         private async Task StartScrollClicked()
         {
+            int songDuration = _songEntity?.SongDuration ?? 3 * 60; 
+
             try
             {
                 var posStr = await LyricsWebView.EvaluateJavaScriptAsync("window.getScrollPosition().toString();");
+                var remainingLyricsInfo = await GetRemainingScrollInfoAsync(); 
                 if (double.TryParse(posStr?.Trim('"'), out var pos))
                 {
-                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({UserViewModel?.AutoScrollSpeed ?? 30}, {pos}, {_songEntity.ScrollingDelay});");
+                    if (pos == 0)
+                    {
+                        if (remainingLyricsInfo != null)
+                            _currentSongScrollSpeed = (int)(remainingLyricsInfo.RemainingPx / songDuration);
+                    }
+                    else
+                    {
+                        var topLineInfo = await GetTopVisibleLineExampleAsync();
+                        if(topLineInfo?.TotalLines > 0 && remainingLyricsInfo != null)
+                        {
+                            // estimate total document height based on current scrollTop and remainingPercent
+                            var estimatedDocHeight = (topLineInfo.ScrollTop * 100) / (100 - remainingLyricsInfo.RemainingPercent);
+                            var estimatedRemainingPx = estimatedDocHeight - (topLineInfo.ScrollTop + (estimatedDocHeight * (100 - remainingLyricsInfo.RemainingPercent) / 100));
+                            _currentSongScrollSpeed = (int)(estimatedRemainingPx! / songDuration);
+                        }
+                    }
+
+                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed}, {pos}, {_songEntity!.ScrollingDelay});");
                 }
                 else
                 {
-                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({UserViewModel?.AutoScrollSpeed ?? 30}, 0, {_songEntity.ScrollingDelay});");
+                    _currentSongScrollSpeed = remainingLyricsInfo != null ? (int)(remainingLyricsInfo.RemainingPx / songDuration) : 30;
+                    await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed}, 0, {_songEntity!.ScrollingDelay});");
                 }
                 _userViewModel.ScrollingInProgress = true;
+
+                
+
             }
             catch (Exception) { /* handle or log if needed */ }
 
@@ -722,6 +874,112 @@ namespace Zaczy.SongBook.MAUI.Pages
                 }
             }
             catch { }
+        }
+
+        private SongVisualization CreateVisualicationOptions()
+        {
+            var fontsPath = _visualization?.CssFontsPath;
+
+            var visualization = new SongVisualization()
+            {
+                IncludeFontsAsBase64 = true,
+                VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions)
+                {
+                    CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
+                    SkipLyricChords = UserViewModel.SkipLyricChords,
+                    SkipTabulatures = UserViewModel.SkipTabulatures
+                }
+            };
+
+            if(fontsPath != null)
+                visualization.CssFontsPath = fontsPath;
+
+            return visualization;
+        }
+
+        private async Task<TopLineResult?> GetTopVisibleLineExampleAsync()
+        {
+            try
+            {
+                var json = await LyricsWebView.EvaluateJavaScriptAsync("getTopLine();");
+                if (string.IsNullOrEmpty(json))
+                    return null;
+
+                json = json.Trim('"'); // EvaluateJavaScriptAsync czêsto zwraca wynik w cudzys³owach
+                json = json.Replace("\\\"", "\"");
+                json = json.Replace("\\\\", "\\");
+
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var doc = System.Text.Json.JsonSerializer.Deserialize<TopLineResult>(json, options);
+
+                return doc;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"getTopLine JS error: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Call the injected JS and return remaining scroll info.
+        /// </summary>
+        private async Task<RemainingScrollResult?> GetRemainingScrollInfoAsync()
+        {
+            try
+            {
+                // Ensure function exists; EvaluateJavaScriptAsync often returns quoted string, possibly escaped
+                var raw = await LyricsWebView.EvaluateJavaScriptAsync("getRemainingScrollInfo();");
+                if (string.IsNullOrEmpty(raw))
+                    return null;
+
+                // Normalize the returned string: Remove surrounding quotes and unescape if necessary
+                // Typical return form from EvaluateJavaScriptAsync: "\"{...}\""
+                string json = raw.Trim();
+                if (json.Length >= 2 && json[0] == '\"' && json[json.Length - 1] == '\"')
+                {
+                    json = json.Substring(1, json.Length - 2);
+                    json = json.Replace("\\\"", "\"");
+                    json = json.Replace("\\\\", "\\");
+                }
+                else 
+                {
+                    json = json.Replace("\\\"", "\"");
+                    json = json.Replace("\\\\", "\\");
+                }
+
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var result = System.Text.Json.JsonSerializer.Deserialize<RemainingScrollResult>(json, options);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetRemainingScrollInfoAsync error: {ex.Message}");
+                return null;
+            }
+        }
+
+        private class RemainingScrollResult
+        {
+            public int RemainingPx { get; set; }
+            public int RemainingPercent { get; set; }   // 0..100
+            public int RemainingLines { get; set; }     // -1 = unknown/not-applicable
+            public int DocHeight { get; set; }
+            public int Viewport { get; set; }
+            public int ScrollTop { get; set; }
+            public string? Error { get; set; }
+        }
+
+        private class TopLineResult
+        {
+            public int Index { get; set; }
+            public string? Text { get; set; }
+            public int? LineHeight { get; set; }
+            public int? Top { get; set; }
+            public int? ScrollTop { get; set; }
+
+            public int? TotalLines { get; set; }
         }
     }
 }

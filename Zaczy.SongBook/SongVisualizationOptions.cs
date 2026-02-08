@@ -42,4 +42,9 @@ public class SongVisualizationOptions
         set { _customChordsOnly = value; }
     }
 
+    public bool SkipTabulatures { get; set; } = false;
+    public bool SkipLyricChords { get; set; } = false;
+
+
+
 }

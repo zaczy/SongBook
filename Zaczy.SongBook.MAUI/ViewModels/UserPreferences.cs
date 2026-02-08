@@ -18,4 +18,7 @@ public class UserPreferences
 
     public bool ShowOnlyCustomChords { get; set; } = false;
 
+    public bool SkipTabulatures { get; set; } = false;
+    public bool SkipLyricChords { get; set; } = false;
+
 }

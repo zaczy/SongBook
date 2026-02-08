@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace Zaczy.SongBook.Data;
 
 [Table("songs")]
-public class SongEntity
+public partial class SongEntity
 {
     [Key]
     [Column("id")]
@@ -55,11 +55,11 @@ public class SongEntity
 
     [Column("scrolling_delay")]
     [JsonPropertyName("scrolling_delay")]
-    public int ScrollingDelay { get; set; }
+    public int? ScrollingDelay { get; set; }
 
-    [Column("scrolling_tempo")]
-    [JsonPropertyName("scrolling_tempo")]
-    public int? ScrollingTempo { get; set; }
+    [Column("song_duration")]
+    [JsonPropertyName("song_duration")]
+    public int? SongDuration { get; set; }
 
     [Column("spotify_link")]
     [JsonPropertyName("spotify_link")]
@@ -83,6 +83,20 @@ public class SongEntity
     [MaxLength(40)]
     public string? Source { get; set; }
 
+    private string? _categoryColor;
+    [MaxLength(20)]
+    [JsonPropertyName("category_color")]
+    [Column("category_color")]
+    public string? CategoryColor
+    {
+        get
+        {
+            return _categoryColor;
+        }
+
+        set => _categoryColor = value;
+    }
+
     /// <summary>
     /// Inicjalizuje obiekt SongEntity na podstawie obiektu Song
     /// </summary>
@@ -97,7 +111,7 @@ public class SongEntity
         MusicAuthor = song.MusicAuthor;
         ChordsVariations = song.ChordsVariations;
         ScrollingDelay = song.ScrollingDelay;
-        ScrollingTempo = song.ScrollingTempo;
+        SongDuration = song.SongDuration;
         SpotifyLink = song.SpotifyLink;
         MoreInfo = song.MoreInfo;
         Source = song.Source;

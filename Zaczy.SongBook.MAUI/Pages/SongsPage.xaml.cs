@@ -25,6 +25,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             BindingContext = _songListViewModel;
         }
 
+        /// <summary>
+        /// Wykonywane, kiedy strona staje siê widoczna. Jeœli lista piosenek jest pusta, ³aduje je z bazy danych. 
+        /// Dziêki temu dane s¹ odœwie¿ane przy ka¿dym wejœciu na stronê, ale tylko jeœli jest to potrzebne (np. po dodaniu nowej piosenki).
+        /// Jeœli dane s¹ ju¿ za³adowane, nie wykonuje ponownie operacji ³adowania.
+        /// </summary>
         protected override async void OnAppearing()
         {
             base.OnAppearing();
@@ -52,6 +57,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
+        /// <summary>
+        /// Fitrowanie po tytule i odœwie¿enie listy. Command jest w ViewModelu, wiêc sprawdzamy jego dostêpnoœæ i wykonujemy.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnTitleFilterCompleted(object sender, EventArgs e)
         {
             if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
@@ -60,6 +70,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             }
         }
 
+        /// <summary>
+        /// Filtrowanie po stronie serwera (paginacja) i odœwie¿enie listy. Command jest w ViewModelu, wiêc sprawdzamy jego dostêpnoœæ i wykonujemy.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnPageFilterCompleted(object sender, EventArgs e)
         {
             if (BindingContext is SongListViewModel vm && vm.PageCommand != null && vm.PageCommand.CanExecute(null))
@@ -67,5 +82,6 @@ namespace Zaczy.SongBook.MAUI.Pages
                 vm.PageCommand.Execute(null);
             }
         }
+
     }
 }

@@ -204,8 +204,8 @@ namespace Zaczy.SongBook.WPF
                     songEntity.initFromSong(ViewModel.ConvertedSong);
                     await songRepository.UpdateAsync(songEntity);
 
-                    ViewModel.Songs.Clear();
-                    await ViewModel.LoadSongsAsync();
+                    //ViewModel.Songs.Clear();
+                    //await ViewModel.LoadSongsAsync();
 
                 }
             }

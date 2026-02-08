@@ -5,6 +5,7 @@ namespace Zaczy.SongBook.Data;
 public class SongBookDbContext : DbContext
 {
     public DbSet<SongEntity> Songs { get; set; }
+    public DbSet<SongCategoryEntity> SongCategories { get; set; }
 
     public SongBookDbContext(DbContextOptions<SongBookDbContext> options) 
         : base(options)

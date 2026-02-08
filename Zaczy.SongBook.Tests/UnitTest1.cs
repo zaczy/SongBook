@@ -249,7 +249,6 @@ namespace Zaczy.SongBook.Tests
             var factory = new SongBookDbContextFactory();
             var songRepository = new SongRepository(factory.CreateDbContext(connectionString));
 
-
             foreach (var s in songs)
             {
                 if(s.Lines?.Count == 0)
@@ -263,7 +262,8 @@ namespace Zaczy.SongBook.Tests
                     await songRepository.AddAsync(s);
                 else
                 {
-                    songEntity.initFromSong(s);
+                    songEntity.Lyrics = s.Lyrics;
+                    //songEntity.initFromSong(s);
                     await songRepository.UpdateAsync(songEntity);
                 }
             }

@@ -43,7 +43,6 @@ public class SongInternalDetails
 
         var songInternalDetails = new SongInternalDetails();
 
-
         if (song?.Lines != null)
         {
             for (int i = 0; i < song.Lines.Count; i++)
@@ -173,12 +172,14 @@ public class SongInternalDetails
         if (normalized == "solo" || normalized == "solo gitara")
             return LyricLineBlockType.Solo;
 
-        if (normalized == "wstęp")
+        if (normalized == "wstęp" || normalized == "intro")
             return LyricLineBlockType.Solo;
 
         if (normalized == "recytacja" || normalized == "rec")
             return LyricLineBlockType.Recytacja;
 
+        if (normalized == "info")
+            return LyricLineBlockType.Info;
 
         return LyricLineBlockType.Inne;
 
@@ -201,6 +202,12 @@ public class SongInternalDetails
         }
     }
 
+    /// <summary>
+    /// Czy wskazana linia wygląda jakby rozpoczynała zapis tabulatury?
+    /// </summary>
+    /// <param name="lines"></param>
+    /// <param name="i"></param>
+    /// <returns></returns>
     private static bool IsTabulaturaSegment(List<string> lines, int i)
     {
         if (lines == null || i < 0 || i >= lines.Count)
@@ -211,6 +218,12 @@ public class SongInternalDetails
         return tabuLines >= 3;
     }
 
+    /// <summary>
+    /// Liczba wierszy rozpoznanych jako zapis tabulatury
+    /// </summary>
+    /// <param name="lines"></param>
+    /// <param name="i"></param>
+    /// <returns></returns>
     public static int TabulaturaSucceedingLines(List<string> lines, int i)
     {
         var tabStartRegex = new Regex(@"^[A-Ha-h][0-9~|-]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);

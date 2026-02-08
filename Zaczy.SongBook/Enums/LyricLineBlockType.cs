@@ -16,5 +16,6 @@ public enum LyricLineBlockType
     Solo,
     Wstęp,
     Inne,
-    Recytacja
+    Recytacja,
+    Info
 }

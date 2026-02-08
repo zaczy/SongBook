@@ -155,6 +155,55 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>
+    /// Nie pokazuj tabulatur dla akordów
+    /// </summary>
+    public bool SkipTabulatures
+    {
+        get { return _prefs?.SkipTabulatures ?? false; }
+        set 
+        {
+            if (_prefs!= null && _prefs.SkipTabulatures != value)
+            {
+                _prefs.SkipTabulatures = value;
+                Save();
+                OnPropertyChanged(nameof(SkipTabulatures));
+                OnPropertyChanged(nameof(SkipTabulaturesTxt));
+            }
+        }
+    }
+
+    public string SkipTabulaturesTxt
+    {
+        get => _prefs?.SkipTabulatures == true ? "tabulatury są niepotrzebne - nie pokazuj ich" : "";
+    }
+
+    public string SkipLyricChordsTxt
+    {
+        get => _prefs?.SkipLyricChords == true ? "nie jestem gitarzystą - schowaj te dziwne literki" : "";
+    }
+
+
+    /// <summary>
+    /// Nie pokazuj tabulatur dla akordów
+    /// </summary>
+    public bool SkipLyricChords
+    {
+        get { return _prefs?.SkipLyricChords ?? false; }
+        set
+        {
+            if (_prefs != null && _prefs.SkipLyricChords != value)
+            {
+                _prefs.SkipLyricChords = value;
+                Save();
+                OnPropertyChanged(nameof(SkipLyricChords));
+                OnPropertyChanged(nameof(SkipLyricChordsTxt));
+            }
+        }
+    }
+
+
     public string ShowOnlyCustomChordsTxt
     {
         get => _prefs?.ShowOnlyCustomChords == true ? "wyświetlaj diagramy tylko dla niestandardowych przewrotów akordów wykorzystanych w piosence" : "pokazuj diagramy wszystkich chwytów";

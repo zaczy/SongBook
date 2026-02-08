@@ -108,6 +108,7 @@
 	  <None Remove="assets\css\Monofonto Regular\Monofonto Regular.ttf" />
 	  <None Remove="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
 	  <None Remove="assets\ikona256.png" />
+	  <None Remove="Resources\Images\sync2_ico.png" />
 	</ItemGroup>
 
 	<!-- Include appsettings.json as a MAUI asset so it's available in the app package on Android/iOS -->
@@ -160,6 +161,9 @@
 	</ItemGroup-->
 
 	<ItemGroup>
+	  <MauiXaml Update="Pages\CategoriesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

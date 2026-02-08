@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Zaczy.SongBook.Data;
 
@@ -11,9 +12,11 @@ using Zaczy.SongBook.Data;
 namespace Zaczy.SongBook.Migrations
 {
     [DbContext(typeof(SongBookDbContext))]
-    partial class SongBookDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260205162655_SongDuration")]
+    partial class SongDuration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,60 +24,6 @@ namespace Zaczy.SongBook.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("Zaczy.SongBook.Data.SongCategoryEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CategoryColor")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("category_color")
-                        .HasAnnotation("Relational:JsonPropertyName", "category_color");
-
-                    b.Property<string>("CategoryColorThemed")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("category_color_themed")
-                        .HasAnnotation("Relational:JsonPropertyName", "category_color_themed");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsSelected")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_selected");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("SongsCount")
-                        .HasColumnType("int")
-                        .HasColumnName("songs_count")
-                        .HasAnnotation("Relational:JsonPropertyName", "songs_count");
-
-                    b.Property<string>("SymbolImage")
-                        .HasColumnType("longtext")
-                        .HasColumnName("symbol_image")
-                        .HasAnnotation("Relational:JsonPropertyName", "symbol_image");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SongCategories");
-                });
 
             modelBuilder.Entity("Zaczy.SongBook.Data.SongEntity", b =>
                 {
@@ -94,12 +43,6 @@ namespace Zaczy.SongBook.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("capo");
-
-                    b.Property<string>("CategoryColor")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("category_color")
-                        .HasAnnotation("Relational:JsonPropertyName", "category_color");
 
                     b.Property<string>("ChordsVariations")
                         .HasMaxLength(140)
@@ -138,7 +81,7 @@ namespace Zaczy.SongBook.Migrations
                         .HasColumnName("music_author")
                         .HasAnnotation("Relational:JsonPropertyName", "music_author");
 
-                    b.Property<int?>("ScrollingDelay")
+                    b.Property<int>("ScrollingDelay")
                         .HasColumnType("int")
                         .HasColumnName("scrolling_delay")
                         .HasAnnotation("Relational:JsonPropertyName", "scrolling_delay");
