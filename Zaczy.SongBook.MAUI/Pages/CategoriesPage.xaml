@@ -19,11 +19,10 @@
             Order="Primary"
             Priority="0" />
 		<ToolbarItem
-            Text="Pobierz"
             BindingContext="{x:Reference Root}"
             Command="{Binding FetchCategoriesCommand}"
             Order="Primary"
-			IconImageSource="sync2_ico"
+			IconImageSource="sync2_ico.png"
             Priority="0" />
 	</ContentPage.ToolbarItems>
 
@@ -41,13 +40,16 @@ Wybierz jeden lub więcej katalogów, aby pobrać piosenki wchodzące w ich skł
                         ItemsSource="{Binding Categories}"
                         SelectionMode="Multiple">
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="2" />
+                <GridItemsLayout Orientation="Vertical"
+                   Span="2"
+                   HorizontalItemSpacing="8"
+                   VerticalItemSpacing="8" />
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="data:SongCategoryEntity">
                     <Border 
-                        Margin="6" 
+                        Margin="0" 
                         Padding="15,10,15,20"
                         BackgroundColor="{Binding CategoryColorThemed}"
                         StrokeThickness="1"

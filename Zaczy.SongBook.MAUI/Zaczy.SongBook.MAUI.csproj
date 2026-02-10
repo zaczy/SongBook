@@ -2,7 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+		<!--TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFramework-->
+		<!--TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
+		  $(TargetFrameworks);net9.0-windows10.0.19041.0
+		</TargetFrameworks-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
 
@@ -24,7 +27,7 @@
 		<ApplicationTitle>Zaczy.SongBook.MAUI</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.zaczy.songbook.maui</ApplicationId>
+		<ApplicationId>net.zaczy.songbook</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -45,21 +48,25 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
@@ -67,26 +74,30 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
+	  <ApplicationDisplayVersion>0.8</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\ikona_sp_2601.svg" Color="#b62610" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\ikona_sp_0902.svg" Color="#b62610" />
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#b62610" BaseSize="200,200" />
 		<!--MauiSplashScreen Include="Resources\Splash\spiewajnik_splash.png" Color="#b62610" BaseSize="128,128" /-->
@@ -191,5 +202,12 @@
     <AndroidAarLibrary Include="Platforms\Android\libs\spotify-app-remote-release.aar" />
     -->
   </ItemGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <!-- Publish framework-dependent to avoid requiring Microsoft.NETCore.App.Runtime.Mono.win-x64 -->
+    <SelfContained>false</SelfContained>
+    <!-- Optional: specify RID if you want a specific target arch for framework-dependent output -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
 
 </Project>

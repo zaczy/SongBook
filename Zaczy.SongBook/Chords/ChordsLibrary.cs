@@ -96,7 +96,6 @@ public class ChordsLibrary
                 chord.Tones.Add(new GuitarChordTone(5, 3, 10));  // struna 5, palec 3, próg 3
                 break;
 
-
             case "Cadd9":
                 chord = new GuitarChord("C9") { MutedStrings = new HashSet<int> { 6 }, OpenStrings = new HashSet<int> { 3, 1 } };
                 chord.Tones.Add(new GuitarChordTone(6, 1, 8));  // struna 2, palec 1, próg 1

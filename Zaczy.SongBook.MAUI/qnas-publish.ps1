@@ -19,9 +19,10 @@ $proj = $projFile.FullName
 #$proj = "C:\Users\Rafal.Zak\source\repos\Zaczy.SongBook\Zaczy.SongBook.MAUI\Zaczy.SongBook.MAUI.csproj"
 $out  = "\\qnas\homes\zaczy\Android\"
 
+$packageType = "aab"
 
 dotnet publish $proj -f net9.0-android -c Release `
-  -p:AndroidPackageFormat=apk `
+  -p:AndroidPackageFormat=$packageType `
   -p:AndroidKeyStore=true `
   -p:AndroidSigningKeyStore="C:\Users\Rafal.Zak\AppData\Local\Xamarin\Mono for Android\Keystore\zaczy\zaczy.keystore" `
   -p:AndroidSigningKeyAlias=zaczy `
@@ -39,12 +40,12 @@ $version = dotnet msbuild $proj -nologo -v:quiet `
 Write-Host "Odczytana wersja plikacji: $version"
 
 # 2) Znajdź APK (załóżmy że jest tylko jedno .apk w katalogu publikacji)
-$apk = Get-ChildItem -Path $out -Filter *Signed.apk -Recurse | Select-Object -First 1
+$apk = Get-ChildItem -Path $out -Filter *Signed.$packageType -Recurse | Select-Object -First 1
 
 
 # 3) Zmień nazwę
 if ($apk -and $version) {
-    $newName = Join-Path $apk.DirectoryName ("zaczy.songbook.maui-" + $version + ".apk")
+    $newName = Join-Path $apk.DirectoryName ("zaczy.songbook.maui-" + $version + ".$packageType")
 
     try {
         if (Test-Path -LiteralPath $newName) {
@@ -54,9 +55,9 @@ if ($apk -and $version) {
         }
 
         Rename-Item -LiteralPath $apk.FullName -NewName $newName -Force -ErrorAction Stop
-        Write-Host "APK => $newName" -ForegroundColor Green
+        Write-Host "$packageType => $newName" -ForegroundColor Green
 
-        $newName = Join-Path $apk.DirectoryName ("zaczy.songbook.maui.apk")
+        $newName = Join-Path $apk.DirectoryName ("zaczy.songbook.maui.$packageType")
         Remove-Item -LiteralPath $newName -Force -ErrorAction Stop
         Write-Host "Usuwam $newName" -ForegroundColor Yellow
 
@@ -67,5 +68,5 @@ if ($apk -and $version) {
     }
 
 } else {
-    Write-Warning "Nie znaleziono APK lub wersji."
+    Write-Warning "Nie znaleziono $packageType lub wersji."
 }

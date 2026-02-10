@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Najważniejsze: rozdzielone TargetFrameworks -->
+    <TargetFrameworks>
+      net9.0-android;
+      net9.0-ios;
+      net9.0-maccatalyst
+    </TargetFrameworks>
+
+    <!-- Windows w .NET 8 – stabilnie i bez błędów NU1102 -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
+      $(TargetFrameworks);net8.0-windows10.0.19041.0
+    </TargetFrameworks>
+
+    <!-- Podstawowe ustawienia MAUI -->
+    <OutputType>Exe</OutputType>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <RootNamespace>Zaczy.SongBook.MAUI</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <ApplicationTitle>Zaczy.SongBook.MAUI</ApplicationTitle>
+    <ApplicationId>com.companyname.zaczy.songbook.maui</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <!-- Windows: nadal aplikacja nieopakowana -->
+    <WindowsPackageType>None</WindowsPackageType>
+
+    <!-- Minimalne platformy -->
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
+    <!-- Android 35 (tylko jeśli instalujesz SDK 35) -->
+    <AndroidCompileSdkVersion>35</AndroidCompileSdkVersion>
+    <AndroidTargetSdkVersion>35</AndroidTargetSdkVersion>
+  </PropertyGroup>
+
+  <!-- Tu wpisujesz tylko elementy, które miałeś wcześniej (ikonki, splash, fonty itd.)
+       TROCHĘ skrócone: wstaw tu swoje ItemGroup z zasobami BEZ ZMIAN -->
+  
+  <!-- Reszta Twojego pliku .csproj może zostać praktycznie bez zmian.

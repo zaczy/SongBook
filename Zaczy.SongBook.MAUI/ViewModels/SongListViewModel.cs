@@ -283,11 +283,13 @@ public class SongListViewModel : INotifyPropertyChanged
                 }
 
                 // As a last resort try MainPage if available (kept as non-obsolete fallback).
+#pragma warning disable CS0618 // Type or member is obsolete
                 var fallbackPage = Application.Current?.MainPage;
                 if (fallbackPage?.Navigation != null)
                 {
                     await fallbackPage.Navigation.PushAsync(new CategoriesPage(this));
                 }
+#pragma warning restore CS0618 // Type or member is obsolete
             });
         }
         catch (Exception ex)
