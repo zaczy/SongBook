@@ -82,6 +82,5 @@ namespace Zaczy.SongBook.MAUI.Pages
                 vm.PageCommand.Execute(null);
             }
         }
-
     }
 }

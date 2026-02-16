@@ -45,6 +45,6 @@ public class SongVisualizationOptions
     public bool SkipTabulatures { get; set; } = false;
     public bool SkipLyricChords { get; set; } = false;
 
-
-
+    public bool MoveChordsToLyricsLine { get; set; } = false;
+    public string? ChordDiagramColor { get; set; }
 }

@@ -153,12 +153,9 @@ namespace Zaczy.SongBook.Tests
         }
 
         [Test]
-        public void GuitarChord_AdurToSvg_ReturnsCorrectSvg()
+        public void GuitarChord_AsciiChordCDur_ReturnsCorrectSvg()
         {
-            var chord = new GuitarChord("A");
-            chord.Tones.Add(new GuitarChordTone(2, 3, 2));  // struna 2, palec 1, próg 2
-            chord.Tones.Add(new GuitarChordTone(3, 2, 2));  // struna 2, palec 1, próg 2
-            chord.Tones.Add(new GuitarChordTone(4, 1, 2));  // struna 2, palec 1, próg 2
+            var chord = ChordsLibrary.ChordByAscii("C", "x32010");
 
             string svg = chord.ToSvg();
             File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
@@ -171,6 +168,42 @@ namespace Zaczy.SongBook.Tests
             Console.WriteLine(svg);
             Assert.That(!string.IsNullOrEmpty(svg));
         }
+
+        [Test]
+        public void GuitarChord_AsciiChordC5_ReturnsCorrectSvg()
+        {
+            var chord = ChordsLibrary.ChordByAscii("C5", "8axxxx");
+
+            string svg = chord.ToSvg();
+            File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
+
+            svg = chord.ToSvgHorizontal();
+            File.WriteAllText(@$"C:\Tmp\{chord.Name}_poziom.svg", svg);
+
+            Console.WriteLine(chord.ToString());
+
+            Console.WriteLine(svg);
+            Assert.That(!string.IsNullOrEmpty(svg));
+        }
+
+        [Test]
+        public void GuitarChord_AsciiChordC5s_ReturnsCorrectSvg()
+        {
+            var chord = ChordsLibrary.ChordByAscii("C5s", "#80a0000");
+
+            string svg = chord.ToSvg();
+            File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
+
+            svg = chord.ToSvgHorizontal();
+            File.WriteAllText(@$"C:\Tmp\{chord.Name}_poziom.svg", svg);
+
+            Console.WriteLine(chord.ToString());
+
+            Console.WriteLine(svg);
+            Assert.That(!string.IsNullOrEmpty(svg));
+        }
+
+
 
         [Test]
         public void GuitarChord_BdurToSvg_ReturnsCorrectSvg()

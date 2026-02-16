@@ -21,4 +21,6 @@ public class CssOption
 
     public string Value { get; set; }
 
+    public string? Context { get; set; }
+
 }

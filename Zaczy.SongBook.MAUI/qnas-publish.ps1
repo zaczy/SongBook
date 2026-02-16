@@ -18,8 +18,9 @@ if (-not $projFile) {
 $proj = $projFile.FullName
 #$proj = "C:\Users\Rafal.Zak\source\repos\Zaczy.SongBook\Zaczy.SongBook.MAUI\Zaczy.SongBook.MAUI.csproj"
 $out  = "\\qnas\homes\zaczy\Android\"
+$out  = "C:\Tmp\"
 
-$packageType = "aab"
+$packageType = "apk"
 
 dotnet publish $proj -f net9.0-android -c Release `
   -p:AndroidPackageFormat=$packageType `
@@ -41,7 +42,6 @@ Write-Host "Odczytana wersja plikacji: $version"
 
 # 2) Znajdź APK (załóżmy że jest tylko jedno .apk w katalogu publikacji)
 $apk = Get-ChildItem -Path $out -Filter *Signed.$packageType -Recurse | Select-Object -First 1
-
 
 # 3) Zmień nazwę
 if ($apk -and $version) {

@@ -20,5 +20,7 @@ public class UserPreferences
 
     public bool SkipTabulatures { get; set; } = false;
     public bool SkipLyricChords { get; set; } = false;
+    public bool LyricsDarkMode { get; set; } = false;
+    public bool MoveChordsToLyricsLine { get; set; } = false;
 
 }

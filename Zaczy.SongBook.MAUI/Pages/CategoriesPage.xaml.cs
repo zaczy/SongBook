@@ -18,6 +18,7 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
     private readonly SongCategoryRepositoryLite? _repo;
     private readonly SongRepositoryLite? _songRepo;
     private readonly SongListViewModel _songListViewModel;
+    private bool _selectionChanged = false;
 
     // expose as public property (ICommand) so XAML binding via x:Reference can find it
     public System.Windows.Input.ICommand FetchCategoriesCommand { get; }
@@ -65,7 +66,8 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
             }
 
             // Seed defaults if empty
-            await _repo.SeedIfEmpty();
+            if (!_repo.HasCategories)
+                await this.RefreshFromApi();
 
             var list = await _repo.GetAllAsync();
             Categories.Clear();
@@ -99,6 +101,11 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
         {
             await DisplayAlert("Error", $"Failed to load categories: {ex.Message}", "OK");
         }
+
+        OnPropertyChanged(nameof(IsEmptyCategories));
+        OnPropertyChanged(nameof(HasCategories));
+
+
     }
 
     /// <summary>
@@ -113,21 +120,31 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
 
     private async Task RefreshFromApi()
     {
-        IsBusy = true;
-
-        if (_repo == null)
+        try
         {
-            await DisplayAlert("Error", "Repository not available.", "OK");
-            return;
+            IsBusy = true;
+
+            if (_repo == null)
+            {
+                await DisplayAlert("Error", "Repository not available.", "OK");
+                return;
+            }
+
+            await _repo.DeleteAllAsync();
+            await _repo.LoadCategoriesFromApiAsync();
+
+            await LoadAsync();
+
+            IsBusy = false;
+
+            OnPropertyChanged(nameof(IsEmptyCategories));
+            OnPropertyChanged(nameof(HasCategories));
         }
-
-        await _repo.DeleteAllAsync();
-        await _repo.LoadCategoriesFromApiAsync();
-
-        await LoadAsync();
-
-        IsBusy = false;
-
+        catch (Exception ex)
+        {
+            IsBusy = false;
+            await DisplayAlert("Houston, mamy problem!", $"B³¹d odœwie¿ania listy kategorii: {ex.Message}", "OK");
+        }
     }
 
     /// <summary>
@@ -217,11 +234,14 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
         }
     }
 
-    // When the page is disappearing, fetch songs for each selected category.
+    /// <summary>
+    /// Kod wywo³ywany przy wyjœciu ze strony.
+    /// </summary>
     protected override async void OnDisappearing()
     {
         base.OnDisappearing();
-        await FetchSelectedCategoriesSongsAsync();
+        if(_selectionChanged)
+            await FetchSelectedCategoriesSongsAsync();
     }
 
     /// <summary>
@@ -277,6 +297,18 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
             System.Diagnostics.Debug.WriteLine($"FetchSelectedCategoriesSongsAsync error: {ex.Message}");
         }
     }
+
+    private void OnTileTapped(object sender, TappedEventArgs e)
+    {
+    }
+
+    private void CategoriesCollection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        _selectionChanged = true;
+    }
+
+    public bool IsEmptyCategories => Categories == null || Categories.Count == 0;
+    public bool HasCategories => Categories != null && Categories.Count > 0;
 
     //public event PropertyChangedEventHandler? PropertyChanged;
     //protected virtual void OnPropertyChanged(string propertyName) =>

@@ -56,9 +56,12 @@ public class SongListViewModel : INotifyPropertyChanged
             {
                 _titleFilter = value;
                 OnPropertyChanged(nameof(TitleFilter));
+                OnPropertyChanged(nameof(TitleFilterNotEmpty));
             }
         }
     }
+
+    public bool TitleFilterNotEmpty => !string.IsNullOrEmpty(TitleFilter);
 
     private string? _pageFilter;
     /// <summary>
@@ -136,6 +139,9 @@ public class SongListViewModel : INotifyPropertyChanged
         {
             IsBusy = false;
         }
+
+        OnPropertyChanged(nameof(HasSongs));
+        OnPropertyChanged(nameof(IsEmptySongs));
     }
 
     /// <summary>
@@ -297,5 +303,9 @@ public class SongListViewModel : INotifyPropertyChanged
             System.Diagnostics.Debug.WriteLine($"LoadCategoriesPage error: {ex.Message}");
         }
     }
+
+    public bool IsEmptySongs => Songs == null || Songs.Count == 0;
+    public bool HasSongs => Songs != null && Songs.Count > 0;
+
 
 }

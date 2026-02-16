@@ -40,7 +40,7 @@ public class SongEntityTools
         if (!TryParseHexColor(categoryColor, out byte cA, out byte cR, out byte cG, out byte cB))
             return NormalizeToHex(baseColor);
 
-        double ratio = 0.05;
+        double ratio = string.Equals(themeName, "Dark", StringComparison.OrdinalIgnoreCase) ? 0.1 : 0.05;
         byte r = MixComponent(bR, cR, ratio);
         byte g = MixComponent(bG, cG, ratio);
         byte b = MixComponent(bB, cB, ratio);

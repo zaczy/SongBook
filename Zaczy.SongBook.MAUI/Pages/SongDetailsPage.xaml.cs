@@ -59,7 +59,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             //    }
             //};
 
-            _visualization = this.CreateVisualicationOptions();
+            _visualization = this.CreateVisualizationOptions();
 
             _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Music, IconColor = Colors.Green }; ;
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.MusicNote2Play20, IconColor = Colors.Green };
@@ -291,6 +291,33 @@ namespace Zaczy.SongBook.MAUI.Pages
         }
 
         /// <summary>
+        /// Dopasuj css dla trybu ciemnego
+        /// </summary>
+        /// <param name="visualizationCssOptions"></param>
+        private void AdjustDarkModeCss(VisualizationCssOptions visualizationCssOptions)
+        {
+            if (_userViewModel.LyricsDarkMode)
+            {
+                var lyricsDarkBg = Application.Current?.Resources["LyricsDarkBackground"] as Color;
+                var lyricsDarkText = Application.Current?.Resources["LyricsDarkText"] as Color;
+                var lyricsDarkChords = Application.Current?.Resources["LyricsDarkChords"] as Color;
+
+                _visualizationCssOptions.Add("body", "background-color", lyricsDarkBg?.ToHex() ?? "#222", "dark");
+                _visualizationCssOptions.Add("body", "color", lyricsDarkText?.ToHex() ?? "#BBB", "dark");
+
+                _visualizationCssOptions.Add(".chord-diagram", "background-color", lyricsDarkBg?.ToHex() ?? "#1e1e1e", "dark");
+                _visualizationCssOptions.Add(".chord-diagram .fret", "background-color", lyricsDarkText?.ToHex() ?? "#1e1e1e", "dark");
+
+                _visualizationCssOptions.Add(".chords", "color", lyricsDarkChords?.ToHex() ?? "#2c2c2c", "dark");
+                _visualizationCssOptions.Add(".chords2", "color", lyricsDarkChords?.ToHex() ?? "#2c2c2c", "dark");
+
+                _visualizationCssOptions.Add(".block-refren", "border-left", "15px solid #262626", "dark");
+            }
+            else
+                _visualizationCssOptions?.CustomOptions?.RemoveWhere(opt => opt.Context == "dark");
+        }
+
+        /// <summary>
         /// Initialize fonts (copy packaged assets to a physical path WebView can access) then render HTML. 
         /// </summary>
         /// <returns></returns>
@@ -305,7 +332,7 @@ namespace Zaczy.SongBook.MAUI.Pages
                 System.Diagnostics.Debug.WriteLine($"EnsureFontsAvailableAsync failed: {ex.Message}");
             }
 
-            await RegenerateHtmlAsync();
+            //await RegenerateHtmlAsync();
         }
 
         /// <summary>
@@ -468,7 +495,7 @@ namespace Zaczy.SongBook.MAUI.Pages
                     _visualization.VisualizationOptions.CustomChordsOnly = UserViewModel?.ShowOnlyCustomChords ?? false;
                 }
 
-                _visualization = this.CreateVisualicationOptions();
+                _visualization = this.CreateVisualizationOptions();
 
                 var song = new Song(_songEntity);
                 string htmlDocument = _visualization!.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
@@ -876,9 +903,15 @@ namespace Zaczy.SongBook.MAUI.Pages
             catch { }
         }
 
-        private SongVisualization CreateVisualicationOptions()
+        /// <summary>
+        /// Stwórz instancjê SongVisualization z aktualnymi opcjami (tryb ciemny, pokazywanie tylko custom chordów itp).
+        /// </summary>
+        /// <returns></returns>
+        private SongVisualization CreateVisualizationOptions()
         {
             var fontsPath = _visualization?.CssFontsPath;
+
+            this.AdjustDarkModeCss(_visualizationCssOptions);
 
             var visualization = new SongVisualization()
             {
@@ -887,9 +920,16 @@ namespace Zaczy.SongBook.MAUI.Pages
                 {
                     CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
                     SkipLyricChords = UserViewModel.SkipLyricChords,
-                    SkipTabulatures = UserViewModel.SkipTabulatures
+                    SkipTabulatures = UserViewModel.SkipTabulatures,
+                    MoveChordsToLyricsLine = UserViewModel.MoveChordsToLyricsLine
                 }
             };
+
+            if(_userViewModel.LyricsDarkMode == true)
+            {
+                var lyricsDarkText = Application.Current?.Resources["LyricsDarkText"] as Color;
+                visualization.VisualizationOptions.ChordDiagramColor = lyricsDarkText?.ToHex();
+            }
 
             if(fontsPath != null)
                 visualization.CssFontsPath = fontsPath;

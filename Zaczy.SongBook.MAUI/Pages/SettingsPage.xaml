@@ -5,53 +5,89 @@
              x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
              x:DataType="vm:UserViewModel"
              Title="Ustawienia">
-    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*"  ColumnDefinitions="4*,6*" RowSpacing="12">
-        <Label Grid.Row="0" Text="Preferencje użytkownika" FontAttributes="Bold" FontSize="20" Grid.ColumnSpan="2" />
+    <ScrollView>
+    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
+        
+        <Label 
+            Grid.Row="0" 
+            Text="Tekst piosenek" 
+            FontAttributes="Bold" 
+            FontSize="{OnIdiom 10, Tablet=12 }"
+            Grid.ColumnSpan="2" />
 
-            <Label Text="Modyfikacja wielkości czcionki (px)" 
-                   Grid.Row="1"
-                   Grid.Column="0" 
-                   FontSize="{OnIdiom 12, Tablet=16 }"
-                   Margin="0,25,0,5"
-                   />
-            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center"
-                Grid.Row="1"
-                Grid.Column="2" 
-                >
+        <BoxView
+            Grid.Row="0"
+            HeightRequest="1"
+            Color="{AppThemeBinding Dark=#FFF, Light=#000}"
+            Margin="0,18,0,0"
+            Grid.ColumnSpan="2"
+        />
 
-                <Slider x:Name="FontSizeSlider"
-                        Minimum="-10"
-                        Maximum="20"
-                        Value="{Binding FontSizeAdjustment, Mode=TwoWay}"
-                        VerticalOptions="Center" />
-                <Label Text="{Binding FontSizeAdjustment, StringFormat='{}{0:F1} px'}"
-                       Grid.Column="1"
-                       VerticalOptions="Center"
-                       Margin="8,0,0,0" />
-            </Grid>
+        <Label
+            Text="Tryb ciemny"
+            Grid.Row="1"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,0,0,0" 
+            />
 
-            <Label 
+        <Grid 
+            Grid.Row="1" 
+            Grid.Column="1" 
+            VerticalOptions="Center"
+            Margin="0,-10,0,0"
+            >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Switch Grid.Column="0"
+                    IsToggled="{Binding LyricsDarkMode, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0"
+                    />
+
+            <Label Grid.Column="1"
+                    Text="Tryb ciemny - nie razi po oczach przy ognisku"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5"
+                    Opacity="0.6"                       
+                    />
+        </Grid>
+
+        <Label Text="Modyfikacja wielkości czcionki (px)" 
+                Grid.Row="2"
+                Grid.Column="0" 
+                FontSize="{OnIdiom 12, Tablet=16 }"
+                Margin="0,0,0,5"
+                />
+        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center"
+            Grid.Row="2"
+            Grid.Column="2" 
+            >
+
+            <Slider x:Name="FontSizeSlider"
+                    Minimum="-10"
+                    Maximum="20"
+                    Value="{Binding FontSizeAdjustment, Mode=TwoWay}"
+                    VerticalOptions="Center" />
+            <Label Text="{Binding FontSizeAdjustment, StringFormat='{}{0:F1} px'}"
+                    Grid.Column="1"
+                    VerticalOptions="Center"
+                    Margin="8,0,0,0" />
+        </Grid>
+
+            <!--Label 
                 Text="Szybkość przewijania automatycznego tekstu" 
                 Grid.Row="2"
                 Grid.Column="0" 
                 FontSize="{OnIdiom 12, Tablet=16 }"
                 Margin="0,15,0,20"
                />
-        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center" Grid.Column="1" Grid.Row="2">
-            <!--Entry x:Name="AutoScrollEntry"
-                       Keyboard="Numeric"
-                       Placeholder="e.g. 50"
-                       VerticalOptions="Center"
-                       WidthRequest="120"
-                       TextChanged="OnAutoScrollSpeedTextChanged" />
-                <Label x:Name="AutoScrollHint"
-                       Grid.Column="1"
-                       VerticalOptions="Center"
-                       Margin="8,0,0,0"
-                       Text="( 0 aby wyłączyć)" 
-                       FontSize="12"
-                       TextColor="#999"
-                       /-->
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center" Grid.Column="1" Grid.Row="2">
                 <Slider x:Name="ScrollSpeedSlider"
                             Minimum="0"
                             Maximum="50"
@@ -61,102 +97,88 @@
                            Grid.Column="1"
                            VerticalOptions="Center"
                            Margin="8,0,0,0" />
-        </Grid>
+            </Grid-->
 
-            <Label 
-                Text="Prezentacja tekstu piosenki" 
-                Grid.Row="3"
-                Grid.Column="0" 
+        <Label 
+            Text="Prezentacja tekstu piosenki" 
+            Grid.Row="3"
+            Grid.Column="0" 
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,20"
+            />
+        <StackLayout 
+            VerticalOptions="Center"
+            Grid.Row="3"                   
+            Grid.Column="1"
+            >
+            <RadioButton 
+                x:Name="RadioPre"
+                Content="Stała szerokość"
                 FontSize="{OnIdiom 12, Tablet=16 }"
-                Margin="0,10,1,20"
+                CheckedChanged="OnLyricsVersionRadioChanged" 
+                Margin="0"
                 />
-            <StackLayout 
-                VerticalOptions="Center"
-                Grid.Row="3"                   
-                Grid.Column="1"
-                >
-                <RadioButton 
-                    x:Name="RadioPre"
-                    Content="Stała szerokość"
-                    FontSize="{OnIdiom 12, Tablet=16 }"
-                    CheckedChanged="OnLyricsVersionRadioChanged" 
-                    Margin="0"
-                    />
-                <RadioButton x:Name="RadioRelative"
-                            FontSize="{OnIdiom 12, Tablet=16 }"
-                             Content="Html formatowany"
-                             CheckedChanged="OnLyricsVersionRadioChanged" 
-                             Margin="0,-5,0,0"
-                             />
-            </StackLayout>
-
-            <!-- New toggle: Show only custom chords -->
-            <Label
-                Text="Pokaż tylko niestandardowe akordy"
-                Grid.Row="4"
-                Grid.Column="0"
+            <RadioButton 
+                x:Name="RadioRelative"
                 FontSize="{OnIdiom 12, Tablet=16 }"
-                Margin="0,10,1,0" />
-
-            <Grid Grid.Row="4" Grid.Column="1" VerticalOptions="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Switch Grid.Column="0"
-                        IsToggled="{Binding ShowOnlyCustomChords, Mode=TwoWay}"
-                        VerticalOptions="Center"
-                        Margin="0,0,10,0"
-                        />
-
-                <Label Grid.Column="1"
-                       Text="{Binding ShowOnlyCustomChordsTxt}"
-                       VerticalOptions="Center"
-                       LineBreakMode="WordWrap"
-                       FontSize="10"
-                       MaxLines="5"
-                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                       
-                       />
-            </Grid>
+                Content="Html formatowany"
+                CheckedChanged="OnLyricsVersionRadioChanged"                
+                Margin="0,-5,0,0"
+                />
+        </StackLayout>
 
         <Label
-                Text="Ukryj tabulatury"
-                Grid.Row="5"
-                Grid.Column="0"
-                FontSize="{OnIdiom 12, Tablet=16 }"
-                Margin="0,10,1,0" />
+            Text="Ukryj tabulatury"
+            Grid.Row="4"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,0" />
 
-        <Grid Grid.Row="5" Grid.Column="1" VerticalOptions="Center">
+        <Grid Grid.Row="4" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Switch Grid.Column="0"
-                        IsToggled="{Binding SkipTabulatures, Mode=TwoWay}"
-                        VerticalOptions="Center"
-                        Margin="0,0,10,0"
-                        />
+                    IsToggled="{Binding SkipTabulatures, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0"
+                    />
 
-            <Label Grid.Column="1"
-                       Text="{Binding SkipTabulaturesTxt}"
-                       VerticalOptions="Center"
-                       LineBreakMode="WordWrap"
-                       FontSize="10"
-                       MaxLines="5"
-                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                   
-                       />
+            <Label 
+                Grid.Column="1"
+                Text="{Binding SkipTabulaturesTxt}"
+                VerticalOptions="Center"
+                LineBreakMode="WordWrap"
+                FontSize="10"
+                MaxLines="5"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                />
         </Grid>
 
+
+        <Label 
+            Grid.Row="5" 
+            Text="Akordy" 
+            FontAttributes="Bold" 
+            FontSize="{OnIdiom 10, Tablet=12 }"
+            Grid.ColumnSpan="2" />
+
+        <BoxView
+            Grid.Row="5"
+            HeightRequest="1"
+            Color="{AppThemeBinding Dark=#FFF, Light=#000}"
+            Margin="0,18,0,0"
+            Grid.ColumnSpan="2"
+        />
+
         <Label
-                Text="Nie pokazuj akordów"
-                Grid.Row="6"
-                Grid.Column="0"
-                FontSize="{OnIdiom 12, Tablet=16 }"
-                Margin="0,10,1,0" />
+            Text="Nie pokazuj akordów"
+            Grid.Row="6"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,0" />
 
         <Grid Grid.Row="6" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
@@ -165,25 +187,105 @@
             </Grid.ColumnDefinitions>
 
             <Switch Grid.Column="0"
-                        IsToggled="{Binding SkipLyricChords, Mode=TwoWay}"
-                        VerticalOptions="Center"
-                        Margin="0,0,10,0"
-                        />
+                IsToggled="{Binding SkipLyricChords, Mode=TwoWay}"
+                VerticalOptions="Center"
+                Margin="0,0,10,0"
+                />
 
             <Label Grid.Column="1"
-                       Text="{Binding SkipLyricChordsTxt}"
-                       VerticalOptions="Center"
-                       LineBreakMode="WordWrap"
-                       FontSize="10"
-                       MaxLines="5"
-                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                       />
-        </Grid>        
+                Text="{Binding SkipLyricChordsTxt}"
+                VerticalOptions="Center"
+                LineBreakMode="WordWrap"
+                FontSize="10"
+                MaxLines="5"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                />
+        </Grid>
 
-        <StackLayout Grid.Row="7" Orientation="Horizontal" VerticalOptions="End" Spacing="12" HorizontalOptions="Center" Grid.ColumnSpan="2" Margin="0,0,0,20">
+        <Label
+            Text="Przenieś akordy do linii z tekstem"
+            Grid.Row="7"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,0" />
+
+        <Grid Grid.Row="7" Grid.Column="1" VerticalOptions="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Switch 
+                Grid.Column="0"
+                IsToggled="{Binding MoveChordsToLyricsLine, Mode=TwoWay}"
+                VerticalOptions="Center"
+                Margin="0,0,10,0"
+                />
+
+            <Label 
+                Grid.Column="1"
+                Text="Przenieś akordy znad linijki na koniec linijki tekstu (więcej linijek tekstu mieści się na ekranie)"
+                VerticalOptions="Center"
+                LineBreakMode="WordWrap"
+                FontSize="10"
+                MaxLines="5"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                />
+        </Grid>
+
+        <Label
+            Text="Pokaż diagramy tylko niestandardowych akordów"
+            Grid.Row="8"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,0" />
+
+        <Grid Grid.Row="8" Grid.Column="1" VerticalOptions="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Switch Grid.Column="0"
+                    IsToggled="{Binding ShowOnlyCustomChords, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0"
+                    />
+
+            <Label Grid.Column="1"
+                    Text="{Binding ShowOnlyCustomChordsTxt}"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                       
+                    />
+        </Grid>
+
+
+        <StackLayout 
+            Grid.Row="9" 
+            Orientation="Horizontal" 
+            VerticalOptions="End" 
+            Spacing="12"
+            HorizontalOptions="Center"
+            Grid.ColumnSpan="2"
+            Margin="0,20,0,20"
+            >
             <Button Text="Resetuj" Clicked="OnResetClicked" />
             <Button Text="Zamknij" Clicked="OnCloseClicked"  />
         </StackLayout>
 
+        <Label 
+            Grid.Row="10" 
+            Grid.Column="1"
+            Text="{Binding ApplicationVersion}" 
+            FontSize="Micro"
+            Opacity="0.4"
+            HorizontalOptions="End"
+            />
+
     </Grid>
+    </ScrollView>
 </ContentPage>

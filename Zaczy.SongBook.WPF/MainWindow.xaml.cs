@@ -328,5 +328,29 @@ namespace Zaczy.SongBook.WPF
 
             UpdateSongVisualization();
         }
+
+        private void Filter_TB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                string filterText = textBox.Text?.Trim() ?? string.Empty;
+
+                // Filtruj tylko jeśli wprowadzono 3 lub więcej znaków
+                if (filterText.Length >= 3)
+                {
+                    var filtered = ViewModel.Songs.Where(song =>
+                        (song.Title?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (song.Artist?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false)
+                    ).ToList();
+
+                    SongsDataGrid.ItemsSource = filtered;
+                }
+                else
+                {
+                    // Jeśli mniej niż 3 znaki, przywróć pełną listę
+                    SongsDataGrid.ItemsSource = ViewModel.Songs;
+                }
+            }
+        }
     }
 }

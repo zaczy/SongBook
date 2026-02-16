@@ -33,9 +33,14 @@ public class VisualizationCssOptions
     /// <param name="cssClass"></param>
     /// <param name="cssProperty"></param>
     /// <param name="value"></param>
-    public void Add(string cssClass, string cssProperty, string value)
+    /// <param name="context"></param>
+    public void Add(string cssClass, string cssProperty, string value, string? context=null)
     {
-        CustomOptions.Add(new CssOption(cssClass, cssProperty, value));
+        
+        bool shouldAdd = context == null || CustomOptions?.Any(o => o.CssClass == cssClass && o.CssProperty == cssProperty && o.Context == context && o.Value == value) != true;
+        
+        if(shouldAdd)
+            CustomOptions!.Add(new CssOption(cssClass, cssProperty, value) { Context = context });
     }
 
     /// <summary>

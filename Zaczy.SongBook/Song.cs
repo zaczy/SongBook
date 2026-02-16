@@ -77,8 +77,8 @@ public class Song: INotifyPropertyChanged
         }
     }
 
-    [JsonPropertyName("music_author")]
     private string? _musicAuthor;
+    [JsonPropertyName("music_author")]
     public string? MusicAuthor
     {
         get => _musicAuthor;
@@ -145,8 +145,62 @@ public class Song: INotifyPropertyChanged
     public int? SongDuration
     {
         get { return _songDuration; }
-        set { _songDuration = value; }
+        set 
+        {
+            if (_songDuration != value)
+            {
+                _songDuration = value;
+                OnPropertyChanged(nameof(SongDuration));
+                OnPropertyChanged(nameof(SongDurationTxt));
+            }
+        }
     }
+
+    private string? _songDurationTxt;
+
+    public string? SongDurationTxt
+    {
+        get 
+        { 
+            // Jeśli _songDurationTxt jest null, spróbuj wygenerować z _songDuration
+            if (_songDurationTxt == null && _songDuration.HasValue)
+            {
+                int totalSeconds = _songDuration.Value;
+                int minutes = totalSeconds / 60;
+                int seconds = totalSeconds % 60;
+                _songDurationTxt = $"{minutes:D2}:{seconds:D2}";
+            }
+            return _songDurationTxt; 
+        }
+        set 
+        { 
+            if (_songDurationTxt != value)
+            {
+                _songDurationTxt = value;
+                
+                // Jeśli wartość jest w formacie mm:ss, przelicz na sekundy
+                if (!string.IsNullOrWhiteSpace(value) && value.Contains(':'))
+                {
+                    var parts = value.Split(':');
+                    if (parts.Length == 2 && 
+                        int.TryParse(parts[0], out int minutes) && 
+                        int.TryParse(parts[1], out int seconds))
+                    {
+                        _songDuration = minutes * 60 + seconds;
+                    }
+                }
+                else if (string.IsNullOrWhiteSpace(value))
+                {
+                    // Jeśli wartość jest pusta, wyczyść również _songDuration
+                    _songDuration = null;
+                }
+                
+                OnPropertyChanged(nameof(SongDurationTxt));
+                OnPropertyChanged(nameof(SongDuration));
+            }
+        }
+    }
+
 
     private string? _spotifyLink;
     [JsonPropertyName("spotify_link")]

@@ -58,8 +58,30 @@
                     />
             </StackLayout>
             
+            <!-- Empty state message -->
+            <Label Grid.Row="2"
+                   Text="Brak piosenek do wyświetlenia. Przejdź do 'Katalogi piosenek' i wybierz jeden lub więcej katalogów piosenek do pobrania z serwera."
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   Margin="20"
+                   FontSize="14"
+                   Opacity="0.5"
+                   IsVisible="{Binding IsEmptySongs}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding TitleFilterNotEmpty}" Value="True">
+                        <Setter Property="Text" Value="Nie znaleziono piosenek zawierających podaną frazę. Usuń filtr lub wprowadź inne kryterium wyszukiwania" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
             <!-- List -->
-            <CollectionView ItemsSource="{Binding Songs}" SelectionMode="Single" Grid.Row="2" x:Name="SongsCollection" Margin="12,20,12,10">
+            <CollectionView ItemsSource="{Binding Songs}" 
+                            SelectionMode="Single" 
+                            Grid.Row="2" 
+                            x:Name="SongsCollection" 
+                            Margin="12,20,12,10"
+                            IsVisible="{Binding HasSongs}">
                 <CollectionView.ItemTemplate>
                     <!-- Use the actual item type stored in SongListViewModel.Songs -->
                     <DataTemplate x:DataType="data:SongEntity">
@@ -90,6 +112,7 @@
                 Keyboard="Numeric"
                 Completed="OnPageFilterCompleted" 
                 Grid.Row="3"
+                IsVisible="{Binding HasSongs}"
                 />
 
             <!-- Overlay loading indicator bound to VM.IsBusy -->

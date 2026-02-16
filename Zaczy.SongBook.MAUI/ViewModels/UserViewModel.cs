@@ -181,7 +181,8 @@ public class UserViewModel : INotifyPropertyChanged
 
     public string SkipLyricChordsTxt
     {
-        get => _prefs?.SkipLyricChords == true ? "nie jestem gitarzystą - schowaj te dziwne literki" : "";
+        //get => _prefs?.SkipLyricChords == true ? "nie jestem gitarzystą - schowaj te dziwne literki" : "";
+        get => "nie jestem gitarzystą - schowaj te dziwne literki";
     }
 
 
@@ -203,7 +204,6 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
-
     public string ShowOnlyCustomChordsTxt
     {
         get => _prefs?.ShowOnlyCustomChords == true ? "wyświetlaj diagramy tylko dla niestandardowych przewrotów akordów wykorzystanych w piosence" : "pokazuj diagramy wszystkich chwytów";
@@ -221,6 +221,38 @@ public class UserViewModel : INotifyPropertyChanged
                 IconColor = Microsoft.Maui.Graphics.Colors.DarkGray 
             };
 
+        }
+    }
+
+    /// <summary>
+    /// Tryb ciemny dla tekstu piosenek
+    /// </summary>
+    public bool LyricsDarkMode 
+    { 
+        get => _prefs?.LyricsDarkMode ?? false;
+        set
+        {
+            if (_prefs != null && _prefs.LyricsDarkMode != value)
+            {
+                _prefs.LyricsDarkMode = value;
+                Save();
+                OnPropertyChanged(nameof(LyricsDarkMode));
+            }
+        }
+    }
+
+    /// Przenieś akordy na koniec linii z tekstem
+    public bool MoveChordsToLyricsLine 
+    {
+        get => _prefs?.MoveChordsToLyricsLine ?? false;
+        set
+        {
+            if (_prefs != null && _prefs.MoveChordsToLyricsLine != value)
+            {
+                _prefs.MoveChordsToLyricsLine = value;
+                Save();
+                OnPropertyChanged(nameof(MoveChordsToLyricsLine));
+            }
         }
     }
 
@@ -242,6 +274,7 @@ public class UserViewModel : INotifyPropertyChanged
     // Exposed icon that the view can bind to (mi:MauiIcon.Value)
     public BaseIcon ToggleIcon => ScrollingInProgress ? _pauseToggle : _playToggle;
 
+    public string ApplicationVersion => $"Wersja aplikacji {AppInfo.Current.VersionString}";
 
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

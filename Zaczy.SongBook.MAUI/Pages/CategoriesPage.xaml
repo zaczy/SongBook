@@ -25,117 +25,140 @@
 			IconImageSource="sync2_ico.png"
             Priority="0" />
 	</ContentPage.ToolbarItems>
-
+    <ScrollView>
 
     <Grid Padding="12" RowDefinitions="Auto,Auto,*,Auto">
 
-        <Label Grid.Row="1" Padding="10,20,10,30">
+        <Label Grid.Row="0" Padding="10,20,10,30">
 Poniżej widoczne są katalogi piosenek pobrane z serwera aplikacji.
 	 
 Wybierz jeden lub więcej katalogów, aby pobrać piosenki wchodzące w ich skład.
         </Label>
 	  
-        <CollectionView Grid.Row="2"
-                        x:Name="CategoriesCollection"
-                        ItemsSource="{Binding Categories}"
-                        SelectionMode="Multiple">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical"
-                   Span="2"
-                   HorizontalItemSpacing="8"
-                   VerticalItemSpacing="8" />
-            </CollectionView.ItemsLayout>
+        <!-- Empty state message -->
+        <Label Grid.Row="1"
+               Text="W tej chwili nie ma żadnych kategorii. Wybierz opcję Pobierz, żeby pobrać z serwera"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               HorizontalTextAlignment="Center"
+               Margin="20"
+               FontSize="14"
+               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+               IsVisible="{Binding IsEmptyCategories}" />
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="data:SongCategoryEntity">
-                    <Border 
-                        Margin="0" 
-                        Padding="15,10,15,20"
-                        BackgroundColor="{Binding CategoryColorThemed}"
-                        StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light=#BBB, Dark=#777}"
-                        >
-<!--                         BackgroundColor="{AppThemeBinding Light=#CCC, Dark=#999}" -->
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal">
-                                    <VisualState.Setters>
-                                        <!-- Target child Labels by owner-qualified property -->
-                                        <Setter TargetName="TitleLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
-                                        <Setter TargetName="CountLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark=White}" />
-                                        <Setter TargetName="DescriptionLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource White}}" />
-										<Setter TargetName="ColorPreview" Property="Border.IsVisible" Value="False" />
-									</VisualState.Setters>
-                                </VisualState>
+        <!-- Wrap CollectionView in RefreshView -->
+        <!--RefreshView 
+            Grid.Row="2"
+            Command="{Binding FetchCategoriesCommand}"
+            IsRefreshing="{Binding IsBusy}"
+            -->
+            <CollectionView 
+                x:Name="CategoriesCollection"
+                Grid.Row="1"
+                ItemsSource="{Binding Categories}"
+                SelectionChanged="CategoriesCollection_SelectionChanged"
+                SelectionMode="Multiple"
+                >
+                <!--IsVisible="{Binding HasCategories}"-->
 
-                                <VisualState x:Name="Selected">
-                                    <VisualState.Setters>
-                                        <!-- Border properties (apply to this Border) -->
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#862620, Dark=#761610}" />
-                                        <Setter Property="Stroke" Value="{AppThemeBinding Light=#862620, Dark=#761610}" />
-                                        <Setter Property="StrokeThickness" Value="1" />
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                       Span="2"
+                       HorizontalItemSpacing="8"
+                       VerticalItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
 
-                                        <!-- change text color on selection (target child Labels) -->
-                                        <Setter TargetName="TitleLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
-                                        <Setter TargetName="CountLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
-                                        <Setter TargetName="DescriptionLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
-                                        <Setter TargetName="ColorPreview" Property="Border.IsVisible" Value="{Binding HasCategoryColor}" />
-									</VisualState.Setters>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="data:SongCategoryEntity">
+                        <Border 
+                            Margin="0" 
+                            Padding="15,10,15,20"
+                            BackgroundColor="{Binding CategoryColorThemed}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#BBB, Dark=#777}"
+                            >
+    <!--                         BackgroundColor="{AppThemeBinding Light=#CCC, Dark=#999}" -->
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <!-- Target child Labels by owner-qualified property -->
+                                            <Setter TargetName="TitleLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                                            <Setter TargetName="CountLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark=White}" />
+                                            <Setter TargetName="DescriptionLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource White}}" />
+    										<Setter TargetName="ColorPreview" Property="Border.IsVisible" Value="False" />
+    									</VisualState.Setters>
+                                    </VisualState>
 
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="3" />
-                        </Border.StrokeShape>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <!-- Border properties (apply to this Border) -->
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#862620, Dark=#761610}" />
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light=#862620, Dark=#761610}" />
+                                            <Setter Property="StrokeThickness" Value="1" />
 
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnTileTapped" NumberOfTapsRequired="1" />
-                        </Border.GestureRecognizers>
+                                            <!-- change text color on selection (target child Labels) -->
+                                            <Setter TargetName="TitleLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
+                                            <Setter TargetName="CountLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
+                                            <Setter TargetName="DescriptionLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
+                                            <Setter TargetName="ColorPreview" Property="Border.IsVisible" Value="{Binding HasCategoryColor}" />
+    									</VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
 
-                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
-                            <Label x:Name="TitleLabel"
-                                   Grid.Column="0"
-                                   Grid.Row="0"
-                                   Text="{Binding Name}"
-                                   FontAttributes="Bold"
-                                   FontSize="{OnIdiom 12, Tablet=16}"
-                                   VerticalOptions="Center" />
-                            <Label x:Name="CountLabel"
-                                   Grid.Column="0"
-                                   Grid.Row="1"
-                                   Text="{Binding SongsCount, StringFormat='Piosenek: {0}'}"
-                                   Margin="0,10,0,0"
-                                   FontSize="10"
-                                   />
-                            <Label x:Name="DescriptionLabel"
-                                   Grid.Column="0"
-                                   Grid.Row="2"
-                                   Text="{Binding Description}"
-                                   FontAttributes="Bold"
-                                   FontSize="{OnIdiom 10, Tablet=14}"
-								   Opacity="0.5"
-								   Padding="0,15,0,0"
-                                   VerticalOptions="Center" />
-							<Border
-								x:Name="ColorPreview"
-								Grid.Column="1"
-								Grid.Row="1"
-								Grid.RowSpan="3"
-								BackgroundColor="{Binding CategoryColor}"
-								StrokeThickness="1"
-                                Stroke="{AppThemeBinding Light=#BBB, Dark=#777}"
-								WidthRequest="15"
-								HeightRequest="15"
-								>
-							</Border>
-						</Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="3" />
+                            </Border.StrokeShape>
 
-        <AbsoluteLayout Grid.Row="0" Grid.RowSpan="4" IsVisible="{Binding IsBusy}" Opacity="0.3">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTileTapped" NumberOfTapsRequired="1" />
+                            </Border.GestureRecognizers>
+
+                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                                <Label x:Name="TitleLabel"
+                                       Grid.Column="0"
+                                       Grid.Row="0"
+                                       Text="{Binding Name}"
+                                       FontAttributes="Bold"
+                                       FontSize="{OnIdiom 12, Tablet=16}"
+                                       VerticalOptions="Center" />
+                                <Label x:Name="CountLabel"
+                                       Grid.Column="0"
+                                       Grid.Row="1"
+                                       Text="{Binding SongsCount, StringFormat='Piosenek: {0}'}"
+                                       Margin="0,10,0,0"
+                                       FontSize="10"
+                                       />
+                                <Label x:Name="DescriptionLabel"
+                                       Grid.Column="0"
+                                       Grid.Row="2"
+                                       Text="{Binding Description}"
+                                       FontAttributes="Bold"
+                                       FontSize="{OnIdiom 10, Tablet=14}"
+    								   Opacity="0.5"
+    								   Padding="0,15,0,0"
+                                       VerticalOptions="Center" />
+    							<Border
+    								x:Name="ColorPreview"
+    								Grid.Column="1"
+    								Grid.Row="1"
+    								Grid.RowSpan="3"
+    								BackgroundColor="{Binding CategoryColor}"
+    								StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#BBB, Dark=#777}"
+    								WidthRequest="15"
+    								HeightRequest="15"
+    								>
+    							</Border>
+    						</Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        <!--/RefreshView-->
+
+        <!--AbsoluteLayout Grid.Row="0" Grid.RowSpan="4" IsVisible="{Binding IsBusy}" Opacity="0.3">
             <BoxView AbsoluteLayout.LayoutBounds="0,0,1,1"
                         AbsoluteLayout.LayoutFlags="All"
                         Color="{AppThemeBinding Light=#FFF, Dark=#000}"
@@ -147,7 +170,8 @@ Wybierz jeden lub więcej katalogów, aby pobrać piosenki wchodzące w ich skł
                                 IsVisible="{Binding IsBusy}"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center" />
-        </AbsoluteLayout>
+        </AbsoluteLayout-->
 	
     </Grid>
+    </ScrollView>
 </ContentPage>

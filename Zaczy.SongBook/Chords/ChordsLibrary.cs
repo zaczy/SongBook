@@ -30,7 +30,15 @@ public class ChordsLibrary
     /// <returns></returns>
     public static GuitarChord? ChordByAscii(string name, string definition)
     {
-        if(string.IsNullOrEmpty(definition) || definition.Length != 6)
+        int barFret = -1;
+        if (definition?.StartsWith("#") == true && definition?.Length == 8)
+        {
+            char c = definition[1];
+            barFret = c >= 'a' ? c - 'a' + 10 : c - '0';
+            definition = definition.Substring(2, 6);
+        }
+
+        if (string.IsNullOrEmpty(definition) || definition.Length != 6)
             return null;
 
         var predefined = ChordsDict.FirstOrDefault(x => x.Value == definition && x.Key == name);
@@ -39,7 +47,12 @@ public class ChordsLibrary
             return StandardChord(predefined.Key, predefined.Value);
 
         GuitarChord chord = new GuitarChord(name);
-        for(int i=0; i<definition.Length; i++)
+        if(barFret > 0)
+        {
+            chord.Tones.Add(new GuitarChordTone(fret: barFret) { Crossbar = true });
+        }
+
+        for (int i=0; i<definition.Length; i++)
         {
             char c = definition[i];
             int stringNumber = 6 - i;
@@ -49,11 +62,13 @@ public class ChordsLibrary
             }
             else if(c == '0')
             {
-                chord.OpenStrings.Add(stringNumber);
+                if(barFret<=0)
+                    chord.OpenStrings.Add(stringNumber);
             }
-            else if(char.IsDigit(c))
+            else if(char.IsAsciiHexDigit(c)) 
             {
-                int fret = int.Parse(c.ToString());
+                int fret = c >= 'a' ? c - 'a' + 10 : c - '0';
+                //int fret = int.Parse(c.ToString());
                 chord.Tones.Add(new GuitarChordTone(stringNumber, finger: 0, fret: fret));
             }
             else
@@ -100,6 +115,16 @@ public class ChordsLibrary
                 chord = new GuitarChord("C9") { MutedStrings = new HashSet<int> { 6 }, OpenStrings = new HashSet<int> { 3, 1 } };
                 chord.Tones.Add(new GuitarChordTone(6, 1, 8));  // struna 2, palec 1, próg 1
                 chord.Tones.Add(new GuitarChordTone(5, 3, 10));  // struna 2, palec 1, próg 1
+                break;
+
+            case "c":
+                chord = StandardChord("a");
+                chord!.TransponeUpBar(3);
+                break;
+
+            case "c7":
+                chord = StandardChord("a7");
+                chord!.TransponeUpBar(3);
                 break;
 
             case "Cis7":
@@ -190,6 +215,19 @@ public class ChordsLibrary
                 chord.Tones.Add(new GuitarChordTone(1));  // struna 1-6, palec 1, próg 1, crossbar
                 break;
 
+            case "F7":
+                chord = StandardChord("E7");
+                chord!.TransponeUpBar(1);
+                break;
+
+            case "F7+":
+                chord = new GuitarChord(name, openStrings: new HashSet<int> { 1 }, mutedStrings: new HashSet<int> { 5, 6 });
+                chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna 2, palec 1, próg 1
+                chord.Tones.Add(new GuitarChordTone(3, 2, 2));  // struna 4, palec 2, próg 2
+                chord.Tones.Add(new GuitarChordTone(4, 3, 3));  // struna 5, palec 3, próg 3
+                break;
+
+
             case "F9/6":
                 chord = new GuitarChord("F9/6") {  MutedStrings = new HashSet<int> { 6, 5 } };
                 chord.Tones.Add(new GuitarChordTone(4, 2, 3));  // struna 2, palec 1, próg 1
@@ -200,8 +238,33 @@ public class ChordsLibrary
 
 
             case "f":
-                chord = StandardChord("e");
-                chord!.TransponeUpBar(1);
+                if (variation == "8poz")
+                {
+                    chord = StandardChord("a");
+                    chord!.TransponeUpBar(8);
+                }
+                else
+                {
+                    chord = StandardChord("e");
+                    chord!.TransponeUpBar(1);
+                }
+                break;
+
+            case "f7":
+                if (variation == "8poz")
+                {
+                    chord = StandardChord("a7");
+                    chord!.TransponeUpBar(8);
+                }
+                else
+                {
+                    chord = new GuitarChord(name) { MutedStrings = new HashSet<int> { 5, 1 } };
+                    chord.Tones.Add(new GuitarChordTone(6, 2, 1));  // struna, palec, próg
+                    chord.Tones.Add(new GuitarChordTone(4, 3, 1));  // struna, palec, próg
+                    chord.Tones.Add(new GuitarChordTone(3, 3, 1));  // struna, palec, próg
+                    chord.Tones.Add(new GuitarChordTone(2, 3, 1));  // struna, palec, próg
+
+                }
                 break;
 
             case "Fis":
@@ -272,6 +335,12 @@ public class ChordsLibrary
                 chord = new GuitarChord(name, openStrings: new HashSet<int> { 1, 5 }, mutedStrings: new HashSet<int> { 6 });
                 chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna, palec, próg
                 chord.Tones.Add(new GuitarChordTone(3, 3, 2));  // struna, palec, próg
+                chord.Tones.Add(new GuitarChordTone(4, 2, 2));  // struna, palec, próg
+                break;
+
+            case "a7":
+                chord = new GuitarChord(name, openStrings: new HashSet<int> { 1, 5 }, mutedStrings: new HashSet<int> { 6 });
+                chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna, palec, próg
                 chord.Tones.Add(new GuitarChordTone(4, 2, 2));  // struna, palec, próg
                 break;
 

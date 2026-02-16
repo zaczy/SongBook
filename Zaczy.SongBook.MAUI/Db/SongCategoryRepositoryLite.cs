@@ -17,6 +17,8 @@ namespace Zaczy.SongBook.Maui.Data
         private readonly LiteDatabase _db;
         private readonly ILiteCollection<SongCategoryEntity> _col;
         private readonly string _apiBaseUrl;
+
+        public bool HasCategories => _col.Count() > 0;
         public SongCategoryRepositoryLite(LiteDatabase db, IOptions<Zaczy.SongBook.MAUI.Settings> options)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -110,7 +112,13 @@ namespace Zaczy.SongBook.Maui.Data
                     UpdatedAt = DateTime.UtcNow
                 }).ToArray();
 
-                _col.InsertBulk(entities);
+                foreach (var entity in entities)
+                {
+                    if(_col.FindById(entity.Id) == null)
+                        _col.Insert(entity);
+                }
+
+                //_col.InsertBulk(entities);
                 return;
             }
 

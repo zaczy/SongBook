@@ -51,6 +51,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Toolbar z przyciskami -->
@@ -78,6 +79,23 @@
                                 <DataGridTextColumn Header="Zaktualizowano" Binding="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130"/>
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <Label 
+                            Grid.Row="2" 
+                            Content="Filtruj po tytule lub artyście:" Margin="5,0,5,0"
+                            Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                            />
+                        <TextBox 
+                            x:Name="Filter_TB"
+                            Grid.Row="2"
+                            Width="500"
+                            Height="27"
+                            TextChanged="Filter_TB_TextChanged"
+                            HorizontalAlignment="Left"
+                            Margin="155,5,15,5"
+                            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                            BorderThickness="1"
+                            />
                     </Grid>
                 </mah:MetroTabItem>
 
@@ -155,8 +173,8 @@
                         <Label Grid.Row="1">Tytuł</Label>
                         <TextBox Text="{Binding ConvertedSong.Title, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Height="25" />
 
-                        <Label Grid.Row="1" Grid.Column="2">Szybkość przewijania</Label>
-                        <TextBox Text="{Binding ConvertedSong.ScrollingTempo, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="3" Height="25" />
+                        <Label Grid.Row="1" Grid.Column="2">Czas trwania</Label>
+                        <TextBox Text="{Binding ConvertedSong.SongDurationTxt, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="3" Height="25" />
 
                         <Label Grid.Row="2">Artysta</Label>
                         <TextBox Text="{Binding ConvertedSong.Artist, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Height="25"/>

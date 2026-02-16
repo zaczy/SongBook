@@ -103,6 +103,7 @@ public class SongVisualization
             .chords { 
                 color: #b62610; 
                 font-weight: 700; 
+                font-size: 0.9em;
             }");
 
         sb.AppendLine("H1 { font-family: InconsolataVariable, RobotoVariable_beta; font-stretch: 100%; color: #b62610; }");
@@ -111,9 +112,10 @@ public class SongVisualization
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
         customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
-        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable_beta'; font-weight: 500; display: inline-block; }");
-        sb.AppendLine(".lyrics-line.annotated { height: 1.2em; margin-top: 0.8em; }");
-        sb.AppendLine(@".lyrics-line.annotated .chords2 {  color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.9em; }");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable'; font-weight: 500; /* display: inline-block; */}");
+        sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; /* height: 1.2em; */ margin-top: 0.8em; }");
+        sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-1em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.9em; }");
+        sb.AppendLine(@".chords, .chords2 { color: #b62610; }");
 
         sb.AppendLine(".block-header { display: none; }");
 
@@ -131,7 +133,13 @@ public class SongVisualization
         sb.AppendLine(".block-bridge { margin-left: 20px; }");
 
         sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
-        sb.AppendLine(".lyrics-author, .music-author { color: #AAA; font-size: 0.8em; margin-top: 5px; }");
+        sb.AppendLine(".lyrics-author, .music-author { opacity: 0.6; font-size: 0.8em; margin-bottom: 1px; " 
+                + (version == LyricsHtmlVersion.RelativeHtml ? "font-family: 'PoltawskiVariable';" : "")
+                +"}");
+
+        sb.AppendLine(".song-metadata { margin-bottom: 1.2em; }");
+        sb.AppendLine(".first-row-block { display: inline-block; margin-top: 1em !important; }");
+
 
         sb.AppendLine(".debug-log  {font-family: 'InconsolataVariable', Roboto, Consolas, monospace; line-height: 1em; font-size: 0.8em;white-space: pre-wrap;word-wrap: break-word; font-weight: 400; }");
 
@@ -139,11 +147,12 @@ public class SongVisualization
         sb.AppendLine("body { margin: 0; margin-top: 8px; } ");
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
-        sb.AppendLine("     .lyrics-line.annotated { height: 1.1em; margin-top: 0.7em; }");
-        sb.AppendLine(@"    .lyrics-line.annotated .chords2 {  color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine("     .lyrics-line.annotated { line-height: 1.8em; margin-top: 0.7em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.9em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine(@"    .chords, .chords2 { font-size: 0.7em; }");
 
 
-        sb.AppendLine("     .block-refren { margin-left: 10px; border-left: 8px solid #F0F0F0; padding-left: 10px; }");
+        sb.AppendLine("     .block-refren { margin-left: 5px; border-left: 10px solid #F0F0F0; padding-left: 5px; }");
         sb.AppendLine("     .block-refren .block-header { display: none; }");
         sb.AppendLine("     .block-bridge { margin-left: 10px; }");
         sb.AppendLine("}");
@@ -162,8 +171,25 @@ public class SongVisualization
         if (!skipHeaders)
             sb.AppendLine($"<h1>{song.Title} <span class=\"artist\">{song.Artist}</span></h1>");
 
+        string songMetadata = string.Empty;
+        if (song.LyricsAuthor != null)
+        {
+            songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
+        }
+        if (song.MusicAuthor != null)
+        {
+            songMetadata += $"<div class=\"music-author\">muz. {song.MusicAuthor}</div>";
+        }
+
         if (!string.IsNullOrEmpty(song.Capo))
-            sb.AppendLine($@"<div class=""capo-info"">Kapodaster: {song.Capo}</div>");
+            songMetadata += $@"<div class=""capo-info"">kapodaster: {song.Capo}</div>";
+
+        bool outputStarted = false;
+        if (!string.IsNullOrEmpty(songMetadata))
+        {
+            sb.AppendLine($"<div class=\"song-metadata\">{songMetadata}</div>");
+            outputStarted = true;
+        }
 
         LyricLineBlockType currentBlockType = LyricLineBlockType.Inne;
 
@@ -242,17 +268,7 @@ public class SongVisualization
         }
         else if (version == LyricsHtmlVersion.RelativeHtml)
         {
-            sb.AppendLine(TransformToVariableFontVersion(song));
-        }
-
-        if (song.LyricsAuthor != null)
-        {
-            sb.AppendLine("<br/>");
-            sb.AppendLine($"<div class=\"lyrics-author\">Tekst: {song.LyricsAuthor}</div>");
-        }
-        if (song.MusicAuthor != null)
-        {
-            sb.AppendLine($"<div class=\"music-author\">Muzyka: {song.MusicAuthor}</div>");
+            sb.AppendLine(TransformToVariableFontVersion(song, outputStarted));
         }
 
         if (VisualizationOptions?.SkipLyricChords != true)
@@ -268,7 +284,7 @@ public class SongVisualization
                     var guitarChord = ChordsLibrary.StandardChord(chord, chordSuggestion);
                     if (guitarChord != null)
                     {
-                        sb.AppendLine(guitarChord.ToSvgHorizontal());
+                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
                     }
                 }
                 sb.AppendLine("</div>");
@@ -282,7 +298,7 @@ public class SongVisualization
                     var guitarChord = ChordsLibrary.StandardChord(suggestion.Key, suggestion.Value);
                     if (guitarChord != null)
                     {
-                        sb.AppendLine(guitarChord.ToSvgHorizontal());
+                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
                     }
                 }
                 sb.AppendLine("</div>");
@@ -292,7 +308,11 @@ public class SongVisualization
         sb.AppendLine(@"<div id=""debugLog"" class=""debug-log""></div>");
         sb.AppendLine("</body></html>");
 
-        return sb.ToString();
+        string html = sb.ToString();
+
+        html = this.ClearHtml(html);
+
+        return html;
     }
 
     /// <summary>
@@ -300,7 +320,7 @@ public class SongVisualization
     /// </summary>
     /// <param name="song"></param>
     /// <returns></returns>
-    public string TransformToVariableFontVersion(Song song)
+    public string TransformToVariableFontVersion(Song song, bool outputStarted)
     {
         string lyrics = string.Empty;
 
@@ -316,11 +336,13 @@ public class SongVisualization
         bool? firstBlockLyricsLine = null;
         int emptyLineCounter = 0;
 
-
         for (int i = 0; i < song.Lines.Count; i++)
         {
             string line = song.Lines[i];
             string? next = (i < song.Lines.Count - 2) ? song.Lines[i + 1] : null;
+
+            bool firstLyricsLine = i==0;
+            string cssClassApply = firstLyricsLine && !outputStarted ? " first-row-block" : string.Empty;
 
 
             if (string.IsNullOrWhiteSpace(line))
@@ -347,7 +369,7 @@ public class SongVisualization
 
             if (blockType == LyricLineBlockType.Tabulatura)
             {
-                lyrics += VisualizationOptions?.SkipTabulatures != true ? $@"<div class=""block-{blockType}"">" : string.Empty;
+                lyrics += VisualizationOptions?.SkipTabulatures != true ? $@"<div class=""block-{blockType}{cssClassApply}"">" : string.Empty;
 
                 int c = SongInternalDetails.TabulaturaSucceedingLines(song.Lines, i);
                 for (int j = 0; j < c; j++)
@@ -383,7 +405,7 @@ public class SongVisualization
                 {
                     lyrics += "</div>";
                 }
-                lyrics += $@"<div class=""block-{currentBlockType}"">";
+                lyrics += $@"<div class=""block-{currentBlockType}{cssClassApply}"">";
 
                 firstBlockLine = false;
                 firstBlockLyricsLine = true;
@@ -409,10 +431,19 @@ public class SongVisualization
                         firstBlockLyricsLine = false;
                     }
 
-                    if (looksLikeLyricsToShort(line, nextLine, 50))
+                    if(VisualizationOptions?.MoveChordsToLyricsLine == true)
+                    {
+                        lyricsLine += clearLyricsForHtml(nextLine) + (!string.IsNullOrEmpty(line) ? $@"&nbsp; <span class=""chords2"">{clearChordForHtml(line)}</span>" : "");
+                        lyrics += headerPrefix + $@"<span class=""lyrics-line{cssClassApply}"">{lyricsLine}</span><br/>";
+
+                        previousBlockType = currentBlockType;
+                        i++;
+                        continue;
+                    }
+                    else if (looksLikeLyricsToShort(line, nextLine, 50))
                     {
                         lyricsLine += (!string.IsNullOrEmpty(line) ? $@"<span class=""chords2"">{clearChordForHtml(line)}</span>" : "") + clearLyricsForHtml(nextLine);
-                        lyrics += headerPrefix + $@"<span class=""lyrics-line annotated"">{lyricsLine}</span><br/>";
+                        lyrics += headerPrefix + $@"<span class=""lyrics-line annotated{cssClassApply}"">{lyricsLine}</span><br/>";
 
                         i++;
                         continue;
@@ -434,7 +465,6 @@ public class SongVisualization
                     lineAfter += chordPart + "|";
                     nextLineAfter += lyricPart + "|";
 
-                    // build inline sequence: chord span(s) interleaved with lyric text
                     lyricsLine += (!string.IsNullOrEmpty(chordPart) ? $@"<span class=""chords2"">{clearChordForHtml(chordPart)}</span>" : "") + headerPrefix + clearLyricsForHtml(lyricPart);
 
                     prevChordPosition = chordPosition + 1;
@@ -470,7 +500,7 @@ public class SongVisualization
                         lyricsLine += (!string.IsNullOrEmpty(chordPart) ? $@"<span class=""chords2"">{clearChordForHtml(chordPart)}</span>" : "") + clearLyricsForHtml(lyricPart);
                     }
 
-                    lyrics += $@"<span class=""lyrics-line annotated"">{lyricsLine}</span><br/>";
+                    lyrics += $@"<span class=""lyrics-line annotated{cssClassApply}"">{lyricsLine}</span><br/>";
 
                     i++;
                     previousBlockType = currentBlockType;
@@ -480,7 +510,7 @@ public class SongVisualization
 
             if (Chord.IsChordLine(line))
             {
-                lyrics += VisualizationOptions?.SkipLyricChords != true ? $@"<span class=""lyrics-line""><span class=""chords"">{clearChordForHtml(line)}</span></span><br/>" : string.Empty;
+                lyrics += VisualizationOptions?.SkipLyricChords != true ? $@"<span class=""lyrics-line{cssClassApply}""><span class=""chords"">{clearChordForHtml(line)}</span></span><br/>" : string.Empty;
             }
             else
             {
@@ -491,14 +521,14 @@ public class SongVisualization
 
                 if (chordStart > 0)
                 {
-                    lyrics += headerPrefix + $@"<span class=""lyrics-line"">{clearLyricsForHtml(line.Substring(0, chordStart))}";
+                    lyrics += headerPrefix + $@"<span class=""lyrics-line{cssClassApply}"">{clearLyricsForHtml(line.Substring(0, chordStart))}";
                     if(VisualizationOptions?.SkipLyricChords != true)
                         lyrics += $@"<span class=""chords"">&nbsp;{clearChordForHtml(line.Substring(chordStart))}</span>";
                     lyrics += $@"</span><br/>";
 
                 }
                 else if (!string.IsNullOrEmpty(line) || blockType == currentBlockType)
-                    lyrics += headerPrefix + $@"<span class=""lyrics-line"">{clearLyricsForHtml(line)}</span><br/>";
+                    lyrics += headerPrefix + $@"<span class=""lyrics-line{cssClassApply}"">{clearLyricsForHtml(line)}</span><br/>";
             }
 
             previousBlockType = currentBlockType;
@@ -537,6 +567,8 @@ public class SongVisualization
 
         lyrics = lyrics.Replace("</div><br/><br/><div", "</div><div");
         lyrics = lyrics.Replace("</div><br/><div", "</div><div");
+        lyrics = lyrics.Replace("</div>\n<br/><br/><div", "</div><div");
+        lyrics = lyrics.Replace("</div>\n<br/><div", "</div><div");
 
         return lyrics;
     }

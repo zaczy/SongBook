@@ -362,7 +362,7 @@ public class GuitarChord
     /// <param name="width">Szerokość diagramu</param>
     /// <param name="height">Wysokość diagramu</param>
     /// <returns>String zawierający kod SVG</returns>
-    public string ToSvgHorizontal(int width = 100, int height = 80)
+    public string ToSvgHorizontal(int width = 100, int height = 80, string? drawColor=null)
     {
         var svg = new StringBuilder();
         
@@ -381,7 +381,7 @@ public class GuitarChord
         int circleRadius = 6;
         
         int startFret = GetStartFret(fretCount);
-        
+
         // Nagłówek SVG
         svg.AppendLine($@"<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"" viewBox=""0 0 {width} {height}"" fill=""#777"">");
         
@@ -394,7 +394,7 @@ public class GuitarChord
         // Siodełko (gruba linia po lewej jeśli zaczynamy od progu 1)
         if (startFret == 1)
         {
-            svg.AppendLine($@"  <rect x=""{marginLeft}"" y=""{marginTop}"" width=""3"" height=""{gridHeight}"" fill=""black""/>");
+            svg.AppendLine($@"  <rect x=""{marginLeft}"" y=""{marginTop}"" width=""3"" height=""{gridHeight}"" fill=""{drawColor?? "black"}""/>");
         }
         else
         {
@@ -406,14 +406,14 @@ public class GuitarChord
         for (int i = 0; i <= fretCount; i++)
         {
             int x = marginLeft + i * fretSpacing;
-            svg.AppendLine($@"  <line x1=""{x}"" y1=""{marginTop}"" x2=""{x}"" y2=""{marginTop + gridHeight}"" stroke=""black"" stroke-width=""1""/>");
+            svg.AppendLine($@"  <line x1=""{x}"" y1=""{marginTop}"" x2=""{x}"" y2=""{marginTop + gridHeight}"" stroke=""{drawColor ?? "black"}"" stroke-width=""1""/>");
         }
         
         // Rysuj struny (linie poziome) - struna 1 (e) na górze, struna 6 (E) na dole
         for (int i = 0; i < 6; i++)
         {
             int y = marginTop + i * stringSpacing;
-            svg.AppendLine($@"  <line x1=""{marginLeft}"" y1=""{y}"" x2=""{marginLeft + gridWidth}"" y2=""{y}"" stroke=""black"" stroke-width=""1""/>");
+            svg.AppendLine($@"  <line x1=""{marginLeft}"" y1=""{y}"" x2=""{marginLeft + gridWidth}"" y2=""{y}"" stroke=""{drawColor ?? "black"}"" stroke-width=""1""/>");
         }
         
         // Znajdź crossbar (barre) jeśli istnieje
@@ -441,7 +441,7 @@ public class GuitarChord
             
             int barCircleRadius = circleRadius-2;
 
-            svg.AppendLine($@"  <rect x=""{x - barCircleRadius}"" y=""{y1 - barCircleRadius}"" width=""{barCircleRadius * 2}"" height=""{y2 - y1 + barCircleRadius * 2}"" rx=""{barCircleRadius}"" fill=""black""/>");
+            svg.AppendLine($@"  <rect x=""{x - barCircleRadius}"" y=""{y1 - barCircleRadius}"" width=""{barCircleRadius * 2}"" height=""{y2 - y1 + barCircleRadius * 2}"" rx=""{barCircleRadius}"" fill=""{drawColor ?? "black"}""/>");
         }
         
         // Rysuj palce (czarne kółka z numerami)
@@ -455,12 +455,13 @@ public class GuitarChord
             int y = marginTop + stringIndex * stringSpacing;
             
             // Czarne kółko
-            svg.AppendLine($@"  <circle cx=""{x}"" cy=""{y}"" r=""{circleRadius}"" fill=""black""/>");
+            svg.AppendLine($@"  <circle cx=""{x}"" cy=""{y}"" r=""{circleRadius}"" fill=""{drawColor ?? "black"}""/>");
             
             // Numer palca (jeśli > 0)
             if (tone.Finger > 0)
             {
-                svg.AppendLine($@"  <text x=""{x}"" y=""{y + 3}"" text-anchor=""middle"" font-family=""Arial"" font-size=""8"" fill=""white"">{tone.Finger}</text>");
+                string textColor = !string.IsNullOrEmpty(drawColor) ? "#222222" : "white";
+                svg.AppendLine($@"  <text x=""{x}"" y=""{y + 3}"" text-anchor=""middle"" font-family=""Arial"" font-size=""8"" fill=""{textColor}"">{tone.Finger}</text>");
             }
         }
         
