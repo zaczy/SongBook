@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
-             x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
-             x:DataType="vm:UserViewModel"
-             Title="Ustawienia">
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    x:Class="Zaczy.SongBook.MAUI.Pages.SettingsPage"
+    x:DataType="vm:UserViewModel"
+    Title="Ustawienia">
     <ScrollView>
-    <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
+        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
         
         <Label 
             Grid.Row="0" 
@@ -19,7 +21,7 @@
             Grid.Row="0"
             HeightRequest="1"
             Color="{AppThemeBinding Dark=#FFF, Light=#000}"
-            Margin="0,18,0,0"
+            Margin="{OnIdiom '0,18,0,0', Tablet='0,24,0,0'}"
             Grid.ColumnSpan="2"
         />
 
@@ -152,10 +154,14 @@
                 VerticalOptions="Center"
                 LineBreakMode="WordWrap"
                 FontSize="10"
-                MaxLines="5"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                />
-        </Grid>
+                MaxLines="5">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding SkipTabulatures}" Value="True">
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+            </Label>
+            </Grid>
 
 
         <Label 
@@ -198,9 +204,15 @@
                 LineBreakMode="WordWrap"
                 FontSize="10"
                 MaxLines="5"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                />
-        </Grid>
+                >
+                <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding SkipLyricChords}" Value="True">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </DataTrigger>
+                </Label.Triggers>
+
+            </Label>
+            </Grid>
 
         <Label
             Text="Przenieś akordy do linii z tekstem"
@@ -222,16 +234,21 @@
                 Margin="0,0,10,0"
                 />
 
-            <Label 
+            <Label
                 Grid.Column="1"
                 Text="Przenieś akordy znad linijki na koniec linijki tekstu (więcej linijek tekstu mieści się na ekranie)"
                 VerticalOptions="Center"
                 LineBreakMode="WordWrap"
                 FontSize="10"
                 MaxLines="5"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                />
-        </Grid>
+                >
+                <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding MoveChordsToLyricsLine}" Value="True">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+            </Grid>
 
         <Label
             Text="Pokaż diagramy tylko niestandardowych akordów"
@@ -253,19 +270,118 @@
                     />
 
             <Label Grid.Column="1"
-                    Text="{Binding ShowOnlyCustomChordsTxt}"
-                    VerticalOptions="Center"
-                    LineBreakMode="WordWrap"
-                    FontSize="10"
-                    MaxLines="5"
-                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                       
-                    />
-        </Grid>
+                Text="{Binding ShowOnlyCustomChordsTxt}"
+                VerticalOptions="Center"
+                LineBreakMode="WordWrap"
+                FontSize="10"
+                MaxLines="5"
+                >
+                
+                <Label.Triggers>
+                   <DataTrigger TargetType="Label" Binding="{Binding ShowOnlyCustomChords}" Value="True">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </DataTrigger>
+                </Label.Triggers>
+                
+            </Label>
+            </Grid>
 
-
-        <StackLayout 
+        <Label 
             Grid.Row="9" 
+            Text="Użytkownik" 
+            FontAttributes="Bold" 
+            FontSize="{OnIdiom 10, Tablet=12 }"
+            Grid.ColumnSpan="2" 
+            />
+
+        <BoxView
+            Grid.Row="9"
+            HeightRequest="1"
+            Color="{AppThemeBinding Dark=#FFF, Light=#000}"
+            Margin="{OnIdiom '0,18,0,0', Tablet='0,24,0,0'}"
+            Grid.ColumnSpan="2"
+            />
+
+        <Label
+            Grid.Row="10"
+            Grid.Column="0"
+            Text="Zalogowany użytkownik"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            />
+
+        <Label
+            Grid.Row="10"
+            Text="Zarejestrowanie użytkownika i zalogowanie się umożliwia dostęp do prywatnych kategorii piosenek zarządzanych przez innych użytkowników"
+            FontSize="{OnIdiom 10, Tablet=14 }"
+            Opacity="0.5"
+            Margin="0,25,0,0"
+            />
+
+
+            <VerticalStackLayout
+                Grid.Row="10"
+                Grid.Column="1"
+                IsVisible="{Binding IsUserAuthenticated}"
+                >
+
+                <HorizontalStackLayout
+                    HorizontalOptions="Center"
+                    >
+                    <Label
+                        Text="{Binding UserEmail}"
+                        />
+                    <Image
+                        IsVisible="{Binding IsUserAuthenticated}"
+                        Source="{Binding UserPicture}"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        Margin="10,0,10,0"
+                        VerticalOptions="End"
+                    />
+                    <ImageButton
+                        Source="{mi:FontAwesomeSolid PersonArrowUpFromLine, IconSize=20, IconColor={AppThemeBinding Dark={StaticResource PrimaryDark}, Light={StaticResource Primary}}}"
+                        BackgroundColor="Transparent"
+                        Command="{Binding AuthenticateCommand}"
+                        VerticalOptions="End"
+                        Margin="{OnIdiom Default='10,0,0,0', Tablet='15,0,0,0'}"
+                        MinimumHeightRequest="{OnIdiom Default=16, Phone=16}"
+                        MinimumWidthRequest="{OnIdiom Default=16, Phone=16}"
+                        />
+
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+
+
+            <VerticalStackLayout
+                Grid.Row="10"
+                Grid.Column="1"
+                IsVisible="{Binding IsUserAuthenticated, Converter={StaticResource InverseBooleanConverter}}"
+                >
+
+                <HorizontalStackLayout
+                    HorizontalOptions="Center"
+                    >
+                    <Label
+                        Text="Nie zalogowano"
+                        FontSize="{OnIdiom 12, Tablet=16 }"
+                        />
+                    <ImageButton
+                        Source="{mi:FontAwesomeSolid PersonArrowDownToLine, IconSize=20, IconColor={AppThemeBinding Dark={StaticResource PrimaryDark}, Light={StaticResource Primary}}}"
+                        BackgroundColor="Transparent"
+                        Command="{Binding AuthenticateCommand}"
+                        VerticalOptions="End"
+                        Margin="{OnIdiom Default='10,0,0,0', Tablet='15,0,0,0'}"
+                        MinimumHeightRequest="{OnIdiom Default=16, Phone=16}"
+                        MinimumWidthRequest="{OnIdiom Default=16, Phone=16}"
+                        />
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+
+
+            <StackLayout 
+            Grid.Row="11" 
             Orientation="Horizontal" 
             VerticalOptions="End" 
             Spacing="12"
@@ -278,7 +394,7 @@
         </StackLayout>
 
         <Label 
-            Grid.Row="10" 
+            Grid.Row="12" 
             Grid.Column="1"
             Text="{Binding ApplicationVersion}" 
             FontSize="Micro"
@@ -286,6 +402,6 @@
             HorizontalOptions="End"
             />
 
-    </Grid>
+        </Grid>
     </ScrollView>
 </ContentPage>

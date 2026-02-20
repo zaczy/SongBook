@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 using System.Collections.Generic;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Maui.Data;
 using Zaczy.SongBook.MAUI.Data;
@@ -96,6 +97,7 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddSingleton<LiteDatabase>(liteDb);
             builder.Services.AddSingleton<SongRepositoryLite>();
             builder.Services.AddSingleton<SongCategoryRepositoryLite>();
+            builder.Services.AddSingleton<EventApi>();
 
             // Register ViewModels and Pages in DI
             builder.Services.AddTransient<SongListViewModel>();
@@ -106,11 +108,9 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<CategoriesPage>();
 
-
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-
             var app = builder.Build();
 
             // Seed initial data if needed

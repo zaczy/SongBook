@@ -34,5 +34,17 @@
 		<string>spotify</string>
 	</array>
 
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>net.zaczy.songbook</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>net.zaczy.songbook</string>
+		</dict>
+	</array>
+
 </dict>
 </plist>

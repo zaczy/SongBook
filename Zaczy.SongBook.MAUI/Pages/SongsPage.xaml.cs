@@ -4,6 +4,7 @@ using System;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook;
 using Zaczy.SongBook.MAUI.ViewModels;
+using Zaczy.SongBook.Api;
 
 namespace Zaczy.SongBook.MAUI.Pages
 {
@@ -11,9 +12,10 @@ namespace Zaczy.SongBook.MAUI.Pages
     {
         private readonly SongListViewModel _songListViewModel;
         private readonly UserViewModel _userViewModel;
+        private readonly EventApi _eventApi;
 
         // ViewModel is injected from DI
-        public SongsPage(SongListViewModel vm, UserViewModel viewModel)
+        public SongsPage(SongListViewModel vm, UserViewModel viewModel, EventApi eventApi)
         {
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ArrowClockwise20, IconColor = Colors.Green };
             _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
@@ -23,6 +25,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
             _userViewModel = viewModel;
             BindingContext = _songListViewModel;
+            _eventApi = eventApi;
         }
 
         /// <summary>
@@ -45,14 +48,14 @@ namespace Zaczy.SongBook.MAUI.Pages
             if (sender is TapGestureRecognizer tg && tg.CommandParameter is SongEntity song)
             {
                 // push details page
-                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel));
+                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi));
             }
             else
             {
                 // fallback: get BindingContext from parent element (safer in some templates)
                 if (sender is Element el && el.BindingContext is SongEntity ctxSong)
                 {
-                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel));
+                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi));
                 }
             }
         }

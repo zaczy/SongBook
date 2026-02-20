@@ -9,7 +9,8 @@ namespace Zaczy.SongBook.Tests;
 
 public class ApiTests
 {
-    private const string ApiBaseUrl = "http://zaczy-api.local/api";
+    private const string ApiBaseUrl = "http://api.zaczy.net/api";
+    private const string ApiBaseUrlLocal = "http://zaczy-api.local/api";
 
     [SetUp]
     public void Setup()
@@ -25,16 +26,16 @@ public class ApiTests
         // Act
         var response = await songApi.GetCategoriesListAsync();
 
-        if(response != null)
+        if (response != null)
         {
-            foreach(var category in response)
+            foreach (var category in response)
             {
                 Console.WriteLine($"{category.Id} {category.Name} (piosenek: {category.SongsCount})");
             }
         }
 
         // Assert
-        Assert.That(response?.Count()>0, "API returned empty song list");
+        Assert.That(response?.Count() > 0, "API returned empty song list");
     }
 
     [Test]
@@ -63,4 +64,17 @@ public class ApiTests
         Assert.That(response != null, "API returned empty song list");
     }
 
+    [Test]
+    public async Task User_CreateOrUpdateUserAsync_ReturnsSuccess()
+    {
+        // Arrange
+        var userApi = new UserApi(ApiBaseUrl);
+
+        // When
+        await userApi.CreateOrUpdateUserAsync("zaczy@zaczy.net", "test-token", "https://example.com/picture.jpg");
+
+        // Assert
+        Assert.That(true);
+
+    }
 }

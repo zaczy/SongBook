@@ -7,10 +7,13 @@ using Microsoft.Maui.Storage;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Extensions;
+using Zaczy.SongBook.MAUI.Extensions;
 using Zaczy.SongBook.MAUI.ViewModels;
 using Timer = System.Timers.Timer;
 
@@ -32,20 +35,21 @@ namespace Zaczy.SongBook.MAUI.Pages
 
         // remember previous KeepScreenOn value so we restore it on exit
         private bool _previousKeepScreenOn;
-
-        // Expose the UserViewModel as a public property so XAML can bind to it via x:Reference
         public UserViewModel UserViewModel => _userViewModel;
 
         // expose strongly-typed Song for XAML compiled bindings (avoid BindingContext.Title lookup)
         public SongEntity Song => _songEntity;
 
+        private readonly EventApi _eventApi;
+
         private bool _suppressTopTouch;
 
-        public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel)
+        public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel, EventApi eventApi)
         {
             _userViewModel = userViewModel;
             _songEntity = songEntity ?? new SongEntity();
             _songEntity.ScrollingDelay = 10;
+            _eventApi = eventApi;
 
             _visualizationCssOptions = new VisualizationCssOptions();
             //_visualization = new SongVisualization() 
@@ -61,7 +65,7 @@ namespace Zaczy.SongBook.MAUI.Pages
 
             _visualization = this.CreateVisualizationOptions();
 
-            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.Music, IconColor = Colors.Green }; ;
+            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.PersonArrowDownToLine, IconColor = Colors.Green }; ;
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.MusicNote2Play20, IconColor = Colors.Green };
             
             InitializeComponent();
@@ -825,9 +829,9 @@ namespace Zaczy.SongBook.MAUI.Pages
 
                 await Navigation.PushAsync(page);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore/navigation failure
+                await ex.SaveExceptionToFileAsync(" settings_page_navigation", eventApi: _eventApi);
             }
 
         }

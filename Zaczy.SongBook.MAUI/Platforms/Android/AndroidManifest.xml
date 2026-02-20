@@ -5,8 +5,22 @@
 		android:icon="@mipmap/appicon"
 		android:roundIcon="@mipmap/appicon_round"
 		android:supportsRtl="true"
-		android:usesCleartextTraffic="true"
-	    ></application>
+		android:usesCleartextTraffic="true">
+
+		<!--activity 
+      android:name="crc6442afa1563feedf1c.WebAuthenticatorActivity"
+      android:noHistory="true"
+      android:launchMode="singleTop"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="net.zaczy.songbook" android:host="oauth2redirect" />
+      </intent-filter>
+    </activity-->
+    
+	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 </manifest>

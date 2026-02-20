@@ -18,9 +18,9 @@ if (-not $projFile) {
 $proj = $projFile.FullName
 #$proj = "C:\Users\Rafal.Zak\source\repos\Zaczy.SongBook\Zaczy.SongBook.MAUI\Zaczy.SongBook.MAUI.csproj"
 $out  = "\\qnas\homes\zaczy\Android\"
-$out  = "C:\Tmp\"
+#$out  = "C:\Tmp\"
 
-$packageType = "apk"
+$packageType = "aab"
 
 dotnet publish $proj -f net9.0-android -c Release `
   -p:AndroidPackageFormat=$packageType `

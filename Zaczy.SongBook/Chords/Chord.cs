@@ -38,7 +38,7 @@ public class Chord
         }
 
         // Check for chords with suffixes like 7, maj7, sus4, and optional slash bass (e.g. F9/6 or G/B)
-        var chordPattern = @"^[A-Ha-h](#|b)?(m|min|maj|dim|aug)?(2|4|5|6|7|9|11|13)?(sus2|sus4|add9|add11|maj7|min7|dim7|aug7|is|\+)?(\/(?:[A-Ha-h](?:#|b|is)?|\d+))?$";
+        var chordPattern = @"^[A-Ha-h](#|b)?(m|min|maj|dim|aug)?(2|4|5|6|7|9|11|13|0)?(sus2|sus4|add9|add11|maj7|min7|dim7|aug7|is|\+)?(\/(?:[A-Ha-h](?:#|b|is)?|\d+))?$";
         
         if (Regex.IsMatch(text, chordPattern))
         {
@@ -181,7 +181,7 @@ public class Chord
     /// <returns></returns>
     private static bool IsStandardChord(string token)
     {
-        bool nonStandard = Regex.IsMatch(token, @"[2-689]|maj|min|dim|aug|sus|add|\+|\*", RegexOptions.IgnoreCase);
+        bool nonStandard = Regex.IsMatch(token, @"[2-6890]|maj|min|dim|aug|sus|add|\+|\*", RegexOptions.IgnoreCase);
         return !nonStandard;
     }
 

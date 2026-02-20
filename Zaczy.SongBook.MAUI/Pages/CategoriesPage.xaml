@@ -13,7 +13,7 @@
     <ContentPage.ToolbarItems>
         <!-- ToolbarItem does not inherit the page BindingContext, use x:Reference to the page -->
         <ToolbarItem 
-            Text="Pobierz"
+            Text="Odśwież"
             BindingContext="{x:Reference Root}"
             Command="{Binding FetchCategoriesCommand}"
             Order="Primary"

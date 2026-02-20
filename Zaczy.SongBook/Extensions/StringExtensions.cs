@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -57,5 +58,15 @@ public static class StringExtensions
         return Regex.Replace(input, @"[^\S\r\n]+", " ");
     }
 
+    public static string ToJson(this object? o)
+    {
+        if(o == null)
+            return "{}";
+
+        return JsonSerializer.Serialize(o, new JsonSerializerOptions
+        {
+            WriteIndented = false
+        });
+    }
 
 }

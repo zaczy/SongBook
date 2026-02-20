@@ -17,6 +17,8 @@ Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Zaczy.SongBook.Maui.Windows
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Zaczy.SongBook.MAUI.Packaging", "Zaczy.SongBook.MAUI.Packaging\Zaczy.SongBook.MAUI.Packaging.wapproj", "{4946F4FA-BDA0-49D9-87E8-B31F64D06D22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSO.dtwarzacz", "..\..\..\..\..\RSOPlayer\RSO.dtwarzacz\RSO.dtwarzacz.csproj", "{B8687EB6-B63A-BA24-6857-EC95D6894B09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -193,6 +195,36 @@ Global
 		{4946F4FA-BDA0-49D9-87E8-B31F64D06D22}.Release|x86.ActiveCfg = Release|x86
 		{4946F4FA-BDA0-49D9-87E8-B31F64D06D22}.Release|x86.Build.0 = Release|x86
 		{4946F4FA-BDA0-49D9-87E8-B31F64D06D22}.Release|x86.Deploy.0 = Release|x86
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM.Deploy.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|ARM64.Deploy.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x64.ActiveCfg = Debug|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x64.Build.0 = Debug|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x64.Deploy.0 = Debug|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x86.Build.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Debug|x86.Deploy.0 = Debug|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM.Build.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM.Deploy.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM64.Build.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|ARM64.Deploy.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x64.ActiveCfg = Release|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x64.Build.0 = Release|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x64.Deploy.0 = Release|x64
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.Build.0 = Release|Any CPU
+		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -47,9 +47,11 @@
             <Label 
                 x:Name="TitleLabel" 
                 Grid.Row="0" 
-                Text="{Binding Title}" 
+                Text="{Binding Source={x:Reference Root}, Path=Song.Title}"
                 VerticalOptions="Center"
                 Grid.Column="1"
+                x:DataType="pages:SongDetailsPage"
+
                 FontAttributes="Bold" 
                 Margin="{OnIdiom 0, Tablet='0,5,0,10'}"
                 FontSize="{OnIdiom Phone=20, Tablet=24, Desktop=24}"
