@@ -38,6 +38,7 @@ public class SongListViewModel : INotifyPropertyChanged
     }
 
     private readonly SongRepositoryLite _repo;
+    public SongRepositoryLite Repo => _repo; 
 
     private readonly string _apiBaseUrl;
 

@@ -18,7 +18,9 @@
         </DataTrigger>
     </ContentPage.Triggers>
     
-    <Grid Padding="{OnIdiom '12,0,12,0', Phone='8,0,6,0'}" RowDefinitions="Auto,Auto,Auto,Auto,*" x:DataType="data:SongEntity">
+    <Grid Padding="{OnIdiom '12,0,12,0', Phone='8,0,6,0'}" 
+          RowDefinitions="Auto,Auto,Auto,Auto,*" 
+          x:DataType="data:SongEntity">
         <Grid Grid.Row="0" Padding="0,3,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{OnIdiom 20, Tablet=40}" />
@@ -71,7 +73,7 @@
                 Text="{Binding Artist}" 
                 FontSize="{OnIdiom Phone=12, Tablet=18, Desktop=20}"
                 TextColor="Gray" 
-                Padding="0,0,-5,0"
+                Padding="{OnIdiom '0,0,-3,0',Tablet='0,0,3,0'}"
                 />
 
             <Button 
@@ -87,7 +89,7 @@
                 FontSize="10"
                 Padding="0,0,0,0"
                 HorizontalOptions="End"
-                Margin="{OnIdiom '0,0,-12,0'}"
+                Margin="{OnIdiom '0,0,-9,0', Tablet='0,0,0,0'}"
                 x:DataType="pages:SongDetailsPage"
                 mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.PlayIcon}"
                 MinimumHeightRequest="30"
@@ -196,6 +198,17 @@
             MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
             />
 
+        <ImageButton
+            Source="{mi:Fluent Pen20, IconSize=30, IconColor=#FFF}"
+            BackgroundColor="Transparent"
+            Clicked="OnSongEditClicked"
+            VerticalOptions="Start"
+            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            IsVisible="{Binding HasEditPrivileges}"
+            />
+        
         </HorizontalStackLayout>
   </Grid>
 </ContentPage>

@@ -226,7 +226,7 @@ public class SongInternalDetails
     /// <returns></returns>
     public static int TabulaturaSucceedingLines(List<string> lines, int i)
     {
-        var tabStartRegex = new Regex(@"^[A-Ha-h][0-9~|-]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var tabStartRegex = new Regex(@"^[A-Ha-h][0-9~p|-]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         int tabuLines = 0;
 

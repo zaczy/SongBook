@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using MauiIcons.Core;
 using MauiIcons.Fluent;
 using MauiIcons.FontAwesome;
@@ -10,9 +12,11 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
+using Zaczy.Songbook.MAUI.Pages;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Extensions;
+using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Extensions;
 using Zaczy.SongBook.MAUI.ViewModels;
 using Timer = System.Timers.Timer;
@@ -33,40 +37,43 @@ namespace Zaczy.SongBook.MAUI.Pages
         private bool _isSubscribed;
         private VisualizationCssOptions _visualizationCssOptions;
 
-        // remember previous KeepScreenOn value so we restore it on exit
         private bool _previousKeepScreenOn;
         public UserViewModel UserViewModel => _userViewModel;
 
-        // expose strongly-typed Song for XAML compiled bindings (avoid BindingContext.Title lookup)
         public SongEntity Song => _songEntity;
 
         private readonly EventApi _eventApi;
+        private readonly SongRepositoryLite _songRepository;
+        private readonly Settings _settings;
 
         private bool _suppressTopTouch;
 
-        public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel, EventApi eventApi)
+        /// <summary>
+        /// Konstruktor
+        /// </summary>
+        /// <param name="songEntity"></param>
+        /// <param name="userViewModel"></param>
+        /// <param name="eventApi"></param>
+        /// <param name="songRepository"></param>
+        /// <param name="settings"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public SongDetailsPage(SongEntity songEntity, UserViewModel userViewModel, EventApi eventApi, SongRepositoryLite songRepository, Settings settings)
         {
             _userViewModel = userViewModel;
             _songEntity = songEntity ?? new SongEntity();
             _songEntity.ScrollingDelay = 10;
             _eventApi = eventApi;
+            _songRepository = songRepository ?? throw new ArgumentNullException(nameof(songRepository));
+            _settings = settings;
+
+            _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin || _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail).Result || true;
 
             _visualizationCssOptions = new VisualizationCssOptions();
-            //_visualization = new SongVisualization() 
-            //{ 
-            //    IncludeFontsAsBase64 = true, 
-            //    VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions) 
-            //    {  
-            //        CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
-            //        SkipLyricChords = UserViewModel.SkipLyricChords,
-            //        SkipTabulatures = UserViewModel.SkipTabulatures
-            //    }
-            //};
 
             _visualization = this.CreateVisualizationOptions();
 
-            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.PersonArrowDownToLine, IconColor = Colors.Green }; ;
-            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.MusicNote2Play20, IconColor = Colors.Green };
+            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.LockOpen, IconColor = Colors.Green }; ;
+            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.Checkmark24, IconColor = Colors.Green };
             
             InitializeComponent();
 
@@ -468,6 +475,9 @@ namespace Zaczy.SongBook.MAUI.Pages
                 _userViewModel.PropertyChanged -= UserViewModel_PropertyChanged;
                 _isSubscribed = false;
             }
+
+            WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<SongEntity>>(this);
+
         }
 
         private void UserViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -517,7 +527,6 @@ namespace Zaczy.SongBook.MAUI.Pages
             {
                 string msg = ex.Message;
 
-                // ignore for robustness; you may add logging here
             }
         }
 #pragma warning restore CS1998 
@@ -1024,6 +1033,24 @@ namespace Zaczy.SongBook.MAUI.Pages
             public int? ScrollTop { get; set; }
 
             public int? TotalLines { get; set; }
+        }
+
+        /// <summary>
+        /// Song edit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnSongEditClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var editPage = new SongWebEditPage(_songEntity, _userViewModel,  _settings, _songRepository);
+                await Navigation.PushAsync(editPage);
+            }
+            catch (Exception ex)
+            {
+                await ex.SaveExceptionToFileAsync(" song_edit_navigation", eventApi: _eventApi);
+            }
         }
     }
 }

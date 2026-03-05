@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
+    xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages"
+    x:Class="Zaczy.SongBook.MAUI.Pages.SongEditPage"
+    x:Name="Root"
+    x:DataType="pages:SongEditPage"
+    Title="Edytuj piosenkę">
+
+    <ContentPage.Triggers>
+        <DataTrigger TargetType="ContentPage" Binding="{Binding Source={x:Reference Root}, Path=UserViewModel.LyricsDarkMode}" Value="True">
+            <Setter Property="BackgroundColor" Value="{StaticResource LyricsDarkBackground}" />
+        </DataTrigger>
+    </ContentPage.Triggers>
+
+    <ScrollView x:Name="MainScroll">
+        <Grid Padding="{OnIdiom '12,12,12,24', Phone='8,8,8,12'}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" 
+              ColumnDefinitions="Auto,*" 
+              ColumnSpacing="12" 
+              RowSpacing="0">
+
+            <!-- Title -->
+            <Label Grid.Row="0" Grid.Column="0" Text="Tytuł" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.Title, Mode=TwoWay}" Placeholder="Wprowadź tytuł" />
+
+            <!-- Artist -->
+            <Label Grid.Row="1" Grid.Column="0" Text="Artysta" FontSize="Micro"  VerticalOptions="Center" />
+            <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.Artist, Mode=TwoWay}" Placeholder="Artysta" />
+
+            <!-- Lyrics Author -->
+            <Label Grid.Row="2" Grid.Column="0" Text="Autor słów" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.LyricsAuthor, Mode=TwoWay}" Placeholder="Autor słów" />
+
+            <!-- Music Author -->
+            <Label Grid.Row="3" Grid.Column="0" Text="Autor muzyki" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.MusicAuthor, Mode=TwoWay}" Placeholder="Autor muzyki" />
+
+            <!-- Numeric fields -->
+            <Label Grid.Row="4" Grid.Column="0" Text="Opóźnienie przewijania (ms)" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="4" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.ScrollingDelay, Mode=TwoWay}" Keyboard="Numeric" Placeholder="np. 10" />
+
+            <Label Grid.Row="5" Grid.Column="0" Text="Długość utworu (s)" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="5" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.SongDurationTxt, Mode=TwoWay}" Keyboard="Time" Placeholder="03:30" />
+            <!-- Lyrics (multi-line) -->
+            <Label 
+                Grid.Row="6" 
+                Grid.Column="0" 
+                Text="Tekst" 
+                VerticalOptions="Start" 
+                Margin="0,0,0,10"
+                FontSize="Micro" 
+                />
+            <Editor 
+                x:Name="LyricsEditor"
+                Grid.Row="6"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Text="{Binding Source={x:Reference Root}, Path=Song.Lyrics, Mode=TwoWay}"
+                Background="{AppThemeBinding Light=#F8F8F8,Dark=#222222}"
+                HeightRequest="520"
+                FontSize="{OnIdiom 12, Tablet=16}"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                FontFamily="{OnPlatform Android='monospace', iOS='Menlo', WinUI='Consolas', MacCatalyst='Menlo'}"
+                Focused="OnLyricsEditorFocused"
+                Unfocused="OnLyricsEditorUnfocused"
+                VerticalOptions="FillAndExpand">
+                
+                <Editor.GestureRecognizers>
+                    <!-- ensure we disable parent ScrollView before attempting to focus the Editor -->
+                    <TapGestureRecognizer Tapped="OnLyricsEditorTapped" NumberOfTapsRequired="1" />
+                </Editor.GestureRecognizers>
+            </Editor>
+
+            <!-- Capo -->
+            <Label Grid.Row="7" Grid.Column="0" Text="Capo" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="7" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.Capo, Mode=TwoWay}" Placeholder="np. Drugi próg" />
+
+            <!-- Chords Variations -->
+            <Label Grid.Row="8" Grid.Column="0" Text="Warianty akordów" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="8" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.ChordsVariations, Mode=TwoWay}" Placeholder="Specyficzne akordy" />
+
+            <!-- Spotify Link -->
+            <Label Grid.Row="9" Grid.Column="0" Text="Spotify link" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="9" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.SpotifyLink, Mode=TwoWay}" Placeholder="https://..." Keyboard="Url" />
+
+            <!-- More Info / Source -->
+            <Label Grid.Row="10" Grid.Column="0" Text="Dodatkowe info" FontSize="Micro" VerticalOptions="Center" />
+            <Entry Grid.Row="10" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.MoreInfo, Mode=TwoWay}" Placeholder="Dodatkowe informacje" />
+
+
+            <!-- Comments / CategoryColor -->
+            <Label Grid.Row="11" Grid.Column="0" Text="Komentarz" VerticalOptions="Center" />
+            <Entry Grid.Row="11" Grid.Column="1" Text="{Binding Source={x:Reference Root}, Path=Song.Comments, Mode=TwoWay}" Placeholder="Komentarz" />
+
+            <!-- Buttons -->
+            <HorizontalStackLayout Grid.Row="15" Grid.ColumnSpan="2" Spacing="12" HorizontalOptions="Center" Padding="0,12,0,24">
+                <Button x:Name="CancelButton" Text="Anuluj" WidthRequest="120" Clicked="OnCancelClicked" />
+                <Button x:Name="SaveButton" Text="Zapisz" WidthRequest="120" Clicked="OnSaveClicked" />
+            </HorizontalStackLayout>
+
+        </Grid>
+    </ScrollView>
+</ContentPage>

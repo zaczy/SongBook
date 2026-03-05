@@ -29,11 +29,10 @@ public class SongEntityTools
             baseColor = "#EEE";
 
         string categoryNormalized = NormalizeToHex(categoryColor);
-        // If no category color provided, just return base color
+
         if (string.IsNullOrWhiteSpace(categoryColor) || categoryNormalized.ToUpper() == "#FFFFFF" || categoryNormalized.ToUpper() == "#000000")
             return NormalizeToHex(baseColor);
 
-        // Try parse both colors; if parsing fails for categoryColor, fall back to baseColor
         if (!TryParseHexColor(NormalizeToHex(baseColor), out byte bA, out byte bR, out byte bG, out byte bB))
             return NormalizeToHex(baseColor);
 

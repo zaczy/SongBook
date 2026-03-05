@@ -157,11 +157,11 @@ namespace Zaczy.SongBook.Tests
         {
             var chord = ChordsLibrary.ChordByAscii("C", "x32010");
 
-            string svg = chord.ToSvg();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
+            string svg = chord?.ToSvg() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
 
-            svg = chord.ToSvgHorizontal();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}_poziom.svg", svg);
+            svg = chord?.ToSvgHorizontal() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}_poziom.svg", svg);
 
             Console.WriteLine(chord.ToString());
 

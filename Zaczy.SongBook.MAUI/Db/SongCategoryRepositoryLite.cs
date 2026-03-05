@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.Maui.Data
 {
@@ -17,11 +18,13 @@ namespace Zaczy.SongBook.Maui.Data
         private readonly LiteDatabase _db;
         private readonly ILiteCollection<SongCategoryEntity> _col;
         private readonly string _apiBaseUrl;
+        private readonly UserViewModel _userViewModel;
 
         public bool HasCategories => _col.Count() > 0;
-        public SongCategoryRepositoryLite(LiteDatabase db, IOptions<Zaczy.SongBook.MAUI.Settings> options)
+        public SongCategoryRepositoryLite(LiteDatabase db, IOptions<Zaczy.SongBook.MAUI.Settings> options, UserViewModel userViewModel)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
+            _userViewModel = userViewModel ?? throw new ArgumentNullException(nameof(userViewModel));
             _col = _db.GetCollection<SongCategoryEntity>("categories");
             _col.EnsureIndex(x => x.Name);
             _apiBaseUrl = options.Value.ApiBaseUrl;
@@ -29,7 +32,7 @@ namespace Zaczy.SongBook.Maui.Data
 
         public Task<List<SongCategoryEntity>> GetAllAsync()
         {
-            return Task.FromResult(_col.FindAll().OrderBy(c => c.Name).ToList());
+            return Task.FromResult(_col.FindAll().OrderBy(c => c.IsPrivate).ThenBy(c=>c.Id).ToList());
         }
 
         public async Task<SongCategoryEntity?> GetByIdAsync(int id)
@@ -95,8 +98,7 @@ namespace Zaczy.SongBook.Maui.Data
         {
             var songApi = new SongApi(_apiBaseUrl);
 
-            var response = await songApi.GetCategoriesListAsync();
-
+            var response = await songApi.GetCategoriesListAsync(_userViewModel?.UserEmail);
             if (response.Count > 0)
             {
                 var entities = response.Select(c => new SongCategoryEntity
@@ -108,6 +110,7 @@ namespace Zaczy.SongBook.Maui.Data
                     Description = c.Description,
                     CategoryColor = c.CategoryColor,
                     CategoryColorThemed = SongEntityTools.ThemeCategoryColor(c.CategoryColor),
+                    IsPrivate = c.IsPrivate,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }).ToArray();

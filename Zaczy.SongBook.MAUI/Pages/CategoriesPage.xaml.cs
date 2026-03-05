@@ -25,8 +25,6 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
 
     public CategoriesPage(SongListViewModel vm)
     {
-        // Initialize command BEFORE InitializeComponent so ToolbarItem binding (evaluated during XAML load)
-        // can resolve a non-null command instance immediately.
         FetchCategoriesCommand = new Command(async () => await RefreshFromApi());
 
         InitializeComponent();
@@ -194,9 +192,7 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
     /// <summary>
     /// Wywo³ane w czasie dotkniêcia kafelka kategorii
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void OnTileTapped(object? sender, EventArgs e)
+    private async void OnTileTapped(object sender, TappedEventArgs e)
     {
         try
         {
@@ -226,7 +222,7 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
 
             var current = selectedItems.Cast<object>().ToList();
 
-            //OnSelectionChangedInternal(prev, current);
+            _selectionChanged = true;
         }
         catch (Exception ex)
         {
@@ -298,13 +294,9 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
         }
     }
 
-    private void OnTileTapped(object sender, TappedEventArgs e)
-    {
-    }
-
     private void CategoriesCollection_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _selectionChanged = true;
+        //_selectionChanged = true;
     }
 
     public bool IsEmptyCategories => Categories == null || Categories.Count == 0;

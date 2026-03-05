@@ -347,7 +347,6 @@
                         MinimumHeightRequest="{OnIdiom Default=16, Phone=16}"
                         MinimumWidthRequest="{OnIdiom Default=16, Phone=16}"
                         />
-
                 </HorizontalStackLayout>
 
             </VerticalStackLayout>

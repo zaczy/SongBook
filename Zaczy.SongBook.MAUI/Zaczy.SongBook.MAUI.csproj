@@ -44,22 +44,22 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -73,22 +73,22 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.6</ApplicationDisplayVersion>
-	  <ApplicationVersion>6</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>7</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -142,6 +142,7 @@
 	<ItemGroup>
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.Fluent" Version="5.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="5.0.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
 		<PackageReference Include="LiteDB" Version="5.0.21" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.2" />
@@ -178,6 +179,9 @@
 	  <MauiXaml Update="Pages\CategoriesPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\SongEditPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -185,6 +189,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\SongsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\SongWebEditPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
@@ -205,6 +212,12 @@
     <AndroidAarLibrary Include="Platforms\Android\libs\spotify-app-remote-release.aar" />
     -->
   </ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Pages\SongEditPage.xaml.cs">
+	    <DependentUpon>SongEditPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 
   <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
     <!-- Publish framework-dependent to avoid requiring Microsoft.NETCore.App.Runtime.Mono.win-x64 -->

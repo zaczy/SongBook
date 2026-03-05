@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Zaczy.Songbook.MAUI.Services;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Enums;
 using Zaczy.SongBook.Extensions;
 
@@ -304,6 +305,40 @@ public class UserViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Czy aktywny użytkownik ma uprawnienia administratora (na podstawie danych z API)
+    /// </summary>
+    public bool IsAdmin
+    {
+        get => _prefs?.IsAdmin ?? false;
+        set
+        {
+            if (_prefs != null && _prefs?.IsAdmin != value)
+            {
+                _prefs!.IsAdmin = value;
+                Save();
+                OnPropertyChanged(nameof(IsAdmin));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Czy aktywny użytkownik ma uprawnienia edytora (na podstawie danych z API)
+    /// </summary>
+    public bool IsEditor
+    {
+        get => _prefs?.IsEditor ?? false;
+        set
+        {
+            if (_prefs != null && _prefs.IsEditor != value)
+            {
+                _prefs.IsEditor = value;
+                Save();
+                OnPropertyChanged(nameof(IsEditor));
+            }
+        }
+    }
+
+    /// <summary>
     /// Awatar użytkownika (URL do zdjęcia z Google)
     /// </summary>
     public string? UserPicture
@@ -324,6 +359,21 @@ public class UserViewModel : INotifyPropertyChanged
     /// Czy użytkownik jest zalogowany
     /// </summary>
     public bool IsUserAuthenticated => !string.IsNullOrEmpty(UserEmail) && !string.IsNullOrEmpty(UserToken);
+
+
+    public string? DeezerArl
+    {
+        get => _prefs?.DeezerArl;
+        set
+        {
+            if (_prefs != null && _prefs.DeezerArl != value)
+            {
+                _prefs.DeezerArl = value;
+                Save();
+                OnPropertyChanged(nameof(DeezerArl));
+            }
+        }
+    }
 
 
     // BaseIcon instances for toggle (MVVM-friendly)
@@ -376,6 +426,8 @@ public class UserViewModel : INotifyPropertyChanged
             // Wyloguj
             UserEmail = null;
             UserToken = null;
+            IsAdmin = false;
+            IsEditor = false;
             return;
         }
 
@@ -386,6 +438,15 @@ public class UserViewModel : INotifyPropertyChanged
 
         if (result != null)
         {
+            if (!string.IsNullOrEmpty(result.IdToken))
+            {
+                var userApi = new UserApi(_settings.ApiBaseUrl);
+                var user = await userApi.GetUserByTokenAsync(result.IdToken);
+
+                IsAdmin = user?.IsAdmin == true;
+                IsEditor = user?.IsEditor == true;
+            }
+
             UserEmail = result.Email;
             UserToken = result.AccessToken; // lub IdToken
             UserPicture = result.Picture;

@@ -88,6 +88,12 @@ namespace Zaczy.SongBook.MAUI.Data
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Pobierz piosenki ze wskazanej kategorii
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <param name="songCategoryEntity"></param>
+        /// <returns></returns>
         public async Task FetchCategorySongsFromApiAsync(int categoryId, SongCategoryEntity? songCategoryEntity=null)
         {
             var songApi = new SongApi(_apiBaseUrl);

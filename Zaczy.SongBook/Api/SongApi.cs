@@ -36,10 +36,18 @@ public class SongApi
     /// Pobierz listę kategorii
     /// </summary>
     /// <returns></returns>
-    public async Task<List<SongCategory>> GetCategoriesListAsync()
+    public async Task<List<SongCategory>> GetCategoriesListAsync(string? email)
     {
         var apiClient = new ApiClient(_baseUrl);
-        var response = await apiClient.GetAsync<List<SongCategory>>("/song-categories");
+
+        string relativeUrl = $"/song-categories/byuser";
+
+        if(!string.IsNullOrEmpty(email))
+        {
+            relativeUrl += $"?email={Uri.EscapeDataString(email)}";
+        }
+
+        var response = await apiClient.GetAsync<List<SongCategory>>(relativeUrl);
         if (response.IsSuccess && response.Data != null)
         {
             return response.Data;

@@ -14,8 +14,8 @@
     <Color x:Key="Tertiary">#961610</Color>
 
     <Color x:Key="LyricsDarkBackground">#222222</Color>
-    <Color x:Key="LyricsDarkText">#777777</Color>
-    <Color x:Key="LyricsDarkChords">#555030</Color>
+    <Color x:Key="LyricsDarkText">#999999</Color>
+    <Color x:Key="LyricsDarkChords">#797351</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>

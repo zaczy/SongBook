@@ -94,6 +94,16 @@ public class SongCategoryEntity : INotifyPropertyChanged
         }
     }
 
+    [JsonPropertyName("is_private")]
+    [Column("is_private")]
+    public bool IsPrivate { get; set; } = false;
+
+    [JsonPropertyName("owner_email")]
+    [Column("owner_email")]
+    [MaxLength(60)]
+    public string? OwnerEmail { get; set; }
+
+
     public override string ToString() => $"{Name} ({Id})";
 
     public event PropertyChangedEventHandler? PropertyChanged;

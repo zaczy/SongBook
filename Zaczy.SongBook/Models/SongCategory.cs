@@ -41,6 +41,9 @@ public class SongCategory
     [JsonPropertyName("category_color")]
     public string? CategoryColor { get; set; }
 
+    [JsonPropertyName("is_private")]
+    public bool IsPrivate { get; set; }
+
     public void initFromEntity(Data.SongCategoryEntity entity)
     {
         Id = entity.Id;
@@ -48,6 +51,7 @@ public class SongCategory
         SymbolImage = entity.SymbolImage;
         Description = entity.Description;
         CategoryColor = entity.CategoryColor;
+        IsPrivate = entity.IsPrivate;
     }
 
 }

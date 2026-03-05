@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 using System.Collections.Generic;
+using Zaczy.Songbook.MAUI.Pages;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Maui.Data;
@@ -82,6 +83,17 @@ namespace Zaczy.SongBook.MAUI
 
                     builder.Configuration.AddInMemoryCollection(dict!);
                 }
+                var webBase = builder.Configuration.GetValue<string>("Settings:WebBaseUrl");
+                if (!string.IsNullOrEmpty(webBase) && webBase.Contains("zaczy-api.local"))
+                {
+                    webBase = webBase.Replace("zaczy-api.local", "10.0.2.2");
+                    var dict = new Dictionary<string, string>
+                    {
+                        ["Settings:WebBaseUrl"] = webBase
+                    };
+
+                    builder.Configuration.AddInMemoryCollection(dict!);
+                }
             }
 
             // Configure LiteDB (single-file, embedded, cross-platform)
@@ -106,6 +118,7 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddTransient<SongsPage>();
             builder.Services.AddTransient<SongDetailsPage>();
             builder.Services.AddTransient<SettingsPage>();
+            builder.Services.AddTransient<SongWebEditPage>();
             builder.Services.AddTransient<CategoriesPage>();
 
 #if DEBUG

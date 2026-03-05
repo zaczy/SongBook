@@ -1,10 +1,13 @@
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using MauiIcons.Core;
+using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 using System;
-using Zaczy.SongBook.Data;
 using Zaczy.SongBook;
-using Zaczy.SongBook.MAUI.ViewModels;
 using Zaczy.SongBook.Api;
+using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages
 {
@@ -13,9 +16,17 @@ namespace Zaczy.SongBook.MAUI.Pages
         private readonly SongListViewModel _songListViewModel;
         private readonly UserViewModel _userViewModel;
         private readonly EventApi _eventApi;
+        private readonly Settings _settings;
 
-        // ViewModel is injected from DI
-        public SongsPage(SongListViewModel vm, UserViewModel viewModel, EventApi eventApi)
+        /// <summary>
+        /// Konstruktor 
+        /// </summary>
+        /// <param name="vm"></param>
+        /// <param name="viewModel"></param>
+        /// <param name="eventApi"></param>
+        /// <param name="settings"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public SongsPage(SongListViewModel vm, UserViewModel viewModel, EventApi eventApi, IOptions<Settings> settings)
         {
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ArrowClockwise20, IconColor = Colors.Green };
             _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
@@ -26,6 +37,51 @@ namespace Zaczy.SongBook.MAUI.Pages
             _userViewModel = viewModel;
             BindingContext = _songListViewModel;
             _eventApi = eventApi;
+            _settings = settings.Value;
+
+            // register to receive updates
+            WeakReferenceMessenger.Default.Register<SongsPage, ValueChangedMessage<SongEntity>>(this, (page, message) =>
+            {
+                try
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        var updatedSong = message.Value;
+                        var existing = _songListViewModel.Songs.FirstOrDefault(s => s.Id == updatedSong.Id);
+                        if (existing != null)
+                        {
+                            var idx = _songListViewModel.Songs.IndexOf(existing);
+                            if (idx >= 0)
+                            {
+                                // replace item to force UI refresh
+                                _songListViewModel.Songs[idx] = updatedSong;
+                            }
+                            else
+                            {
+                                // update properties in place
+                                existing.Title = updatedSong.Title;
+                                existing.Artist = updatedSong.Artist;
+                                existing.Capo = updatedSong.Capo;
+                                existing.Lyrics = updatedSong.Lyrics;
+                                existing.UpdatedAt = updatedSong.UpdatedAt;
+                            }
+                        }
+                        else
+                        {
+                            // not present — add and keep ordering
+                            _songListViewModel.Songs.Add(updatedSong);
+                            var sorted = _songListViewModel.Songs.OrderBy(s => s.Title ?? string.Empty).ToList();
+                            _songListViewModel.Songs.Clear();
+                            foreach (var s in sorted)
+                                _songListViewModel.Songs.Add(s);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"SongUpdated handler error: {ex.Message}");
+                }
+            });
         }
 
         /// <summary>
@@ -48,14 +104,14 @@ namespace Zaczy.SongBook.MAUI.Pages
             if (sender is TapGestureRecognizer tg && tg.CommandParameter is SongEntity song)
             {
                 // push details page
-                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi));
+                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi, _songListViewModel.Repo, _settings));
             }
             else
             {
                 // fallback: get BindingContext from parent element (safer in some templates)
                 if (sender is Element el && el.BindingContext is SongEntity ctxSong)
                 {
-                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi));
+                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi, _songListViewModel.Repo, _settings));
                 }
             }
         }
@@ -84,6 +140,11 @@ namespace Zaczy.SongBook.MAUI.Pages
             {
                 vm.PageCommand.Execute(null);
             }
+        }
+
+        private void OnItemTapped(object sender, TappedEventArgs e)
+        {
+
         }
     }
 }

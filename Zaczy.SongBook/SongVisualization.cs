@@ -56,7 +56,7 @@ public class SongVisualization
         sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
         sb.AppendLine("<style>");
         sb.AppendLine("html {  }");
-        sb.AppendLine("body { padding-bottom: 1em; }");
+        sb.AppendLine("body { padding-bottom: 1em; margin: 0; }");
 
         if (CssFontsPath?.Count > 0)
         {
@@ -112,9 +112,11 @@ public class SongVisualization
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
         customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
-        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable'; font-weight: 500; /* display: inline-block; */}");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable'; font-weight: 500; /* display: inlinecd-block; */}");
+        
         sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; /* height: 1.2em; */ margin-top: 0.8em; }");
-        sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-1em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.9em; }");
+        sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-1.2em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
+        
         sb.AppendLine(@".chords, .chords2 { color: #b62610; }");
 
         sb.AppendLine(".block-header { display: none; }");
@@ -127,13 +129,13 @@ public class SongVisualization
         sb.AppendLine(".block-tabulatura { font-family: 'InconsolataVariable', Consolas, monospace; font-size: 0.8em; line-height: 1.2em; }");
         sb.AppendLine(".block-tabulatura .block-header { display: none; }");
 
-        sb.AppendLine(".block-recytacja { font-style: italic; }");
+        sb.AppendLine(".block-recytacja { font-style: italic; font-size: 0.8em;  }");
         sb.AppendLine(".block-info { font-style: italic; font-size: 0.8em; }");
 
         sb.AppendLine(".block-bridge { margin-left: 20px; }");
 
         //sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
-        sb.AppendLine(".capo-info, .lyrics-author, .music-author { opacity: 0.5; font-size: 0.8em; margin-bottom: 1px; "
+        sb.AppendLine(".capo-info, .lyrics-author, .music-author { opacity: 0.7; font-size: 0.8em; margin-bottom: 1px; "
                 + (version == LyricsHtmlVersion.RelativeHtml ? "font-family: 'PoltawskiVariable';" : "")
                 +"}");
 
@@ -149,7 +151,7 @@ public class SongVisualization
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
         sb.AppendLine("     .lyrics-line.annotated { line-height: 1.8em; margin-top: 0.7em; }");
-        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.9em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.98em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
         sb.AppendLine(@"    .chords2 { font-size: 0.7em; }");
         sb.AppendLine(@"    .chords { font-size: 0.9em; }");
 
@@ -174,13 +176,21 @@ public class SongVisualization
             sb.AppendLine($"<h1>{song.Title} <span class=\"artist\">{song.Artist}</span></h1>");
 
         string songMetadata = string.Empty;
-        if (song.LyricsAuthor != null)
+
+        if (song.LyricsAuthor != null && song.LyricsAuthor == song.MusicAuthor)
         {
-            songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
+            songMetadata += $"<div class=\"lyrics-author\">sł. i muz. {song.LyricsAuthor}</div>";
         }
-        if (song.MusicAuthor != null)
+        else
         {
-            songMetadata += $"<div class=\"music-author\">muz. {song.MusicAuthor}</div>";
+            if (song.LyricsAuthor != null)
+            {
+                songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
+            }
+            if (song.MusicAuthor != null)
+            {
+                songMetadata += $"<div class=\"music-author\">muz. {song.MusicAuthor}</div>";
+            }
         }
 
         if (!string.IsNullOrEmpty(song.Capo))

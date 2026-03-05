@@ -23,4 +23,10 @@ public class UserPreferences
     public string? UserEmail { get; set; }
     public string? UserToken { get; set; }
     public string? UserPicture { get; set; }
+    public bool IsAdmin { get; set; }
+    public bool IsEditor { get; set; }
+
+    public string? DeezerArl { get; set; }
+
+
 }

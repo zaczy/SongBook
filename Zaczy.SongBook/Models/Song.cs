@@ -10,6 +10,7 @@ public class Song: INotifyPropertyChanged
 {
     public Song() { }
 
+    [JsonPropertyName("id")]
     public int? ServerId { get; set; }
 
     public Song(SongEntity entity): this()
@@ -157,7 +158,6 @@ public class Song: INotifyPropertyChanged
     }
 
     private string? _songDurationTxt;
-
     public string? SongDurationTxt
     {
         get 
