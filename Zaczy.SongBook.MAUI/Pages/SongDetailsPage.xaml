@@ -6,6 +6,8 @@
     xmlns:vm="clr-namespace:Zaczy.SongBook.MAUI.ViewModels"
     xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
     xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    
     x:Class="Zaczy.SongBook.MAUI.Pages.SongDetailsPage"
     x:Name="Root"
     x:DataType="pages:SongDetailsPage"
@@ -103,7 +105,28 @@
              x:Name="LyricsWebView"
              />
 
-    <!-- Transparent touch area above the WebView to detect taps at the top of the page.
+        <HorizontalStackLayout 
+            x:Name="DeezerStatus"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
+            Grid.Row="4" 
+            HeightRequest="30" 
+            BackgroundColor="{AppThemeBinding Dark=#111, Light=#FFF}" 
+            Opacity="0.6"
+            VerticalOptions="End"
+            HorizontalOptions="Center"
+            WidthRequest="300"
+            Padding="10,5,10,5"
+            x:DataType="pages:SongDetailsPage"
+            >
+            <Label 
+                Text="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerStatusInfo}"
+                FontSize="9"
+                HorizontalTextAlignment="Center"
+                />
+        </HorizontalStackLayout>
+
+        <!-- Transparent touch area above the WebView to detect taps at the top of the page.
          Placed after WebView so it overlays it, and before ControlsPanel so controls remain top-most. -->
     <BoxView 
         x:Name="TopTouchArea"
@@ -188,7 +211,28 @@
                 </DataTrigger>
             </ImageButton.Triggers>
         </ImageButton>
+
         <ImageButton
+            Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FF0000}"
+            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+            BackgroundColor="Transparent"
+            IsVisible="Hidden"
+            VerticalOptions="Start"
+            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+            Clicked="OnPlayDeezerClicked" 
+            >
+                <ImageButton.Triggers>
+                    <DataTrigger 
+                        TargetType="ImageButton"
+                        Binding="{Binding HasDeezerLink}"
+                        Value="True">
+                        <Setter Property="IsVisible" Value="Visible" />
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+
+            <ImageButton
             Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
             BackgroundColor="Transparent"
             Clicked="OnSettingsClicked"
@@ -210,5 +254,8 @@
             />
         
         </HorizontalStackLayout>
-  </Grid>
+
+    </Grid>
+
+   
 </ContentPage>

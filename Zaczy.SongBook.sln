@@ -19,6 +19,8 @@ Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Zaczy.SongBook.MAUI.Packagi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSO.dtwarzacz", "..\..\..\..\..\RSOPlayer\RSO.dtwarzacz\RSO.dtwarzacz.csproj", "{B8687EB6-B63A-BA24-6857-EC95D6894B09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YT2Mp3Core", "..\zaczy\Yt2Mp3Core\YT2Mp3Core.csproj", "{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,26 @@ Global
 		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.ActiveCfg = Release|Any CPU
 		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.Build.0 = Release|Any CPU
 		{B8687EB6-B63A-BA24-6857-EC95D6894B09}.Release|x86.Deploy.0 = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|x64.Build.0 = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Debug|x86.Build.0 = Debug|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|ARM.Build.0 = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|ARM64.Build.0 = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|x64.ActiveCfg = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|x64.Build.0 = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|x86.ActiveCfg = Release|Any CPU
+		{3E9D43AD-7D91-C11F-B3C6-C8F297A7F437}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

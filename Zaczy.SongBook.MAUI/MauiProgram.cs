@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
+using Plugin.Maui.Audio;
 using System.Collections.Generic;
 using Zaczy.Songbook.MAUI.Pages;
 using Zaczy.SongBook.Api;
@@ -120,6 +121,9 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<SongWebEditPage>();
             builder.Services.AddTransient<CategoriesPage>();
+
+            builder.Services.AddSingleton(AudioManager.Current);
+            builder.Services.AddTransient<IAudioManager>(provider => AudioManager.Current);
 
 #if DEBUG
             builder.Logging.AddDebug();

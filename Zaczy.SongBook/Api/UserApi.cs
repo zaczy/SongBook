@@ -72,4 +72,33 @@ public class UserApi
         }
     }
 
+    /// <summary>
+    ///  Pobierz informacje o użytkowniku na podstawie tokena API. 
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public async Task<User?> GetUserByEmailAsync(string token)
+    {
+        try
+        {
+            var apiClient = new ApiClient(_baseUrl);
+            var response = await apiClient.GetAsync<User>($"/songbook-users/email/{token}", new Dictionary<string, string>());
+            if (response.IsSuccess && response.Data != null)
+            {
+                return response.Data;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"GetUserByEmailAsync: API error: {response.ErrorMessage} {response.ErrorDetails}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"GetUserByEmailAsync: Exception: {ex.Message}");
+            return null;
+        }
+    }
+
+
 }

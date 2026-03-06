@@ -21,6 +21,12 @@ public class EventApi
         _settings = settings;
     }
 
+    /// <summary>
+    /// Wyślij powiadomienie o zdarzeniu
+    /// </summary>
+    /// <param name="eventName"></param>
+    /// <param name="details"></param>
+    /// <returns></returns>
     public async Task SendEventAsync(string eventName, string details)
     {
         string appVersion = AppInfo.Current.VersionString;

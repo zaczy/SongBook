@@ -20,7 +20,7 @@ $proj = $projFile.FullName
 $out  = "\\qnas\homes\zaczy\Android\"
 #$out  = "C:\Tmp\"
 
-$packageType = "aab"
+$packageType = "apk"
 
 dotnet publish $proj -f net9.0-android -c Release `
   -p:AndroidPackageFormat=$packageType `

@@ -26,7 +26,7 @@ public class UserPreferences
     public bool IsAdmin { get; set; }
     public bool IsEditor { get; set; }
 
-    public string? DeezerArl { get; set; }
+    public string? DeezerArl { get; set; } = "a15129c93bb2459ae6618cab267d52f11e7cf696abe76f4d91f633f8380141fa1ba9b1168284085ea5944266f4bd1a48249a1ecc5b6e947feb46987a6ef008b65090286bfef913d30ee852004513faf8dd98d73aea43c24b0cfe3b3191d253a4";
 
 
 }

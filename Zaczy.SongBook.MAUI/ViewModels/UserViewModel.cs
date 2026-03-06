@@ -415,6 +415,23 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
+    private string? _deezerStatusInfo = "Hello world!";
+    /// <summary>
+    /// Status przetwarzania danych Deezer
+    /// </summary>
+    public string? DeezerStatusInfo
+    {
+        get { return _deezerStatusInfo; }
+        set 
+        {
+            if (_deezerStatusInfo != value)
+            {
+                _deezerStatusInfo = value;
+                OnPropertyChanged(nameof(DeezerStatusInfo));
+            }
+        }
+    }
+
     /// <summary>
     /// Przeprowadź proces logowania lub wylogowania użytkownika. 
     /// </summary>
@@ -445,6 +462,7 @@ public class UserViewModel : INotifyPropertyChanged
 
                 IsAdmin = user?.IsAdmin == true;
                 IsEditor = user?.IsEditor == true;
+                DeezerArl = user?.DeezerArl;
             }
 
             UserEmail = result.Email;

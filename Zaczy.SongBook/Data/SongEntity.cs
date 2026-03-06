@@ -148,6 +148,14 @@ public partial class SongEntity : INotifyPropertyChanged
         get => !string.IsNullOrEmpty(SpotifyLink);
     }
 
+    [JsonIgnore]
+    [NotMapped]
+    public bool HasDeezerLink
+    {
+        get => true;
+    }
+
+
     [JsonPropertyName("more_info")]
     [Column("more_info")]
     [MaxLength(255)]
