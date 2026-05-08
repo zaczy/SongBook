@@ -375,6 +375,25 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Czy włączyć funkcje związane z odtwarzaczem Deezer (wymaga podania ARL i zalogowania do Deezer)
+    /// </summary>
+    public bool DeezerPlayerEnabled
+    {
+        get 
+        { 
+            return _prefs?.DeezerPlayerEnabled ?? false;
+        }
+        set 
+        { 
+            if (_prefs != null && _prefs.DeezerPlayerEnabled != value)
+            {
+                _prefs.DeezerPlayerEnabled = value;
+                Save();
+                OnPropertyChanged(nameof(DeezerPlayerEnabled));
+            }
+        }
+    }
 
     // BaseIcon instances for toggle (MVVM-friendly)
     private readonly BaseIcon _playToggle = new BaseIcon
@@ -415,7 +434,7 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
-    private string? _deezerStatusInfo = "Hello world!";
+    private string? _deezerStatusInfo;
     /// <summary>
     /// Status przetwarzania danych Deezer
     /// </summary>
@@ -431,6 +450,58 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    private bool? _deezerPlayerActive;
+    /// <summary>
+    /// Status przetwarzania danych Deezer
+    /// </summary>
+    public bool? DeezerPlayerActive
+    {
+        get { return _deezerPlayerActive; }
+        set
+        {
+            if (_deezerPlayerActive != value)
+            {
+                _deezerPlayerActive = value;
+                OnPropertyChanged(nameof(DeezerPlayerActive));
+                OnPropertyChanged(nameof(DeezerPlayIcon));
+            }
+        }
+    }
+
+    private bool? _deezerPlaying;
+    /// <summary>
+    /// Status odtwarzania danych Deezer
+    /// </summary>
+    public bool? DeezerPlaying
+    {
+        get { return _deezerPlaying; }
+        set
+        {
+            if (_deezerPlaying != value)
+            {
+                _deezerPlaying = value;
+                OnPropertyChanged(nameof(DeezerPlaying));
+                OnPropertyChanged(nameof(DeezerPlayIcon));
+            }
+        }
+    }
+
+    public BaseIcon DeezerPlayIcon
+    {
+        get
+        {
+            return new BaseIcon()
+            {
+                Icon = (DeezerPlaying == true ? MauiIcons.Fluent.FluentIcons.Pause32 : MauiIcons.Fluent.FluentIcons.Play32),
+                IconSize = 40,
+                IconColor = Microsoft.Maui.Graphics.Colors.DarkGray
+            };
+
+        }
+    }
+
+
 
     /// <summary>
     /// Przeprowadź proces logowania lub wylogowania użytkownika. 
@@ -473,4 +544,25 @@ public class UserViewModel : INotifyPropertyChanged
 
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+
+    /// <summary>
+    /// Panel diagnostyczny z informacjami o przewijaniu
+    /// </summary>
+    public bool ShowDiagnostics
+    {
+        get
+        {
+            return _prefs?.ShowDiagnostics ?? false;
+        }
+        set
+        {
+            if (_prefs != null && _prefs.ShowDiagnostics != value)
+            {
+                _prefs.ShowDiagnostics = value;
+                Save();
+                OnPropertyChanged(nameof(ShowDiagnostics));
+            }
+        }
+    }
 }

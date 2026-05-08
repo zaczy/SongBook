@@ -54,26 +54,42 @@ public class DeezerSummary
 
         DeezerService deezerService = new DeezerService(userViewModel.DeezerArl);
 
-        userViewModel.DeezerStatusInfo = "Wysyłam zapytanie do Deezer";
-        var searchResults = await deezerService.DeezerSearch($"{songEntity.Artist} {songEntity.Title}");
-        if (searchResults?.results?.TRACK?.data?.Count() > 0)
+        if (!string.IsNullOrEmpty(songEntity.DeezerLink))
         {
-            userViewModel.DeezerStatusInfo = $"Zwróconych wyników: {searchResults.results.TRACK.data.Count()}";
-            var track = searchResults.results.TRACK.data.Where(t => t.SNG_TITLE.ValueForComparisions() == songEntity.Title.ValueForComparisions() && t.ArtistNames.ValueForComparisions() == songEntity.Artist.ValueForComparisions()).FirstOrDefault();
-
+            var track =await deezerService.GetDeezerTrackMetadataAsync(songEntity.DeezerLink);
             if (track != null)
             {
-                userViewModel.DeezerStatusInfo = $"Znaleziono dopasowanie {track.ArtistNames} - {track.SNG_TITLE} {track.DURATION_FORMATTED}";
+                userViewModel.DeezerStatusInfo = $"Pobrano dane z Deezer na podstawie linku: {track.ArtistNames} - {track.SNG_TITLE} {track.DURATION_FORMATTED}";
                 return CreateFromTrack(track);
             }
-            else
+             else
             {
-                userViewModel.DeezerStatusInfo = "Nie znaleziono dopasowania w Deezer";
+                userViewModel.DeezerStatusInfo = "Nie udało się pobrać danych z Deezer na podstawie linku";
             }
         }
         else
         {
-            userViewModel.DeezerStatusInfo = "Nie znaleziono utworu w Deezer";
+            userViewModel.DeezerStatusInfo = "Wysyłam zapytanie do Deezer";
+            var searchResults = await deezerService.DeezerSearch($"{songEntity.Artist} {songEntity.Title}");
+            if (searchResults?.results?.TRACK?.data?.Count() > 0)
+            {
+                userViewModel.DeezerStatusInfo = $"Zwróconych wyników: {searchResults.results.TRACK.data.Count()}";
+                var track = searchResults.results.TRACK.data.Where(t => t.SNG_TITLE.ValueForComparisions() == songEntity.Title.ValueForComparisions() && t.ArtistNames.ValueForComparisions() == songEntity.Artist.ValueForComparisions()).FirstOrDefault();
+
+                if (track != null)
+                {
+                    userViewModel.DeezerStatusInfo = $"Znaleziono dopasowanie {track.ArtistNames} - {track.SNG_TITLE} {track.DURATION_FORMATTED}";
+                    return CreateFromTrack(track);
+                }
+                else
+                {
+                    userViewModel.DeezerStatusInfo = "Nie znaleziono dopasowania w Deezer";
+                }
+            }
+            else
+            {
+                userViewModel.DeezerStatusInfo = "Nie znaleziono utworu w Deezer";
+            }
         }
 
 

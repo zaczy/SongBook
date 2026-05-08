@@ -28,6 +28,7 @@ public class Song: INotifyPropertyChanged
         MoreInfo = entity.MoreInfo;
         Source = entity.Source;
         ServerId = entity.Id;
+        DeezerLink = entity.DeezerLink;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -209,6 +210,15 @@ public class Song: INotifyPropertyChanged
         get { return _spotifyLink; }
         set { _spotifyLink = value; }
     }
+
+    private string? _deezerLink;
+    [JsonPropertyName("deezer_link")]
+    public string? DeezerLink
+    {
+        get { return _deezerLink; }
+        set { _deezerLink = value; }
+    }
+
 
     private List<string>? _lines;
     /// <summary>

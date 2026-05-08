@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.Extensions;
 
 namespace Zaczy.SongBook.Api;
 
@@ -79,5 +80,78 @@ public class SongApi
         }
     }
 
+    /// <summary>
+    /// Pobierz wszystkie piosenki z API i zapisz w lokalnej bazie danych
+    /// </summary>
+    /// <param name="songRepository">Repozytorium do zapisu piosenek</param>
+    /// <returns></returns>
+    public async Task GetFromApi(SongRepository songRepository)
+    {
+        var apiClient = new ApiClient(_baseUrl);
+        
+        // Pobierz wszystkie piosenki z API
+        var response = await apiClient.GetAsync<List<SongEntity>>("/songs/all");
+        
+        if (response.IsSuccess && response.Data != null)
+        {
+            // Iteruj przez wszystkie pobrane piosenki
+            foreach (var song in response.Data)
+            {
+                try
+                {
+                    // Sprawdź czy piosenka już istnieje w bazie danych
+                    //var existingSong = await songRepository.SearchIdAsync(song.Id);
+                    var existingSong = await songRepository.SearchOnlySongAsync(new Song(song));
 
+                    if (existingSong != null)
+                    {
+                        if(existingSong.HasSignigicantDifferences(song, new List<string> { "Id", "CreatedAt", "UpdatedAt" }))
+                        {
+                            // Aktualizuj istniejącą piosenkę
+                            /*
+                            existingSong.Title = song.Title;
+                            existingSong.Artist = song.Artist;
+                            existingSong.Lyrics = song.Lyrics;
+                            existingSong.LyricsAuthor = song.LyricsAuthor;
+                            existingSong.MusicAuthor = song.MusicAuthor;
+                            existingSong.Capo = song.Capo;
+                            existingSong.Comments = song.Comments;
+                            existingSong.ChordsVariations = song.ChordsVariations;
+                            existingSong.ScrollingDelay = song.ScrollingDelay;
+                            existingSong.SongDuration = song.SongDuration;
+                            existingSong.SpotifyLink = song.SpotifyLink;
+                            existingSong.MoreInfo = song.MoreInfo;
+                            existingSong.Source = song.Source;
+                            existingSong.CategoryColor = song.CategoryColor;
+                            */
+
+                            song.ShallowCopyTo(existingSong, new List<string> { "Id", "CreatedAt", "UpdatedAt" });
+
+                            await songRepository.UpdateAsync(existingSong);
+                        }
+                        else
+                        {
+                         //   System.Diagnostics.Debug.WriteLine($"GetFromApi: Song ID {song.Id} {song.Title}- no significant differences found");
+                        }
+                    }
+                    else
+                    {
+                        // Dodaj nową piosenkę
+                        var songModel = new Song(song);
+                        await songRepository.AddAsync(songModel);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GetFromApi: Error processing song ID {song.Id}: {ex.Message}");
+                }
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"GetFromApi: Successfully synchronized {response.Data.Count} songs");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"GetFromApi: API error: {response.ErrorMessage} {response.ErrorDetails}");
+        }
+    }
 }

@@ -10,6 +10,7 @@ public class SongPreviewJavascript
 {
     public static string JavascriptTxt()
     {
+
         var autoScrollJs = @"
 <script>
 (function(){
@@ -76,6 +77,9 @@ public class SongPreviewJavascript
 
     if(rafId) return;
     last = performance.now();
+    var scrollStartTime = performance.now(); // czas rozpoczęcia przewijania
+    var rampUpDuration = 60000; // 60 sekund w milisekundach
+    var minSpeedFactor = 0.5; // początkowa prędkość to 50%
 
     // ensure initial position applied
     window.scrollTo(0, pos);
@@ -83,7 +87,18 @@ public class SongPreviewJavascript
     function step(now){
       var dt = (now - last)/1000;
       last = now;
-      pos += speed * dt;
+      
+      // oblicz aktualny współczynnik prędkości w zależności od czasu
+      var elapsed = now - scrollStartTime;
+      var speedFactor;
+      if (elapsed < rampUpDuration) {
+        // interpolacja liniowa od 0.5 do 1.0 w ciągu 60 sekund
+        speedFactor = minSpeedFactor + (1.0 - minSpeedFactor) * (elapsed / rampUpDuration);
+      } else {
+        speedFactor = 1.0;
+      }
+      
+      pos += speed * speedFactor * dt;
       window.scrollTo(0, pos);
       if(window.innerHeight + pos >= document.body.scrollHeight - 1){
         window.stopAutoScroll();

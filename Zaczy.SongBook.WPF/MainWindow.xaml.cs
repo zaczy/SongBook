@@ -352,5 +352,19 @@ namespace Zaczy.SongBook.WPF
                 }
             }
         }
+
+        private async void SyncDownButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
+            {
+                SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
+
+                var factory = new SongBookDbContextFactory();
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+
+                await songApi.GetFromApi(songRepository);
+            }
+        }
     }
 }

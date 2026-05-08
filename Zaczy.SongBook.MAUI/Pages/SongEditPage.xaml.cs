@@ -64,6 +64,7 @@ public partial class SongEditPage : ContentPage
             ScrollingDelay = source.ScrollingDelay,
             SongDuration = source.SongDuration,
             SpotifyLink = source.SpotifyLink,
+            DeezerLink = source.DeezerLink,
             Source = source.Source
             // Do not attempt to set MoreInfo here — its setter is internal in the data assembly.
         };
@@ -85,6 +86,7 @@ public partial class SongEditPage : ContentPage
         to.ScrollingDelay = from.ScrollingDelay;
         to.SongDuration = from.SongDuration;
         to.SpotifyLink = from.SpotifyLink;
+        to.DeezerLink = from.DeezerLink;
         to.Source = from.Source;
     }
 

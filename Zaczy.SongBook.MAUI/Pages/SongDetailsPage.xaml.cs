@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using DocumentFormat.OpenXml.Presentation;
 using MauiIcons.Core;
 using MauiIcons.Fluent;
 using MauiIcons.FontAwesome;
@@ -31,11 +30,12 @@ public partial class SongDetailsPage : ContentPage
 {
     private readonly Timer _hideControlsTimer;
     private readonly Timer _hideDeezerStatusTimer;
+    private readonly Timer _loadingDeezerStatusTimer;
     private readonly UserViewModel _userViewModel;
     private readonly SongEntity _songEntity;
     private SongVisualization _visualization;
     private readonly string _autoScrollJs;
-    private int _currentSongScrollSpeed;
+    private double _currentSongScrollSpeed;
     private bool _isSubscribed;
     private VisualizationCssOptions _visualizationCssOptions;
     private bool _previousKeepScreenOn;
@@ -47,13 +47,15 @@ public partial class SongDetailsPage : ContentPage
     
     private bool _suppressTopTouch;
     private IAudioPlayer? _deezerPlayer; // Zmieñ na IAudioPlayer
-    private bool _isDeezerPlaying = false;
+    private bool _isDeezerLoading = false;
 
     public UserViewModel UserViewModel => _userViewModel;
     public SongEntity Song => _songEntity;
     
     private DeezerSummary? _deezerSummary;
-        public DeezerSummary? DeezerSummary
+    private int _currentToneAdjustLevel;
+
+    public DeezerSummary? DeezerSummary
     {
         get => _deezerSummary;
     }
@@ -74,7 +76,7 @@ public partial class SongDetailsPage : ContentPage
         EventApi eventApi, 
         SongRepositoryLite songRepository, 
         Settings settings,
-        IAudioManager audioManager) // Dodaj parametr
+        IAudioManager audioManager)
     {
         _userViewModel = userViewModel;
         _songEntity = songEntity ?? new SongEntity();
@@ -91,7 +93,7 @@ public partial class SongDetailsPage : ContentPage
         _visualization = this.CreateVisualizationOptions();
 
         _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.LockOpen, IconColor = Colors.Green };
-        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.Checkmark24, IconColor = Colors.Green };
+        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ChevronUp24, IconColor = Colors.Green };
         
         InitializeComponent();
         
@@ -106,6 +108,119 @@ public partial class SongDetailsPage : ContentPage
         // prepare auto-scroll JS once
         _autoScrollJs = SongPreviewJavascript.JavascriptTxt();
 
+        // Dodaj kod diagnostyczny
+        var diagnosticJs = @"
+<style>
+#diagnosticPanel {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #0f0;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9999;
+    min-width: 200px;
+    display: none;
+}
+#diagnosticPanel.active {
+    display: block;
+}
+#diagnosticPanel .label {
+    color: #888;
+}
+#diagnosticPanel .value {
+    color: #0f0;
+    font-weight: bold;
+}
+</style>
+
+<div id='diagnosticPanel'>
+    <div><span class='label'>Tempo:</span> <span class='value' id='diagSpeed'>0</span> px/s</div>
+    <div><span class='label'>Pozosta³o:</span> <span class='value' id='diagRemainingPx'>0</span> px</div>
+    <div><span class='label'>Pozosta³o:</span> <span class='value' id='diagRemainingPercent'>0</span>%</div>
+    <div><span class='label'>Pozosta³o linii:</span> <span class='value' id='diagRemainingLines'>0</span></div>
+    <div><span class='label'>Czas trwania:</span> <span class='value' id='diagDuration'>0</span>s</div>
+    <div><span class='label'>Szac. pozosta³y czas:</span> <span class='value' id='diagEstTime'>0</span>s</div>
+    <div><span class='label'>View port:</span> <span class='value' id='viewPort'>0</span></div>
+    <div><span class='label'>Doc height:</span> <span class='value' id='docHeight'>0</span></div>
+</div>
+
+<script>
+(function() {
+    var diagPanel = document.getElementById('diagnosticPanel');
+    var diagSpeed = document.getElementById('diagSpeed');
+    var diagRemainingPx = document.getElementById('diagRemainingPx');
+    var diagRemainingPercent = document.getElementById('diagRemainingPercent');
+    var diagRemainingLines = document.getElementById('diagRemainingLines');
+    var diagDuration = document.getElementById('diagDuration');
+    var diagEstTime = document.getElementById('diagEstTime');
+    var viewPort = document.getElementById('viewPort');
+    var docHeight = document.getElementById('docHeight');
+    
+    var currentSpeed = 0;
+    var songDuration = 0;
+    var updateInterval = null;
+
+    // Funkcja do w³¹czania/wy³¹czania panelu diagnostycznego
+    window.toggleDiagnostics = function(enabled) {
+        if (enabled) {
+            diagPanel.classList.add('active');
+            if (!updateInterval) {
+                updateInterval = setInterval(updateDiagnostics, 500);
+            }
+        } else {
+            diagPanel.classList.remove('active');
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+    };
+
+    // Funkcja do ustawiania parametrów diagnostycznych
+    window.setDiagnosticParams = function(speed, duration) {
+        currentSpeed = speed;
+        songDuration = duration;
+        diagSpeed.textContent = speed;
+        diagDuration.textContent = duration;
+    };
+
+    // Funkcja aktualizuj¹ca diagnostykê
+    function updateDiagnostics() {
+        try {
+            var scrollInfo = JSON.parse(window.getRemainingScrollInfo());
+            
+            if (scrollInfo && !scrollInfo.error) {
+                diagRemainingPx.textContent = scrollInfo.remainingPx || 0;
+                diagRemainingPercent.textContent = scrollInfo.remainingPercent || 0;
+                diagRemainingLines.textContent = scrollInfo.remainingLines >= 0 ? scrollInfo.remainingLines : 'N/A';
+
+                docHeight.textContent = scrollInfo.docHeight || 'N/A';
+                viewPort.textContent = scrollInfo.viewport || 'N/A';
+
+                // Oblicz szacowany pozosta³y czas
+                if (currentSpeed > 0) {
+                    var estTime = Math.round(scrollInfo.remainingPx / currentSpeed);
+                    diagEstTime.textContent = estTime;
+                } else {
+                    diagEstTime.textContent = 'N/A';
+                }
+            }
+        } catch (e) {
+            console.error('Diagnostic update error:', e);
+        }
+    }
+
+    // Inicjalizuj diagnostykê
+    addToLog('Diagnostic panel initialized');
+})();
+</script>
+";
+
+    _autoScrollJs += diagnosticJs;
 
         NavigationPage.SetHasNavigationBar(this, false);
         NavigationPage.SetHasBackButton(this, false);
@@ -169,8 +284,10 @@ public partial class SongDetailsPage : ContentPage
         try
         {
             await EnsureFontsAvailableAsync();
-            
-            _ = InitializeDeezerSummaryAsync();
+
+            UserViewModel.DeezerPlayerActive = false;
+            if (_userViewModel.DeezerPlayerEnabled)
+                _ = InitializeDeezerSummaryAsync();
         }
         catch (Exception ex)
         {
@@ -178,14 +295,23 @@ public partial class SongDetailsPage : ContentPage
         }
     }
 
+    /// <summary>
+    /// Pobierz dane o utworze z Deezer na podstawie dostêpnych informacji (np. tytu³, wykonawca) i przygotuj odtwarzacz.
+    /// </summary>
+    /// <returns></returns>
     private async Task InitializeDeezerSummaryAsync()
     {
         try
         {
-            if (!string.IsNullOrEmpty(_userViewModel?.DeezerArl))
+            UserViewModel.DeezerPlayerActive = false;
+            if (!string.IsNullOrEmpty(_userViewModel?.DeezerArl) && _userViewModel?.DeezerPlayerEnabled == true)
             {
+                UserViewModel.DeezerPlayerActive = false;
+
                 await ShowDeezerControlsAsync();
                 _deezerSummary = await DeezerSummary.CreateForSongEntity(_songEntity, _userViewModel);
+
+                UserViewModel.DeezerPlayerActive = _deezerSummary?.DeezerTrack != null;
             }
         }
         catch (Exception ex)
@@ -301,7 +427,7 @@ public partial class SongDetailsPage : ContentPage
             _deezerPlayer.Stop();
             _deezerPlayer.Dispose();
             _deezerPlayer = null;
-            _isDeezerPlaying = false;
+            UserViewModel.DeezerPlaying = null;
         }
 
         //CleanupDeezerTempFile();
@@ -338,6 +464,11 @@ public partial class SongDetailsPage : ContentPage
         WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<SongEntity>>(this);
     }
 
+    /// <summary>
+    /// UserViewModel properties changed - regenerate HTML if relevant properties changed (e.g. LyricsHtmlVersion, FontSizeAdjustment).
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void UserViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e == null) return;
@@ -347,10 +478,6 @@ public partial class SongDetailsPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(async () => await RegenerateHtmlAsync());
         }
-        //else if (e.PropertyName == "EnablePinchGestures")
-        //{
-        //    MainThread.BeginInvokeOnMainThread(SetPinchOverlayFromViewModel);
-        //}
     }
 
     /// <summary>
@@ -358,7 +485,7 @@ public partial class SongDetailsPage : ContentPage
     /// Do not attempt to evaluate JS immediately — wait for Navigated (OnLyricsWebViewNavigated).
     /// </summary>
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously        
-    private async Task RegenerateHtmlAsync()
+    private async Task RegenerateHtmlAsync(Song? _song=null)
     {
         try
         {
@@ -369,7 +496,7 @@ public partial class SongDetailsPage : ContentPage
 
             _visualization = this.CreateVisualizationOptions();
 
-            var song = new Song(_songEntity);
+            var song = _song ?? new Song(_songEntity);
             string htmlDocument = _visualization!.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
 
             var insertAt = htmlDocument.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
@@ -399,6 +526,11 @@ public partial class SongDetailsPage : ContentPage
         _hideControlsTimer.Start();
     }
 
+    /// <summary>
+    /// Zdarzenie nawigacji WebView - przechwyæ niestandardowy schemat app:// do komunikacji z JS (np. pokazywanie/ukrywanie kontrolek, reagowanie na gesty pinch).
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void LyricsWebView_Navigating(object? sender, WebNavigatingEventArgs e)
     {
         if (string.IsNullOrEmpty(e?.Url))
@@ -553,10 +685,14 @@ public partial class SongDetailsPage : ContentPage
             var remainingLyricsInfo = await GetRemainingScrollInfoAsync(); 
             if (double.TryParse(posStr?.Trim('"'), out var pos))
             {
-                if (pos == 0)
+                if (pos == 0 || true)
                 {
                     if (remainingLyricsInfo != null)
-                        _currentSongScrollSpeed = (int)(remainingLyricsInfo.RemainingPx / songDuration);
+                    {
+                        _currentSongScrollSpeed = double.Round(remainingLyricsInfo.RemainingPx / songDuration,2);
+                        if (_currentSongScrollSpeed == 0)
+                            _currentSongScrollSpeed = 1;
+                    }
                 }
                 else
                 {
@@ -566,7 +702,7 @@ public partial class SongDetailsPage : ContentPage
                         // estimate total document height based on current scrollTop and remainingPercent
                         var estimatedDocHeight = (topLineInfo.ScrollTop * 100) / (100 - remainingLyricsInfo.RemainingPercent);
                         var estimatedRemainingPx = estimatedDocHeight - (topLineInfo.ScrollTop + (estimatedDocHeight * (100 - remainingLyricsInfo.RemainingPercent) / 100));
-                        _currentSongScrollSpeed = (int)(estimatedRemainingPx! / songDuration);
+                        _currentSongScrollSpeed = double.Round(estimatedRemainingPx ?? 0 / songDuration, 2);
                     }
                 }
 
@@ -577,16 +713,25 @@ public partial class SongDetailsPage : ContentPage
                 _currentSongScrollSpeed = remainingLyricsInfo != null ? (int)(remainingLyricsInfo.RemainingPx / songDuration) : 30;
                 await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed}, 0, {_songEntity!.ScrollingDelay});");
             }
+            
+            
             _userViewModel.ScrollingInProgress = true;
 
-            
-
+            if (_userViewModel.ShowDiagnostics)
+            {
+                await LyricsWebView.EvaluateJavaScriptAsync($"toggleDiagnostics(true);");
+                await LyricsWebView.EvaluateJavaScriptAsync($"setDiagnosticParams({_currentSongScrollSpeed}, {songDuration});");
+            }
         }
         catch (Exception) { /* handle or log if needed */ }
 
     }
 
-
+    /// <summary>
+    /// Zdarzenie koniec przewijania - zatrzymaj auto-scroll i poka¿ kontrolki
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void OnStopScrollPanelClicked(object sender, EventArgs e)
     {
         try
@@ -597,6 +742,11 @@ public partial class SongDetailsPage : ContentPage
         catch (Exception) { /* handle or log if needed */ }
     }
 
+    /// <summary>
+    /// Zdarzenie koniec przewijania - zatrzymaj auto-scroll
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void OnStopScrollClicked(object sender, EventArgs e)
     {
         try
@@ -606,12 +756,21 @@ public partial class SongDetailsPage : ContentPage
         catch (Exception) { /* handle or log if needed */ }
     }
 
+    /// <summary>
+    /// Zatrzymaj auto-scroll
+    /// </summary>
+    /// <returns></returns>
     private async Task StopScrollClicked()
     {
         try
         {
             await LyricsWebView.EvaluateJavaScriptAsync("stopAutoScroll();");
             _userViewModel.ScrollingInProgress = false;
+
+            if (_userViewModel.ShowDiagnostics)
+            {
+                await LyricsWebView.EvaluateJavaScriptAsync("toggleDiagnostics(false);");
+            }
         }
         catch (Exception) { /* handle or log if needed */ }
     }
@@ -934,15 +1093,25 @@ public partial class SongDetailsPage : ContentPage
     {
         try
         {
-            if (_isDeezerPlaying && _deezerPlayer != null)
+            if (_deezerPlayer != null)
             {
-                // Zatrzymaj odtwarzanie
-                _deezerPlayer.Stop();
-                _deezerPlayer.Dispose();
-                _deezerPlayer = null;
-                _isDeezerPlaying = false;
-                //CleanupDeezerTempFile();
-                return;
+                if(UserViewModel.DeezerPlaying == true)
+                    {
+                    // Zatrzymaj odtwarzanie
+                    //_deezerPlayer.Stop();
+                    //_deezerPlayer.Dispose();
+                    //_deezerPlayer = null;
+                    UserViewModel.DeezerPlaying = false;
+                    _deezerPlayer.Pause();
+                    //CleanupDeezerTempFile();
+                    return;
+                }
+                else if(UserViewModel.DeezerPlaying == false)
+                {
+                    UserViewModel.DeezerPlaying = true;
+                    _deezerPlayer.Play();
+                    return;
+                }
             }
 
             if (!string.IsNullOrEmpty(_userViewModel?.DeezerArl))
@@ -954,6 +1123,10 @@ public partial class SongDetailsPage : ContentPage
 
                 if (_deezerSummary?.DeezerTrack != null)
                 {
+                    _isDeezerLoading = true;
+                    MainThread.BeginInvokeOnMainThread(async () => { while (_isDeezerLoading) { DeezerPlayer.Opacity = 1; await DeezerPlayer.RotateYTo(180, 1500); await DeezerPlayer.RotateYTo(-180, 1500); }  DeezerPlayer.CancelAnimations(); });
+
+                    UserViewModel.DeezerPlayerActive = true;
                     var deezerService = new DeezerService(_userViewModel.DeezerArl);
 
                     var trackBytes = await deezerService.DeezerDownloadBytes(_deezerSummary.DeezerTrack.Url);
@@ -970,7 +1143,7 @@ public partial class SongDetailsPage : ContentPage
                         {
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                _isDeezerPlaying = false;
+                                UserViewModel.DeezerPlaying = false;
                                 _deezerPlayer?.Dispose();
                                 _deezerPlayer = null;
                                 //CleanupDeezerTempFile();
@@ -980,7 +1153,10 @@ public partial class SongDetailsPage : ContentPage
 
                         _userViewModel.DeezerStatusInfo = $"Odtwarzam";
                         _deezerPlayer.Play();
-                        _isDeezerPlaying = true;
+                        UserViewModel.DeezerPlaying = true;
+                        _isDeezerLoading = false;
+
+                        await StartScrollClicked();
                     }
                     else
                     {
@@ -1016,5 +1192,22 @@ public partial class SongDetailsPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine($"Failed to cleanup temp file: {ex.Message}");
         }
+    }
+
+    private void OnToneDownClicked(object sender, EventArgs e)
+    {
+        var song = new Song(_songEntity);
+        _currentToneAdjustLevel += -1;
+        song.AdjustTonation(_currentToneAdjustLevel);
+        _ = RegenerateHtmlAsync(song);
+    }
+
+    private void OnToneUpClicked(object sender, EventArgs e)
+    {
+        var song = new Song(_songEntity);
+        _currentToneAdjustLevel += 1;
+        song.AdjustTonation(_currentToneAdjustLevel);
+        _ = RegenerateHtmlAsync(song);
+
     }
 }

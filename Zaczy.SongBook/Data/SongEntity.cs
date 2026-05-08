@@ -141,6 +141,12 @@ public partial class SongEntity : INotifyPropertyChanged
     [MaxLength(120)]
     public string? SpotifyLink { get; set; }
 
+    [Column("deezer_link")]
+    [JsonPropertyName("deezer_link")]
+    [MaxLength(120)]
+    public string? DeezerLink { get; set; }
+
+
     [JsonIgnore]
     [NotMapped]
     public bool HasSpotifyLink
@@ -152,7 +158,7 @@ public partial class SongEntity : INotifyPropertyChanged
     [NotMapped]
     public bool HasDeezerLink
     {
-        get => true;
+        get => !string.IsNullOrEmpty(DeezerLink);
     }
 
 
@@ -182,7 +188,7 @@ public partial class SongEntity : INotifyPropertyChanged
 
     [NotMapped]
     public bool HasEditPrivileges { get; set; } = true;
-
+    
     /// <summary>
     /// Inicjalizuje obiekt SongEntity na podstawie obiektu Song
     /// </summary>
@@ -199,10 +205,11 @@ public partial class SongEntity : INotifyPropertyChanged
         ScrollingDelay = song.ScrollingDelay;
         SongDuration = song.SongDuration;
         SpotifyLink = song.SpotifyLink;
+        DeezerLink = song.DeezerLink;
         MoreInfo = song.MoreInfo;
         Source = song.Source;
-        if (song?.ServerId != null)
-            Id = song.ServerId.Value;
+        //if (song?.ServerId != null)
+        //    Id = song.ServerId.Value;
     }
 
     public override string ToString()

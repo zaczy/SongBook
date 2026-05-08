@@ -9,6 +9,44 @@ namespace Zaczy.SongBook.Extensions;
 
 public static class ContentCopier
 {
+
+
+    public static bool HasSignigicantDifferences(this object obj, object other, List<string>? exceptionsList = null)
+    {
+        if (obj == null || other == null)
+            return false;
+        var type = obj.GetType();
+        var otherType = other.GetType();
+
+        //if (type != other.GetType())
+        //    return true;
+
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        foreach (var prop in properties)
+        {
+            // skip indexers and non-readable props
+            if (!prop.CanRead || prop.GetIndexParameters().Length > 0)
+                continue;
+            if (exceptionsList != null && exceptionsList.Contains(prop.Name))
+                continue;
+        
+            var otherProp = otherType.GetProperty(prop.Name, BindingFlags.Public | BindingFlags.Instance);
+            if (otherProp == null)
+            {
+                continue;
+            }
+
+            var value1 = prop.GetValue(obj);
+            var value2 = otherProp?.GetValue(other);
+            if (!Equals(value1, value2))
+            {
+                System.Diagnostics.Debug.WriteLine($"HasSignigicantDifferences: Property {prop.Name} differs: {value1} != {value2}");
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static object? ShallowCopyTo(this object obj, object target, List<string>? exceptionsList=null)
     {
         if (obj == null)
@@ -60,7 +98,12 @@ public static class ContentCopier
             if (tProp.PropertyType.IsAssignableFrom(sProp.PropertyType))
             {
                 var value = sProp.GetValue(obj);
-                tProp.SetValue(resultTarget, value);
+                var currentValue = tProp.GetValue(resultTarget);
+                if (!Equals(value, currentValue))
+                {
+                    System.Diagnostics.Debug.WriteLine($"ShallowCopyTo: Property {sProp.Name} changed from {currentValue} to {value}");
+                    tProp.SetValue(resultTarget, value);
+                }
                 continue;
             }
 

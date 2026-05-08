@@ -12,6 +12,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

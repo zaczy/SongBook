@@ -27,7 +27,8 @@
                 <MenuItem Header="_Nowy" Click="NewMenuItem_Click"/>
                 <MenuItem Header="_Otwórz z pliku" Click="OpenMenuItem_Click"/>
                 <MenuItem Header="_Zapisz w bazie danych" Click="SaveMenuItem_Click"/>
-                <MenuItem Header="_Synchronizuj z Chmurą" Click="SyncUpButton_Click"/>
+                <MenuItem Header="_Wyślij do Chmury" Click="SyncUpButton_Click"/>
+                <MenuItem Header="_Pobierz z Chmury" Click="SyncDownButton_Click"/>
                 <Separator/>
                 <MenuItem Header="E_xit"/>
             </MenuItem>
@@ -191,8 +192,12 @@
                         <Label Grid.Row="4">Muzyka</Label>
                         <TextBox Text="{Binding ConvertedSong.MusicAuthor, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Height="25"/>
 
-                        <Label Grid.Row="4" Grid.Column="2">Niestandardowe chwyty</Label>
-                        <TextBox Text="{Binding ConvertedSong.ChordsVariations, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="3" Height="25"/>
+                        <Label Grid.Row="4" Grid.Column="2">Deezer</Label>
+                        <TextBox Text="{Binding ConvertedSong.DeezerLink, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="3" Height="25" />
+
+
+                        <Label Grid.Row="5" Grid.Column="2">Niestandardowe chwyty</Label>
+                        <TextBox Text="{Binding ConvertedSong.ChordsVariations, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="3" Height="25"/>
 
 
                         <Label Grid.Row="5">Kapo</Label>

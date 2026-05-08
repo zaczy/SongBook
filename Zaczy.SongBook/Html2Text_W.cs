@@ -88,11 +88,17 @@ public class Html2Text_W : Html2Text
 
         var result = new StringBuilder();
         
-        var contentMatch = Regex.Match(HtmlContent, 
-            //@"<div class=""interpretation-content"">(.*?)</div>\s*</div>", 
-            @"<div class=""interpretation-content"">(.*?)</div>", 
+        HtmlContent = HtmlContent.Replace("<div class='song-section'>[Refren]</div>","<br/>ref.<br/>");
+
+
+        var acontentMatch = Regex.Match(HtmlContent, 
+            @" < div class=""interpretation-content"">(.*?)</div>", 
             RegexOptions.Singleline);
-        
+
+        var contentMatch = Regex.Match(HtmlContent,
+            @"<div class=""interpretation-content"">(.+?)</div>(?:\s*</div>)*\s*(?:<div(?!\s+class=""interpretation-content"")|\z)",
+            RegexOptions.Singleline);
+
         if (!contentMatch.Success)
             return string.Empty;
 

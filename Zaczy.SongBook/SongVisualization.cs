@@ -177,17 +177,17 @@ public class SongVisualization
 
         string songMetadata = string.Empty;
 
-        if (song.LyricsAuthor != null && song.LyricsAuthor == song.MusicAuthor)
+        if (!string.IsNullOrEmpty(song.LyricsAuthor) && song.LyricsAuthor == song.MusicAuthor)
         {
             songMetadata += $"<div class=\"lyrics-author\">sł. i muz. {song.LyricsAuthor}</div>";
         }
         else
         {
-            if (song.LyricsAuthor != null)
+            if (!string.IsNullOrEmpty(song.LyricsAuthor))
             {
                 songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
             }
-            if (song.MusicAuthor != null)
+            if (!string.IsNullOrEmpty(song.MusicAuthor))
             {
                 songMetadata += $"<div class=\"music-author\">muz. {song.MusicAuthor}</div>";
             }
@@ -461,6 +461,7 @@ public class SongVisualization
                         lyrics += headerPrefix + $@"<span class=""lyrics-line annotated{cssClassApply}"">{lyricsLine}</span><br/>";
 
                         i++;
+                        previousBlockType = currentBlockType;
                         continue;
                     }
 

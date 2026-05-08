@@ -372,7 +372,7 @@ public class ChordsLibrary
                 break;
         }
 
-        if(chord==null && !string.IsNullOrEmpty(variation))
+        if(!string.IsNullOrEmpty(variation))
             chord = ChordByAscii(name, variation);
 
         if (chord != null)
