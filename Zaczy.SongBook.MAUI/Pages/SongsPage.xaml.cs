@@ -85,6 +85,24 @@ namespace Zaczy.SongBook.MAUI.Pages
                     System.Diagnostics.Debug.WriteLine($"SongUpdated handler error: {ex.Message}");
                 }
             });
+
+            _ = this.GetUserDataFromServer();
+        }
+
+        private async Task GetUserDataFromServer()
+        {
+
+            if (!string.IsNullOrEmpty(_userViewModel.UserEmail))
+            {
+                var userApi = new UserApi(_settings.ApiBaseUrl);
+                var user = await userApi.GetUserByEmailAsync(_userViewModel.UserEmail);
+                if(user != null)
+                {
+                    _userViewModel.IsAdmin = user.IsAdmin;
+                    _userViewModel.IsEditor = user.IsEditor;
+                    _userViewModel.DeezerArl = user.DeezerArl;
+                }
+            }
         }
 
         /// <summary>

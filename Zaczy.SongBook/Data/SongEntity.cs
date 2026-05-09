@@ -189,6 +189,11 @@ public partial class SongEntity : INotifyPropertyChanged
     [NotMapped]
     public bool HasEditPrivileges { get; set; } = true;
     
+    [MaxLength(10)]
+    [Column("scrolling_start_function")]
+    [JsonPropertyName("scrolling_start_function")]
+    public string? ScrollingStartFunction { get; set; }
+
     /// <summary>
     /// Inicjalizuje obiekt SongEntity na podstawie obiektu Song
     /// </summary>
@@ -208,6 +213,7 @@ public partial class SongEntity : INotifyPropertyChanged
         DeezerLink = song.DeezerLink;
         MoreInfo = song.MoreInfo;
         Source = song.Source;
+        ScrollingStartFunction = song.ScrollingStartFunction;
         //if (song?.ServerId != null)
         //    Id = song.ServerId.Value;
     }

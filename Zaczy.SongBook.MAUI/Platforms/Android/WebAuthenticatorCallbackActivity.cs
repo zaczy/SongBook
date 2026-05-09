@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace Zaczy.SongBook.MAUI;//.Platforms.Android;
 
-[Activity(NoHistory = true, LaunchMode = LaunchMode.SingleTop, Exported = true)]
+[Activity(NoHistory = true, LaunchMode = LaunchMode.SingleTask, Exported = true
+    //, TaskAffinity = ""
+    )]
 [IntentFilter(new[] { Intent.ActionView },
     Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
     DataScheme = "com.googleusercontent.apps.84331651713-fcrfbobjt30t1jt6rlu4vg7ee988sep2")] 
@@ -31,6 +33,7 @@ public class WebAuthenticatorCallbackActivity : Microsoft.Maui.Authentication.We
         System.Diagnostics.Debug.WriteLine($"WebAuthenticatorActivity: OnNewIntent - {intent?.Data}");
         System.Diagnostics.Debug.WriteLine($"WebAuthenticatorActivity: Intent Action = {intent?.Action}");
         System.Diagnostics.Debug.WriteLine($"WebAuthenticatorActivity: Intent DataString = {intent?.DataString}");
+        //SetIntent(intent);
         base.OnNewIntent(intent);
     }
 

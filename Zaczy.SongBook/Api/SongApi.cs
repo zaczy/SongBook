@@ -85,10 +85,15 @@ public class SongApi
     /// </summary>
     /// <param name="songRepository">Repozytorium do zapisu piosenek</param>
     /// <returns></returns>
-    public async Task GetFromApi(SongRepository songRepository)
+    public async Task<List<String>?> GetFromApi(SongRepository songRepository, bool checkForDiffsOnly=false)
     {
         var apiClient = new ApiClient(_baseUrl);
-        
+
+        List<string>? differenciesList = null;
+
+        if (checkForDiffsOnly)
+            differenciesList = new List<string>();
+
         // Pobierz wszystkie piosenki z API
         var response = await apiClient.GetAsync<List<SongEntity>>("/songs/all");
         
@@ -105,29 +110,22 @@ public class SongApi
 
                     if (existingSong != null)
                     {
-                        if(existingSong.HasSignigicantDifferences(song, new List<string> { "Id", "CreatedAt", "UpdatedAt" }))
+                        List<SongDiffSpecification>? diffs = checkForDiffsOnly ? new List<SongDiffSpecification>() : null;
+
+                        if(existingSong.HasSignigicantDifferences(song, new List<string> { "Id", "CreatedAt", "UpdatedAt" }, differenciesFound: diffs) )
                         {
-                            // Aktualizuj istniejącą piosenkę
-                            /*
-                            existingSong.Title = song.Title;
-                            existingSong.Artist = song.Artist;
-                            existingSong.Lyrics = song.Lyrics;
-                            existingSong.LyricsAuthor = song.LyricsAuthor;
-                            existingSong.MusicAuthor = song.MusicAuthor;
-                            existingSong.Capo = song.Capo;
-                            existingSong.Comments = song.Comments;
-                            existingSong.ChordsVariations = song.ChordsVariations;
-                            existingSong.ScrollingDelay = song.ScrollingDelay;
-                            existingSong.SongDuration = song.SongDuration;
-                            existingSong.SpotifyLink = song.SpotifyLink;
-                            existingSong.MoreInfo = song.MoreInfo;
-                            existingSong.Source = song.Source;
-                            existingSong.CategoryColor = song.CategoryColor;
-                            */
+                            if (!checkForDiffsOnly)
+                            {
+                                // Aktualizuj istniejącą piosenkę
+                                song.ShallowCopyTo(existingSong, new List<string> { "Id", "CreatedAt", "UpdatedAt" });
 
-                            song.ShallowCopyTo(existingSong, new List<string> { "Id", "CreatedAt", "UpdatedAt" });
-
-                            await songRepository.UpdateAsync(existingSong);
+                                await songRepository.UpdateAsync(existingSong);
+                            }
+                            else
+                            {
+                                string message = $"\"{existingSong.Title}\" różni się od wersji na serwerze (pola {string.Join(",", diffs?.Select(d=>d.FieldName)?.ToArray() ?? [] )})";
+                                differenciesList!.Add(message);
+                            }
                         }
                         else
                         {
@@ -153,5 +151,7 @@ public class SongApi
         {
             System.Diagnostics.Debug.WriteLine($"GetFromApi: API error: {response.ErrorMessage} {response.ErrorDetails}");
         }
+
+        return differenciesList;
     }
 }

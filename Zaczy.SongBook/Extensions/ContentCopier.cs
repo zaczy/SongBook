@@ -11,7 +11,7 @@ public static class ContentCopier
 {
 
 
-    public static bool HasSignigicantDifferences(this object obj, object other, List<string>? exceptionsList = null)
+    public static bool HasSignigicantDifferences(this object obj, object other, List<string>? exceptionsList = null, List<SongDiffSpecification>? differenciesFound=null)
     {
         if (obj == null || other == null)
             return false;
@@ -40,11 +40,27 @@ public static class ContentCopier
             var value2 = otherProp?.GetValue(other);
             if (!Equals(value1, value2))
             {
+                if(prop.PropertyType == typeof(string))
+                {
+                    string s1 = (value1 as string)?.Trim() ?? string.Empty;
+                    string s2 = (value2 as string)?.Trim() ?? string.Empty;
+                    if (s1.Equals(s2, StringComparison.Ordinal))
+                        continue; // ignore whitespace differences in strings
+                }
+
                 System.Diagnostics.Debug.WriteLine($"HasSignigicantDifferences: Property {prop.Name} differs: {value1} != {value2}");
-                return true;
+
+                if (differenciesFound != null)
+                    differenciesFound.Add(new SongDiffSpecification(prop.Name, value1?.ToString() ?? String.Empty, value2?.ToString() ?? String.Empty));
+                else
+                    return true;
             }
         }
-        return false;
+
+        if (differenciesFound != null)
+            return differenciesFound.Count > 0;
+        else
+            return false;
     }
 
     public static object? ShallowCopyTo(this object obj, object target, List<string>? exceptionsList=null)

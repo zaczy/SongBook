@@ -29,6 +29,7 @@ public class Song: INotifyPropertyChanged
         Source = entity.Source;
         ServerId = entity.Id;
         DeezerLink = entity.DeezerLink;
+        ScrollingStartFunction = entity.ScrollingStartFunction;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -260,6 +261,9 @@ public class Song: INotifyPropertyChanged
 
     [JsonPropertyName("source")]
     public string? Source { get; set; }
+
+    [JsonPropertyName("scrolling_start_function")]
+    public string? ScrollingStartFunction { get; internal set; }
 
     // Słownik mapujący numery progów na polskie nazwy
     private static readonly Dictionary<int, string> FretNames = new()

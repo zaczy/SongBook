@@ -12,13 +12,55 @@ public class SongPreviewJavascript
     {
 
         var autoScrollJs = @"
+<style>
+#diagnosticPanel {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #0f0;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9999;
+    min-width: 200px;
+    display: none;
+}
+#diagnosticPanel.active {
+    display: block;
+}
+#diagnosticPanel .label {
+    color: #888;
+}
+#diagnosticPanel .value {
+    color: #0f0;
+    font-weight: bold;
+}
+</style>
+
+<div id='diagnosticPanel'>
+    <div><span class='label'>Tempo:</span> <span class='value' id='diagSpeed'>0</span> px/s</div>
+    <div><span class='label'>Pozostało:</span> <span class='value' id='diagRemainingPx'>0</span> px</div>
+    <div><span class='label'>Pozostało:</span> <span class='value' id='diagRemainingPercent'>0</span>%</div>
+    <div><span class='label'>Pozostało linii:</span> <span class='value' id='diagRemainingLines'>0</span></div>
+    <div><span class='label'>Czas trwania:</span> <span class='value' id='diagDuration'>0</span>s</div>
+    <div><span class='label'>Szac. pozostały czas:</span> <span class='value' id='diagEstTime'>0</span>s</div>
+    <div><span class='label'>View port:</span> <span class='value' id='viewPort'>0</span></div>
+    <div><span class='label'>Doc height:</span> <span class='value' id='docHeight'>0</span></div>
+</div>
+
+
 <script>
+  var actualSpeed = 0;
+
 (function(){
   var rafId = null;
   var pos = 0;
   var speed = 50;
   var last = 0;
   var scrollDelay = 0;
+
 
   // keep pos updated on manual scroll
   window.addEventListener('scroll', function(){
@@ -60,10 +102,12 @@ public class SongPreviewJavascript
     window.scrollTo(0, pos);
   };
 
-  // startAutoScroll(pxPerSec, optionalStartY)
-  window.startAutoScroll = function(pxPerSec, startY, scrollDelay){
+  // startAutoScroll(pxPerSec, optionalStartY, scrollDelay, startMode)
+  // startMode: 'linear' | 'log' | 'quad' | 'cubic'  (default: 'log')
+  window.startAutoScroll = function(pxPerSec, startY, scrollDelay, startMode){
 
     delay = Number(scrollDelay) || 0;
+
     if(delay > 0 && startY ==0) {
       setTimeout(function(){
         window.startAutoScroll(pxPerSec, startY);
@@ -77,9 +121,10 @@ public class SongPreviewJavascript
 
     if(rafId) return;
     last = performance.now();
-    var scrollStartTime = performance.now(); // czas rozpoczęcia przewijania
+    var scrollStartTime = performance.now();
     var rampUpDuration = 60000; // 60 sekund w milisekundach
-    var minSpeedFactor = 0.5; // początkowa prędkość to 50%
+    var minSpeedFactor = 0.1;
+    var mode = startMode || 'quad';
 
     // ensure initial position applied
     window.scrollTo(0, pos);
@@ -88,18 +133,47 @@ public class SongPreviewJavascript
       var dt = (now - last)/1000;
       last = now;
       
-      // oblicz aktualny współczynnik prędkości w zależności od czasu
       var elapsed = now - scrollStartTime;
       var speedFactor;
       if (elapsed < rampUpDuration) {
-        // interpolacja liniowa od 0.5 do 1.0 w ciągu 60 sekund
-        speedFactor = minSpeedFactor + (1.0 - minSpeedFactor) * (elapsed / rampUpDuration);
+        var t = elapsed / rampUpDuration; // 0..1
+
+        var progress;
+        if (mode === 'linear') {
+          // jednostajny wzrost — powolny, przewidywalny
+          progress = t;
+        } else if (mode === 'log') {
+          // logarytmiczny — szybki rozruch, potem zwalnia
+          // ~80% prędkości po ~17% czasu (10s z 60s)
+          progress = Math.log(1 + t * (Math.E - 1));
+        } else if (mode === 'quad') {
+          // kwadratowy — powolny start, przyspiesza w środku
+          // lustrzane odbicie: t^2 daje wolny start
+          progress = t * t;
+        } else if (mode === 'cubic') {
+          // sześcienny — bardzo powolny start, gwałtowne przyspieszenie
+          progress = t * t * t;
+        } else {
+          progress = t; // fallback: linear
+        }
+
+        speedFactor = minSpeedFactor + (1.0 - minSpeedFactor) * progress;
       } else {
         speedFactor = 1.0;
       }
       
       pos += speed * speedFactor * dt;
+      actualSpeed = (speed * speedFactor).toFixed(2);
+
       window.scrollTo(0, pos);
+
+      var scrollInfo = JSON.parse(window.getRemainingScrollInfo());
+            
+      //if (scrollInfo && !scrollInfo.error && scrollInfo.remainingLines == 0) {
+      //  window.stopAutoScroll();
+      //  return;
+      //}
+
       if(window.innerHeight + pos >= document.body.scrollHeight - 1){
         window.stopAutoScroll();
         return;
@@ -311,6 +385,80 @@ public class SongPreviewJavascript
     }
   };
 })();
+
+// ---- DIAGNOSTIC SCROLL DIRECTION DETECTOR AND TOP LINE DETECTOR ----
+//(function() {
+    var diagPanel = document.getElementById('diagnosticPanel');
+    var diagSpeed = document.getElementById('diagSpeed');
+    var diagRemainingPx = document.getElementById('diagRemainingPx');
+    var diagRemainingPercent = document.getElementById('diagRemainingPercent');
+    var diagRemainingLines = document.getElementById('diagRemainingLines');
+    var diagDuration = document.getElementById('diagDuration');
+    var diagEstTime = document.getElementById('diagEstTime');
+    var viewPort = document.getElementById('viewPort');
+    var docHeight = document.getElementById('docHeight');
+    
+    var currentSpeed = 0;
+    var songDuration = 0;
+    var updateInterval = null;
+
+    // Funkcja do włączania/wyłączania panelu diagnostycznego
+    window.toggleDiagnostics = function(enabled) {
+        if (enabled) {
+            diagPanel.classList.add('active');
+            if (!updateInterval) {
+                updateInterval = setInterval(updateDiagnostics, 500);
+            }
+        } else {
+            diagPanel.classList.remove('active');
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+    };
+
+    // Funkcja do ustawiania parametrów diagnostycznych
+    window.setDiagnosticParams = function(speed, duration) {
+        currentSpeed = speed;
+        songDuration = duration;
+        diagSpeed.textContent = speed;
+        diagDuration.textContent = duration;
+    };
+
+    // Funkcja aktualizująca diagnostykę
+    function updateDiagnostics() {
+        try {
+            diagSpeed.textContent = actualSpeed;
+
+            var scrollInfo = JSON.parse(window.getRemainingScrollInfo());
+            
+            if (scrollInfo && !scrollInfo.error) {
+                diagRemainingPx.textContent = scrollInfo.remainingPx || 0;
+                diagRemainingPercent.textContent = scrollInfo.remainingPercent || 0;
+                diagRemainingLines.textContent = scrollInfo.remainingLines >= 0 ? scrollInfo.remainingLines : 'N/A';
+
+                docHeight.textContent = scrollInfo.docHeight || 'N/A';
+                viewPort.textContent = scrollInfo.viewport || 'N/A';
+
+                // Oblicz szacowany pozostały czas
+                if (currentSpeed > 0) {
+                    var estTime = Math.round(scrollInfo.remainingPx / currentSpeed);
+                    diagEstTime.textContent = estTime;
+                } else {
+                    diagEstTime.textContent = 'N/A';
+                }
+            }
+        } catch (e) {
+            console.error('Diagnostic update error:', e);
+        }
+    }
+
+    // Inicjalizuj diagnostykę
+    addToLog('Diagnostic panel initialized');
+//})();
+
+
 </script>
 ";
 

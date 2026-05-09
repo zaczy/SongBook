@@ -371,9 +371,22 @@ public class UserViewModel : INotifyPropertyChanged
                 _prefs.DeezerArl = value;
                 Save();
                 OnPropertyChanged(nameof(DeezerArl));
+                OnPropertyChanged(nameof(DeezerArlInfo));
             }
         }
     }
+
+    public string? DeezerArlInfo
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(DeezerArl))
+                return "Nie podano ARL - funkcje Deezer będą niedostępne.";
+            else
+                return $"ARL: {DeezerArl.Substring(0,10)}...";
+        }
+    }
+
 
     /// <summary>
     /// Czy włączyć funkcje związane z odtwarzaczem Deezer (wymaga podania ARL i zalogowania do Deezer)
@@ -519,6 +532,26 @@ public class UserViewModel : INotifyPropertyChanged
             return;
         }
 
+#if DEBUG
+        if (ShouldUseMockLogin())
+        {
+            UserEmail = "jaskiery@gmail.com";
+            var userApi = new UserApi(_settings.ApiBaseUrl);
+            var user = await userApi.GetUserByEmailAsync(UserEmail);
+
+            if (user != null)
+            {
+                UserToken = !string.IsNullOrEmpty(user.api_token) ? user.api_token : "FAKE_TOKEN";
+                IsAdmin = user.IsAdmin == true;
+                IsEditor = user.IsEditor == true;
+                DeezerArl = user.DeezerArl;
+                UserPicture = user.avatar;
+            }
+
+            return;
+        }
+#endif
+
         //var result = await _authService.AuthenticateAsync();
         var result = await WebAuthenticationBrowserClient.LoginWithGoogle(_settings);
 
@@ -541,6 +574,26 @@ public class UserViewModel : INotifyPropertyChanged
             UserPicture = result.Picture;
         }
     }
+
+    /// <summary>
+    /// Czy użyć trybu mockowego dla logowania (na emulatorze lub w debugowaniu) - 
+    /// pozwala na testowanie funkcji wymagających autoryzacji bez konieczności przechodzenia przez cały proces logowania Google.
+    /// </summary>
+    /// <returns></returns>
+#if DEBUG
+    private static bool ShouldUseMockLogin()
+    {
+        bool isEmulator = false;
+#if ANDROID
+        isEmulator = Android.OS.Build.Fingerprint?.StartsWith("generic", StringComparison.OrdinalIgnoreCase) == true
+                  || Android.OS.Build.Model?.Contains("Emulator", StringComparison.OrdinalIgnoreCase) == true
+                  || Android.OS.Build.Model?.Contains("Android SDK", StringComparison.OrdinalIgnoreCase) == true
+                  || Android.OS.Build.Hardware?.Contains("goldfish", StringComparison.OrdinalIgnoreCase) == true
+                  || Android.OS.Build.Hardware?.Contains("ranchu", StringComparison.OrdinalIgnoreCase) == true;
+#endif
+        return isEmulator;
+    }
+#endif
 
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -565,4 +618,6 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
+
+
 }

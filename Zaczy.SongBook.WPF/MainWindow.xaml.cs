@@ -54,6 +54,18 @@ namespace Zaczy.SongBook.WPF
             // Załaduj piosenki z DB (ViewModel)
             await ViewModel.LoadSongsAsync();
 
+            // Porównaj z serwerem i pokaż różnice
+            var differences = await CompareWithServer();
+            if (differences != null && differences.Count > 0)
+            {
+                var message = string.Join(Environment.NewLine, differences);
+                MessageBox.Show(
+                    message,
+                    $"Różnice względem serwera ({differences.Count})",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+
             // Inicjalizuj WebView2 jednorazowo
             await EnsureWebView2InitializedAsync();
 
@@ -366,5 +378,22 @@ namespace Zaczy.SongBook.WPF
                 await songApi.GetFromApi(songRepository);
             }
         }
+
+        private async Task<List<string>?> CompareWithServer()
+        {
+            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
+            {
+                SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
+
+                var factory = new SongBookDbContextFactory();
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+
+                var differencies = await songApi.GetFromApi(songRepository, true);
+                return differencies;
+            }
+
+            return null;
+        }
+
     }
 }
