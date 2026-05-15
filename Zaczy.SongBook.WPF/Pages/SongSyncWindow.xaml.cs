@@ -1,0 +1,148 @@
+﻿using MahApps.Metro.Controls;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using Zaczy.SongBook.Api;
+using Zaczy.SongBook.Data;
+
+namespace Zaczy.SongBook.WPF.Pages
+{
+    public partial class SongSyncWindow : MetroWindow
+    {
+        private List<SelectableSongComparisionResult> _items = new();
+        private ViewModel _viewModel;
+
+        public List<SongComparisionResults> SelectedResults =>
+            _items.Where(i => i.IsSelected)
+                  .Select(i => i.Inner)
+                  .ToList();
+
+        public SongSyncWindow(List<SongComparisionResults> songComparisionResults, ViewModel viewModel)
+        {
+            _viewModel = viewModel;
+
+            InitializeComponent();
+
+            _items = songComparisionResults
+                .Select(r => new SelectableSongComparisionResult(r))
+                .ToList();
+
+            foreach (var item in _items)
+                item.PropertyChanged += Item_PropertyChanged;
+
+            DataContext = _items;
+
+            CountLabel.Text = $"({_items.Count} pozycji)";
+            UpdateSelectedCount();
+        }
+
+        private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SelectableSongComparisionResult.IsSelected))
+                UpdateSelectedCount();
+        }
+
+        private void UpdateSelectedCount()
+        {
+            var count = _items.Count(i => i.IsSelected);
+            SelectedCountLabel.Text = count > 0 ? $"Zaznaczono: {count}" : string.Empty;
+            SyncSelectedButton.IsEnabled = count > 0;
+        }
+
+        /// <summary>
+        /// Zaznaczy wszystkie
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in _items)
+                item.IsSelected = true;
+        }
+
+        /// <summary>
+        /// Odznacz wszystkie
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DeselectAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in _items)
+                item.IsSelected = false;
+        }
+
+        /// <summary>
+        /// Synchronizuj zaznaczone elementy
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void SyncSelected_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+
+            string message = String.Empty;
+            foreach(var s in SelectedResults)
+            {
+                if (!string.IsNullOrEmpty(message))
+                    message += ", ";
+                message += $"\"{s.SongTitle} (id: API {s.ApiSong?.Id}, local {s.BaseSongEntity?.Id})\"";
+            }
+
+            MessageBox.Show(message);
+
+            if (!string.IsNullOrEmpty(_viewModel.AppSettings.Settings.ApiBaseUrl) && !string.IsNullOrEmpty(_viewModel.AppSettings.ConnectionStrings.SongBookDb))
+            {
+                SongApi songApi = new SongApi(_viewModel.AppSettings.Settings.ApiBaseUrl);
+
+                var factory = new SongBookDbContextFactory();
+                var songRepository = new SongRepository(factory.CreateDbContext(_viewModel.AppSettings.ConnectionStrings.SongBookDb));
+
+                await songApi.CreateOrUpdateSongsAsync(songRepository, SelectedResults);
+            }
+
+            Close();
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
+
+    /// <summary>
+    /// Wrapper dodający obsługę checkboxa do SongComparisionResults
+    /// </summary>
+    public class SelectableSongComparisionResult : INotifyPropertyChanged
+    {
+        private bool _isSelected;
+
+        public SongComparisionResults Inner { get; }
+
+        public string? SongTitle => Inner.SongTitle;
+        public string? DiffSummary => Inner.DiffSummary;
+        public string FieldsSummary => Inner.FieldsSummary;
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+                }
+            }
+        }
+
+        public SelectableSongComparisionResult(SongComparisionResults inner)
+        {
+            Inner = inner;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+    }
+}

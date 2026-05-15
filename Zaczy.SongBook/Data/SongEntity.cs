@@ -1,9 +1,11 @@
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Migrations;
 
 namespace Zaczy.SongBook.Data;
@@ -225,9 +227,17 @@ public partial class SongEntity : INotifyPropertyChanged
 
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<bool> HasUserEditPrivileges(string? email)
+    public async Task<bool> HasUserEditPrivileges(string? email, string baseUrl)
     {
-        return !string.IsNullOrEmpty(email) && true;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            UserApi userApi = new UserApi(baseUrl);
+            var user = await userApi.GetUserByEmailAsync(email);
+
+            return user?.IsAdmin == true || user?.IsEditor == true;
+        }
+
+        return false;
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

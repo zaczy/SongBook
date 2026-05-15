@@ -46,13 +46,17 @@ public class SongPreviewJavascript
     <div><span class='label'>Pozostało linii:</span> <span class='value' id='diagRemainingLines'>0</span></div>
     <div><span class='label'>Czas trwania:</span> <span class='value' id='diagDuration'>0</span>s</div>
     <div><span class='label'>Szac. pozostały czas:</span> <span class='value' id='diagEstTime'>0</span>s</div>
+    <div><span class='label'>Pozostały czas:</span> <span class='value' id='diagRemainingTime'>0</span>s</div>
     <div><span class='label'>View port:</span> <span class='value' id='viewPort'>0</span></div>
     <div><span class='label'>Doc height:</span> <span class='value' id='docHeight'>0</span></div>
+    <div><span class='label'>Stack:</span> <span class='value' id='stackCalls'></span></div>
 </div>
 
 
 <script>
   var actualSpeed = 0;
+  var stackCallsTxt = '';
+  var timeElapsed = 0;
 
 (function(){
   var rafId = null;
@@ -154,7 +158,7 @@ public class SongPreviewJavascript
           // sześcienny — bardzo powolny start, gwałtowne przyspieszenie
           progress = t * t * t;
         } else {
-          progress = t; // fallback: linear
+          progress = 1; // fallback: linear without slow start
         }
 
         speedFactor = minSpeedFactor + (1.0 - minSpeedFactor) * progress;
@@ -164,15 +168,17 @@ public class SongPreviewJavascript
       
       pos += speed * speedFactor * dt;
       actualSpeed = (speed * speedFactor).toFixed(2);
+      timeElapsed = performance.now() - scrollStartTime;
 
       window.scrollTo(0, pos);
 
       var scrollInfo = JSON.parse(window.getRemainingScrollInfo());
             
-      //if (scrollInfo && !scrollInfo.error && scrollInfo.remainingLines == 0) {
-      //  window.stopAutoScroll();
-      //  return;
-      //}
+      if (scrollInfo && !scrollInfo.error && scrollInfo.chordListHeight > 0 
+            && window.innerHeight + pos + scrollInfo.chordListHeight + 20 >= document.body.scrollHeight) {
+        window.stopAutoScroll();
+        return;
+      }
 
       if(window.innerHeight + pos >= document.body.scrollHeight - 1){
         window.stopAutoScroll();
@@ -336,9 +342,11 @@ public class SongPreviewJavascript
         document.body.clientHeight, document.documentElement.clientHeight
       );
 
-      var remainingPx = Math.max(0, docHeight - (scrollTop + viewport));
+      var effectiveDocHeight = docHeight;
+
+      var remainingPx = Math.max(0, effectiveDocHeight - (scrollTop + viewport));
       // percent of the total scrollable distance remaining (0..100)
-      var totalScrollable = Math.max(0, docHeight - viewport);
+      var totalScrollable = Math.max(0, effectiveDocHeight - viewport);
       var remainingPercent = totalScrollable > 0 ? Math.round(remainingPx / totalScrollable * 100) : 0;
 
       // remaining lines estimation for variable-font mode (.lyrics-line) or pre-mode
@@ -372,13 +380,22 @@ public class SongPreviewJavascript
         }
       }
 
+      // Wysokość sekcji z diagramami akordów (jest na końcu dokumentu)
+      var chordListHeight = 0;
+      var chordList = document.querySelector('.chord-list');
+      if (chordList) {
+        chordListHeight = chordList.offsetHeight || 0;
+      }
+
+
       return JSON.stringify({
         remainingPx: Math.round(remainingPx),
         remainingPercent: remainingPercent,
         remainingLines: remainingLines,
-        docHeight: Math.round(docHeight),
+        docHeight: Math.round(effectiveDocHeight),
         viewport: Math.round(viewport),
-        scrollTop: Math.round(scrollTop)
+        scrollTop: Math.round(scrollTop),
+        chordListHeight: Math.round(chordListHeight),
       });
     } catch (e) {
       return JSON.stringify({ error: (e && e.message) ? e.message : 'unknown' });
@@ -387,7 +404,7 @@ public class SongPreviewJavascript
 })();
 
 // ---- DIAGNOSTIC SCROLL DIRECTION DETECTOR AND TOP LINE DETECTOR ----
-//(function() {
+(function() {
     var diagPanel = document.getElementById('diagnosticPanel');
     var diagSpeed = document.getElementById('diagSpeed');
     var diagRemainingPx = document.getElementById('diagRemainingPx');
@@ -395,8 +412,10 @@ public class SongPreviewJavascript
     var diagRemainingLines = document.getElementById('diagRemainingLines');
     var diagDuration = document.getElementById('diagDuration');
     var diagEstTime = document.getElementById('diagEstTime');
+    var diagRemainingTime = document.getElementById('diagRemainingTime');
     var viewPort = document.getElementById('viewPort');
     var docHeight = document.getElementById('docHeight');
+    var stackCalls = document.getElementById('stackCalls');
     
     var currentSpeed = 0;
     var songDuration = 0;
@@ -430,6 +449,7 @@ public class SongPreviewJavascript
     function updateDiagnostics() {
         try {
             diagSpeed.textContent = actualSpeed;
+            stackCalls.textContent = stackCallsTxt;
 
             var scrollInfo = JSON.parse(window.getRemainingScrollInfo());
             
@@ -448,6 +468,8 @@ public class SongPreviewJavascript
                 } else {
                     diagEstTime.textContent = 'N/A';
                 }
+
+                diagRemainingTime.textContent = Math.round(songDuration - timeElapsed/1000);
             }
         } catch (e) {
             console.error('Diagnostic update error:', e);
@@ -456,7 +478,13 @@ public class SongPreviewJavascript
 
     // Inicjalizuj diagnostykę
     addToLog('Diagnostic panel initialized');
-//})();
+})();
+
+var registerDebugInfo = function(stackLine) {
+    if(stackCallsTxt != '')
+        stackCallsTxt += '\n';
+    stackCallsTxt += stackLine;
+};
 
 
 </script>

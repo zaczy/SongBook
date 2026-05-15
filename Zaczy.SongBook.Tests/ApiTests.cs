@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
+using Zaczy.SongBook.Models;
 
 namespace Zaczy.SongBook.Tests;
 
@@ -91,6 +92,109 @@ public class ApiTests
         Assert.That(user?.IsAdmin == true);
 
     }
+
+    [Test]
+    public async Task SingingGroups_CreateGroup_ReturnsGroup()
+    {
+        // Arrange
+        var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
+        // When
+        var group = await singingGroupApi.CreateGroupAsync(new SingingGroup
+        {
+            GroupName = "Test",
+            Description = "Grupa testowa do testowania API"
+        });
+
+        // Assert
+        Assert.That(group?.Id > 0);
+
+    }
+
+    [Test]
+    public async Task SingingGroups_GetList_ReturnsList()
+    {
+        // Arrange
+        var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
+        // When
+        var groups = await singingGroupApi.GetServerGroupsAsync();
+
+        if(groups != null)
+        {
+            foreach (var group in groups)
+            {
+                Console.WriteLine($"{group.Id} {group.GroupName}");
+            }
+        }   
+
+        // Assert
+        Assert.That(groups?.Count > 0);
+
+    }
+
+    [Test]
+    [TestCase(1, 1)]
+    [TestCase(2, 12)]
+    [TestCase(3, 5)]
+    public async Task SingingGroups_SetSong_ReturnsList(int groupId, int songId)
+    {
+        // Arrange
+        var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
+        // When
+        var group = await singingGroupApi.ChangeSongAsync(groupId, songId);
+
+        if (group != null)
+        {
+            Console.WriteLine($"{group.Id} {group.GroupName} - song: {group.CurrentSongId}");
+        }
+
+        // Assert
+        Assert.That(group?.Id > 0);
+
+    }
+
+    [Test]
+    [TestCase(1, "")]
+    [TestCase(2, "rafal.zak@zaczy.net")]
+    [TestCase(3, "zaczy.net@gmail.com")]
+    public async Task SingingGroups_SetLeader_ReturnsList(int groupId, string userEmail)
+    {
+        // Arrange
+        var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
+        // When
+        var group = await singingGroupApi.ChangeLeaderAsync(groupId, userEmail, Guid.NewGuid().ToString());
+
+        if (group != null)
+        {
+            Console.WriteLine($"{group.Id} {group.GroupName} - leader: {group.Leader}");
+        }
+
+        // Assert
+        Assert.That(group?.Id > 0);
+
+    }
+
+
+    [Test]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    public async Task SingingGroups_GetStatus_ReturnsStatus(int id)
+    {
+        // Arrange
+        var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
+        // When
+        var status = await singingGroupApi.GetServerGroupsStatusAsync(groupId: id);
+
+        if (status != null)
+        {
+            Console.WriteLine($"{status.Id} {status.GroupName} - leader {status.Leader} {status.LeaderGuid}, song: {status.CurrentSongId} {status.CurrentSong?.Title}");
+        }
+
+        // Assert
+        Assert.That(status?.Id >0);
+
+    }
+
 
 
 }

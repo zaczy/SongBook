@@ -55,18 +55,15 @@
                 VerticalOptions="Center"
                 Grid.Column="1"
                 x:DataType="pages:SongDetailsPage"
-
                 FontAttributes="Bold" 
                 Margin="{OnIdiom 0, Tablet='0,5,0,10'}"
                 FontSize="{OnIdiom Phone=20, Tablet=24, Desktop=24}"
                 TextColor="#962610" >
-
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference Root}, Path=UserViewModel.LyricsDarkMode}" Value="True">
                         <Setter Property="TextColor" Value="{StaticResource LyricsDarkChords}" />
                     </DataTrigger>
                 </Label.Triggers>
-
             </Label>
             <Label 
                 Grid.Row="0" 
@@ -77,7 +74,6 @@
                 TextColor="Gray" 
                 Padding="{OnIdiom '0,0,-3,0',Tablet='0,0,3,0'}"
                 />
-
             <Button 
                 Grid.Row="0"
                 Grid.Column="3"
@@ -105,6 +101,101 @@
              x:Name="LyricsWebView"
              />
 
+        <!-- Obszar dotyku prawej krawędzi — wywołuje pokazanie suwaka prędkości -->
+        <BoxView
+            x:Name="RightEdgeTouchArea"
+            Grid.Row="4"
+            WidthRequest="30"
+            HorizontalOptions="End"
+            VerticalOptions="Fill"
+            BackgroundColor="Transparent"
+            x:DataType="pages:SongDetailsPage">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnRightEdgeTapped" NumberOfTapsRequired="2" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Panel pionowego suwaka prędkości przewijania -->
+        <Border
+            x:Name="SpeedSliderPanel"
+            Grid.Row="4"
+            WidthRequest="56"
+            HorizontalOptions="End"
+            VerticalOptions="Fill"
+            BackgroundColor="#CC000000"
+            StrokeThickness="0"
+            IsVisible="False"
+            Opacity="0"
+            x:DataType="pages:SongDetailsPage"
+            Margin="0,0,-4,0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12,0,0,12" />
+            </Border.StrokeShape>
+            <Grid RowDefinitions="Auto,*,Auto" Padding="4,12,4,12">
+
+                <!-- Etykieta górna: max -->
+                <Label Grid.Row="0"
+                       Text="▲"
+                       FontSize="10"
+                       TextColor="#888"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,4"/>
+
+                <!-- Pionowy suwak (obrócony Slider) -->
+                <Slider
+                    x:Name="SpeedSlider"
+                    Grid.Row="1"
+                    Minimum="0.5"
+                    Maximum="3.0"
+                    Value="1.0"
+                    Rotation="270"
+                    WidthRequest="160"
+                    HeightRequest="44"
+                    MinimumTrackColor="{StaticResource Primary}"
+                    MaximumTrackColor="#555"
+                    ThumbColor="White"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    ValueChanged="OnSpeedSliderValueChanged"
+                    x:DataType="pages:SongDetailsPage"
+                    />
+
+                <!-- Etykieta wartości -->
+                <Label
+                    x:Name="SpeedSliderLabel"
+                    Grid.Row="2"
+                    Text="1.0×"
+                    FontSize="10"
+                    TextColor="White"
+                    HorizontalTextAlignment="Center"
+                    Margin="0,4,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Overlay z opisem suwaka — pojawia się i znika razem z suwakiem -->
+        <Border
+            x:Name="SpeedSliderTooltip"
+            Grid.Row="4"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            BackgroundColor="#CC000000"
+            StrokeThickness="0"
+            IsVisible="False"
+            Opacity="0"
+            Padding="10,6"
+            Margin="0,12,64,0"
+            x:DataType="pages:SongDetailsPage">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Label
+                Text="Dostosuj prędkość przewijania tekstu"
+                FontSize="11"
+                TextColor="White"
+                HorizontalTextAlignment="Center"
+                InputTransparent="True" />
+        </Border>
+
         <HorizontalStackLayout 
             x:Name="DeezerStatus"
             Grid.Column="0"
@@ -116,8 +207,7 @@
             WidthRequest="300"
             Padding="10,5,10,5"
             x:DataType="pages:SongDetailsPage"
-            IsVisible="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayerEnabled}"
-            >
+            IsVisible="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayerEnabled}">
             <Label 
                 Text="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerStatusInfo}"
                 FontSize="9"
@@ -125,22 +215,6 @@
                 Opacity="0.15"
                 />
         </HorizontalStackLayout>
-
-
-        <!--BoxView 
-            x:Name="DeezerTopTouchArea"
-            Grid.Column="0"
-            Grid.ColumnSpan="4"
-            Grid.Row="4" 
-            HeightRequest="60" 
-            WidthRequest="60" 
-            VerticalOptions="End"
-            HorizontalOptions="End"
-            >
-            <BoxView.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnBottomRightTouched" NumberOfTapsRequired="1" />
-            </BoxView.GestureRecognizers>
-        </BoxView-->
 
         <HorizontalStackLayout 
             x:Name="DeezerPlayer"
@@ -153,8 +227,7 @@
             HorizontalOptions="End"
             Padding="10,15,10,15"
             x:DataType="pages:SongDetailsPage"
-            IsVisible="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayerActive}"
-            >
+            IsVisible="{ Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayerActive}">
             <ImageButton
                 x:Name="DeezerPlayBtn"
                 MinimumWidthRequest="40"
@@ -162,32 +235,26 @@
                 Margin="0,0,0,00"
                 Opacity="0.1"
                 Clicked="OnPlayDeezerClicked"
-                mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayIcon}"
-                >
-
+                mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.DeezerPlayIcon}">
             </ImageButton>
         </HorizontalStackLayout>
 
+        <BoxView 
+            x:Name="TopTouchArea"
+            Grid.Row="0"
+            Grid.ColumnSpan="1"
+            Grid.RowSpan="3"
+            HeightRequest="{OnIdiom 45, Tablet=53}"
+            VerticalOptions="Start"
+            BackgroundColor="Transparent"
+            Opacity="0.6"
+            Margin="{OnIdiom '20,0,30,0', Tablet='40,0,30,0'}">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTopTouched" NumberOfTapsRequired="1" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
 
-        <!-- Transparent touch area above the WebView to detect taps at the top of the page.
-         Placed after WebView so it overlays it, and before ControlsPanel so controls remain top-most. -->
-    <BoxView 
-        x:Name="TopTouchArea"
-        Grid.Row="0"
-        Grid.ColumnSpan="1"
-        Grid.RowSpan="3"
-        HeightRequest="{OnIdiom 45, Tablet=53}"
-        VerticalOptions="Start"
-        BackgroundColor="Transparent"
-        Opacity="0.6"
-        Margin="{OnIdiom '20,0,30,0', Tablet='40,0,30,0'}"
-        >
-      <BoxView.GestureRecognizers>
-        <TapGestureRecognizer Tapped="OnTopTouched" NumberOfTapsRequired="1" />
-      </BoxView.GestureRecognizers>
-    </BoxView>
-
-    <HorizontalStackLayout x:Name="ControlsPanel"
+        <HorizontalStackLayout x:Name="ControlsPanel"
                            Grid.Row="0"
                            Grid.RowSpan="5"
                            Padding="12"
@@ -195,131 +262,103 @@
                            VerticalOptions="Start"
                            BackgroundColor="#80000000"
                            IsVisible="False"
-                           Margin="{OnPlatform  WinUI='-10', Default='-15,0,-15,0'}"
+                           Margin="{OnPlatform WinUI='-10', Default='-15,0,-15,0'}"
                            HeightRequest="{OnPlatform WinUI=70, Default=60}"
                            Opacity="0">
-        <!-- bind to the UserViewModel exposed on the page with x:Reference -->
-        <ImageButton
-            x:Name="ScrollToggle"
-            x:DataType="pages:SongDetailsPage"
-            Clicked="OnScrollTogglePanelClicked"
-            BackgroundColor="Transparent"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            VerticalOptions="Start"
-            mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.ToggleIcon}" />
-        
-        <ImageButton 
-            Source="{mi:Fluent FontIncrease24, IconSize=30, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            VerticalOptions="Start"
-            Clicked="OnIncreaseFontClicked" 
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            />
-        <ImageButton 
-            Source="{mi:Fluent FontDecrease24, IconSize={OnIdiom 25, Phone=18}, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            HeightRequest="{OnIdiom Default=25, Phone=18}"
-            WidthRequest="{OnIdiom Default=25, Phone=18}"
-            MinimumHeightRequest="{OnIdiom Default=25, Phone=18}"
-            MinimumWidthRequest="{OnIdiom Default=25, Phone=18}"
-            VerticalOptions="Start"
-            Clicked="OnDecreaseFontClicked" />
-        <ImageButton 
-            Source="{mi:Fluent ApprovalsApp20, IconSize=30, IconColor=#FFF}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            BackgroundColor="Transparent"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            Clicked="OnResetFontClicked" 
-            VerticalOptions="Start"
-            />
-        <ImageButton
-            Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FFF}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            BackgroundColor="Transparent"
-            IsVisible="Hidden"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            Clicked="OnPlayMusicClicked" 
-            >
-            <ImageButton.Triggers>
-                <DataTrigger 
-                    TargetType="ImageButton"
-                    Binding="{Binding HasSpotifyLink}"
-                    Value="True">
-                    <Setter Property="IsVisible" Value="Visible" />
-                </DataTrigger>
-            </ImageButton.Triggers>
-        </ImageButton>
-
-        <ImageButton
-            Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FF0000}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            BackgroundColor="Transparent"
-            IsVisible="Hidden"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            Clicked="OnPlayDeezerClicked" 
-            >
-                <ImageButton.Triggers>
+            <ImageButton
+                x:Name="ScrollToggle"
+                x:DataType="pages:SongDetailsPage"
+                Clicked="OnScrollTogglePanelClicked"
+                BackgroundColor="Transparent"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                VerticalOptions="Start"
+                mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.ToggleIcon}" />
+            <ImageButton 
+                Source="{mi:Fluent FontIncrease24, IconSize=30, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                VerticalOptions="Start"
+                Clicked="OnIncreaseFontClicked" 
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}" />
+            <ImageButton 
+                Source="{mi:Fluent FontDecrease24, IconSize={OnIdiom 25, Phone=18}, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                HeightRequest="{OnIdiom Default=25, Phone=18}"
+                WidthRequest="{OnIdiom Default=25, Phone=18}"
+                MinimumHeightRequest="{OnIdiom Default=25, Phone=18}"
+                MinimumWidthRequest="{OnIdiom Default=25, Phone=18}"
+                VerticalOptions="Start"
+                Clicked="OnDecreaseFontClicked" />
+            <ImageButton 
+                Source="{mi:Fluent ApprovalsApp20, IconSize=30, IconColor=#FFF}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                BackgroundColor="Transparent"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                Clicked="OnResetFontClicked" 
+                VerticalOptions="Start" />
+            <ImageButton
+                Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FFF}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                BackgroundColor="Transparent"
+                IsVisible="Hidden"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                Clicked="OnPlayMusicClicked">
+                <!--ImageButton.Triggers>
                     <DataTrigger 
                         TargetType="ImageButton"
-                        Binding="{Binding HasDeezerLink}"
+                        Binding="{Binding HasSpotifyLink}"
                         Value="True">
                         <Setter Property="IsVisible" Value="Visible" />
                     </DataTrigger>
-                </ImageButton.Triggers>
+                </ImageButton.Triggers-->
             </ImageButton>
-
             <ImageButton
-            Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            Clicked="OnSettingsClicked"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            />
-
-        <ImageButton
-            Source="{mi:Fluent Pen20, IconSize=30, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            Clicked="OnSongEditClicked"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            IsVisible="{Binding HasEditPrivileges}"
-            />
-
+                Source="{mi:Fluent MusicNote2Play20, IconSize=30, IconColor=#FF0000}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                BackgroundColor="Transparent"
+                IsVisible="Hidden"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                Clicked="OnPlayDeezerClicked" />
             <ImageButton
-            Source="{mi:Fluent ChevronUp20, IconSize=30, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            Clicked="OnToneUpClicked"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            />
-        
+                Source="{mi:FontAwesomeSolid Gear, IconSize=30, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                Clicked="OnSettingsClicked"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}" />
             <ImageButton
-            Source="{mi:Fluent ChevronDown20, IconSize=30, IconColor=#FFF}"
-            BackgroundColor="Transparent"
-            Clicked="OnToneDownClicked"
-            VerticalOptions="Start"
-            Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
-            MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
-            MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
-            />
-
-
+                Source="{mi:Fluent Pen20, IconSize=30, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                Clicked="OnSongEditClicked"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}"
+                IsVisible="{Binding HasEditPrivileges}" />
+            <ImageButton
+                Source="{mi:Fluent ChevronUp20, IconSize=30, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                Clicked="OnToneUpClicked"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}" />
+            <ImageButton
+                Source="{mi:Fluent ChevronDown20, IconSize=30, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                Clicked="OnToneDownClicked"
+                VerticalOptions="Start"
+                Margin="{OnIdiom Default='5,0,0,0', Tablet='20,0,0,0'}"
+                MinimumHeightRequest="{OnIdiom Default=32, Phone=22}"
+                MinimumWidthRequest="{OnIdiom Default=32, Phone=22}" />
         </HorizontalStackLayout>
 
     </Grid>
-
-   
 </ContentPage>

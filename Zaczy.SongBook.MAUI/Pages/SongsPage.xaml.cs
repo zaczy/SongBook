@@ -8,6 +8,7 @@ using System;
 using Zaczy.SongBook;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages
@@ -19,6 +20,7 @@ namespace Zaczy.SongBook.MAUI.Pages
         private readonly EventApi _eventApi;
         private readonly Settings _settings;
         private readonly IAudioManager _audioManager;
+        private readonly SongCustomSettingsRepositoryLite _customSettingsRepository;
 
         /// <summary>
         /// Konstruktor 
@@ -28,7 +30,13 @@ namespace Zaczy.SongBook.MAUI.Pages
         /// <param name="eventApi"></param>
         /// <param name="settings"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SongsPage(SongListViewModel vm, UserViewModel viewModel, EventApi eventApi, IOptions<Settings> settings, IAudioManager audioManager)
+        public SongsPage(
+            SongListViewModel vm, 
+            UserViewModel viewModel, 
+            EventApi eventApi, 
+            IOptions<Settings> settings, 
+            IAudioManager audioManager,
+            SongCustomSettingsRepositoryLite customSettingsRepository)
         {
             _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ArrowClockwise20, IconColor = Colors.Green };
             _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
@@ -41,6 +49,7 @@ namespace Zaczy.SongBook.MAUI.Pages
             _eventApi = eventApi;
             _settings = settings.Value;
             _audioManager = audioManager;
+            _customSettingsRepository = customSettingsRepository ?? throw new ArgumentNullException(nameof(customSettingsRepository));
 
             // register to receive updates
             WeakReferenceMessenger.Default.Register<SongsPage, ValueChangedMessage<SongEntity>>(this, (page, message) =>
@@ -125,14 +134,14 @@ namespace Zaczy.SongBook.MAUI.Pages
             if (sender is TapGestureRecognizer tg && tg.CommandParameter is SongEntity song)
             {
                 // push details page
-                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager));
+                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository));
             }
             else
             {
                 // fallback: get BindingContext from parent element (safer in some templates)
                 if (sender is Element el && el.BindingContext is SongEntity ctxSong)
                 {
-                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager));
+                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository));
                 }
             }
         }

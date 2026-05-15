@@ -81,18 +81,15 @@ public class SongApi
     }
 
     /// <summary>
-    /// Pobierz wszystkie piosenki z API i zapisz w lokalnej bazie danych
+    /// Pobierz wszystkie piosenki z API porównaj z intniejącą bazą danych
     /// </summary>
     /// <param name="songRepository">Repozytorium do zapisu piosenek</param>
     /// <returns></returns>
-    public async Task<List<String>?> GetFromApi(SongRepository songRepository, bool checkForDiffsOnly=false)
+    public async Task<List<SongComparisionResults>?> CompareWithApiAsync(SongRepository songRepository)
     {
-        var apiClient = new ApiClient(_baseUrl);
+        var apiClient = new ApiClient(_baseUrl, 15000);
 
-        List<string>? differenciesList = null;
-
-        if (checkForDiffsOnly)
-            differenciesList = new List<string>();
+        List<SongComparisionResults>? differenciesList = new List<SongComparisionResults>();
 
         // Pobierz wszystkie piosenki z API
         var response = await apiClient.GetAsync<List<SongEntity>>("/songs/all");
@@ -110,33 +107,18 @@ public class SongApi
 
                     if (existingSong != null)
                     {
-                        List<SongDiffSpecification>? diffs = checkForDiffsOnly ? new List<SongDiffSpecification>() : null;
+                        List<SongDiffSpecification>? diffs = new List<SongDiffSpecification>();
 
                         if(existingSong.HasSignigicantDifferences(song, new List<string> { "Id", "CreatedAt", "UpdatedAt" }, differenciesFound: diffs) )
                         {
-                            if (!checkForDiffsOnly)
-                            {
-                                // Aktualizuj istniejącą piosenkę
-                                song.ShallowCopyTo(existingSong, new List<string> { "Id", "CreatedAt", "UpdatedAt" });
-
-                                await songRepository.UpdateAsync(existingSong);
-                            }
-                            else
-                            {
-                                string message = $"\"{existingSong.Title}\" różni się od wersji na serwerze (pola {string.Join(",", diffs?.Select(d=>d.FieldName)?.ToArray() ?? [] )})";
-                                differenciesList!.Add(message);
-                            }
-                        }
-                        else
-                        {
-                         //   System.Diagnostics.Debug.WriteLine($"GetFromApi: Song ID {song.Id} {song.Title}- no significant differences found");
+                            string message = $"\"{existingSong.Title}\" różni się od wersji na serwerze (pola {string.Join(",", diffs?.Select(d=>d.FieldName)?.ToArray() ?? [] )})";
+                            differenciesList!.Add(new SongComparisionResults() { DiffSummary = message, SongTitle = existingSong.Title, DiffSpecification = diffs, BaseSongEntity = existingSong, ApiSong = song});
                         }
                     }
                     else
                     {
-                        // Dodaj nową piosenkę
-                        var songModel = new Song(song);
-                        await songRepository.AddAsync(songModel);
+                        string message = $"\"{song.Title}\" - nowa piosenka)";
+                        differenciesList!.Add(new SongComparisionResults() { DiffSummary = message, SongTitle = existingSong?.Title ?? String.Empty, DiffSpecification = null, ApiSong = song });
                     }
                 }
                 catch (Exception ex)
@@ -153,5 +135,43 @@ public class SongApi
         }
 
         return differenciesList;
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="songRepository"></param>
+    /// <param name="songComparisionResults"></param>
+    /// <returns></returns>
+    public async Task CreateOrUpdateSongsAsync(SongRepository songRepository, List<SongComparisionResults>? songComparisionResults)
+    {
+        if(songComparisionResults != null)
+        {
+            foreach(var comparisionResult in songComparisionResults)
+            {
+                var song = comparisionResult.ApiSong;
+                var existingSong = comparisionResult.BaseSongEntity;
+
+                if (song == null)
+                    continue;
+
+                if (existingSong != null)
+                {
+                    // Aktualizuj istniejącą piosenkę
+                    song.ShallowCopyTo(existingSong, new List<string> { "Id", "CreatedAt", "UpdatedAt" });
+
+                    await songRepository.UpdateAsync(existingSong);
+                }
+                else
+                {
+                    // Dodaj nową piosenkę
+                    var songModel = new Song(song);
+                    await songRepository.AddAsync(songModel);
+
+                }
+
+            }
+        }
     }
 }

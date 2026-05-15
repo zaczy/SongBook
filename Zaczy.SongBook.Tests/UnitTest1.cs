@@ -163,7 +163,7 @@ namespace Zaczy.SongBook.Tests
             svg = chord?.ToSvgHorizontal() ?? String.Empty;
             File.WriteAllText(@$"C:\Tmp\{chord?.Name}_poziom.svg", svg);
 
-            Console.WriteLine(chord.ToString());
+            Console.WriteLine(chord!.ToString());
 
             Console.WriteLine(svg);
             Assert.That(!string.IsNullOrEmpty(svg));
@@ -174,13 +174,12 @@ namespace Zaczy.SongBook.Tests
         {
             var chord = ChordsLibrary.ChordByAscii("C5", "8axxxx");
 
-            string svg = chord.ToSvg();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
+            string svg = chord?.ToSvg() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
 
-            svg = chord.ToSvgHorizontal();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}_poziom.svg", svg);
-
-            Console.WriteLine(chord.ToString());
+            svg = chord?.ToSvgHorizontal() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}_poziom.svg", svg);
+            Console.WriteLine(chord?.ToString());
 
             Console.WriteLine(svg);
             Assert.That(!string.IsNullOrEmpty(svg));

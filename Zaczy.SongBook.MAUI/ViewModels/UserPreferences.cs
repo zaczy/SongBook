@@ -26,8 +26,9 @@ public class UserPreferences
     public bool IsAdmin { get; set; }
     public bool IsEditor { get; set; }
     public bool DeezerPlayerEnabled { get; set; }
-    public string? DeezerArl { get; set; } = "a15129c93bb2459ae6618cab267d52f11e7cf696abe76f4d91f633f8380141fa1ba9b1168284085ea5944266f4bd1a48249a1ecc5b6e947feb46987a6ef008b65090286bfef913d30ee852004513faf8dd98d73aea43c24b0cfe3b3191d253a4";
+    public string? DeezerArl { get; set; } = "864acf7079aa1364f72ab423edf6a7fc5050d6a56de9ef24b0b5a982c9bbd967a8c02478e1464713f2d985f9cee7bcc69df25e8ee3078f54037f03acc9fbdc335ae587338b97d01d704896713ae9d15884e082c3041ade62c65055e9ebb4ad84";
 
     public bool ShowDiagnostics { get; set; } = false;
-
+    public bool ScrollingStartCompensate { get; set; }
+    public string? AppGuid { get; set; }
 }

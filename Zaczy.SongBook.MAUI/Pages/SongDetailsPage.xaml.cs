@@ -19,6 +19,7 @@ using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Extensions;
 using Zaczy.SongBook.MAUI.Data;
+using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.Deezer;
 using Zaczy.SongBook.MAUI.Extensions;
 using Zaczy.SongBook.MAUI.ViewModels;
@@ -60,6 +61,12 @@ public partial class SongDetailsPage : ContentPage
         get => _deezerSummary;
     }
 
+    private readonly SongCustomSettingsRepositoryLite _customSettingsRepository;
+
+    private SongCustomSettingsEntity? _songCustomSettings;
+    private bool _suppressSliderSave;
+    private Timer? _hideSpeedSliderTimer;
+
     /// <summary>
     /// Konstruktor
     /// </summary>
@@ -76,17 +83,20 @@ public partial class SongDetailsPage : ContentPage
         EventApi eventApi, 
         SongRepositoryLite songRepository, 
         Settings settings,
-        IAudioManager audioManager)
+        IAudioManager audioManager,
+        SongCustomSettingsRepositoryLite customSettingsRepository
+        )
     {
         _userViewModel = userViewModel;
         _songEntity = songEntity ?? new SongEntity();
         _eventApi = eventApi;
         _songRepository = songRepository ?? throw new ArgumentNullException(nameof(songRepository));
         _settings = settings;
-        _audioManager = audioManager; // Przypisz
+        _audioManager = audioManager; 
+        _customSettingsRepository = customSettingsRepository;
 
         _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin || 
-            _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail).Result || true;
+            _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail, _settings.ApiBaseUrl).Result;
 
         _visualizationCssOptions = new VisualizationCssOptions();
         _visualization = this.CreateVisualizationOptions();
@@ -169,6 +179,18 @@ public partial class SongDetailsPage : ContentPage
         try
         {
             await EnsureFontsAvailableAsync();
+
+            // Załaduj lokalne ustawienia piosenki i ustaw wartość suwaka
+            _songCustomSettings = await _customSettingsRepository.GetOrCreateAsync(_songEntity.Id);
+            _suppressSliderSave = true;
+            SpeedSlider.Value = (double)(_songCustomSettings.ScrollingSpeedFactor ?? 1.0f);
+            SpeedSliderLabel.Text = $"{SpeedSlider.Value:F1}×";
+            _suppressSliderSave = false;
+
+            // Timer auto-ukrywania suwaka (4 sekundy)
+            _hideSpeedSliderTimer = new Timer(4000) { AutoReset = false };
+            _hideSpeedSliderTimer.Elapsed += (s, e) =>
+                MainThread.BeginInvokeOnMainThread(async () => await HideSpeedSliderAsync());
 
             UserViewModel.DeezerPlayerActive = false;
             if (_userViewModel.DeezerPlayerEnabled)
@@ -580,7 +602,8 @@ public partial class SongDetailsPage : ContentPage
                         // całka funkcji kwadratowej po [0,1]: min + (1-min)/3
                         double rampIntegral = minSpeedFactor + (1.0 - minSpeedFactor) / 3.0; // ≈ 0.4667
 
-                        switch(_songEntity?.ScrollingStartFunction ?? "quad")
+                        //_songEntity!.ScrollingStartFunction = "const";
+                        switch (_songEntity?.ScrollingStartFunction ?? "quad")
                         {
                             case "linear":
                                 rampIntegral = minSpeedFactor + (1.0 - minSpeedFactor) / 2.0; // całka funkcji liniowej po [0,1]: min + (1-min)/2
@@ -595,6 +618,10 @@ public partial class SongDetailsPage : ContentPage
                                 // całka funkcji logarytmicznej po [0,1] nie ma prostego wzoru, przyjmijmy empirycznie 0.3
                                 rampIntegral = 0.71;
                                 break;
+                            case "const":
+                                // całka funkcji stałej po [0,1] jest po prostu wartość stała
+                                rampIntegral = 1.0;
+                                break;
                         }
 
                         // efektywna korekta czasu: ile sekund "traci" rozruch względem stałej prędkości
@@ -602,13 +629,22 @@ public partial class SongDetailsPage : ContentPage
 
                         // mianownik: czas efektywny (nigdy nie < 1s)
                         double effectiveDuration = Math.Max(1.0, songDuration - rampCorrection);
-                        effectiveDuration = songDuration;
+                        
+                        if(!_userViewModel.ScrollingStartCompensate)
+                            effectiveDuration = songDuration;
 
                         _currentSongScrollSpeed = double.Round(remainingLyricsInfo.RemainingPx / effectiveDuration, 2);
 
-                        //_currentSongScrollSpeed = double.Round(remainingLyricsInfo.RemainingPx / songDuration,2);
                         if (_currentSongScrollSpeed == 0)
                             _currentSongScrollSpeed = 1;
+
+                        _songCustomSettings = await _customSettingsRepository.GetBySongIdAsync(_songEntity!.Id);
+
+                        if (_songCustomSettings?.ScrollingSpeedFactor != null)
+                        {
+                            _currentSongScrollSpeed *= (double)_songCustomSettings.ScrollingSpeedFactor;
+                        }
+
                     }
                 }
                 else
@@ -623,21 +659,30 @@ public partial class SongDetailsPage : ContentPage
                     }
                 }
 
-                await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed}, {pos}, {_songEntity!.ScrollingDelay ?? 0}, '{_songEntity.ScrollingStartFunction ?? "quad"}');");
+                string js = $"startAutoScroll({_currentSongScrollSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)}, {pos}, {_songEntity!.ScrollingDelay ?? 0}, '{_songEntity.ScrollingStartFunction ?? "quad"}');";
+                await LyricsWebView.EvaluateJavaScriptAsync(js);
+
+                //js = $"registerDebugInfo('{js.Replace("'", "\\'")}');";
+                //await LyricsWebView.EvaluateJavaScriptAsync(js);
+
             }
             else
             {
                 _currentSongScrollSpeed = remainingLyricsInfo != null ? (int)(remainingLyricsInfo.RemainingPx / songDuration) : 30;
-                await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed}, 0, {_songEntity!.ScrollingDelay ?? 0}, '{_songEntity.ScrollingStartFunction ?? "quad"}');");
+                await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)}, 0, {_songEntity!.ScrollingDelay ?? 0}, '{_songEntity.ScrollingStartFunction ?? "quad"}');");
             }
             
             
             _userViewModel.ScrollingInProgress = true;
 
-            if (_userViewModel.ShowDiagnostics)
+            if (_userViewModel.ShowDiagnostics && _userViewModel.IsAdmin)
             {
                 await LyricsWebView.EvaluateJavaScriptAsync($"toggleDiagnostics(true);");
-                await LyricsWebView.EvaluateJavaScriptAsync($"setDiagnosticParams({_currentSongScrollSpeed}, {songDuration});");
+                string js = $"setDiagnosticParams({_currentSongScrollSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)}, {songDuration});";
+                await LyricsWebView.EvaluateJavaScriptAsync(js);
+
+                //js = $"registerDebugInfo('{js.Replace("'", "\\'")}');";
+                //await LyricsWebView.EvaluateJavaScriptAsync(js);
             }
         }
         catch (Exception) { /* handle or log if needed */ }
@@ -975,6 +1020,8 @@ public partial class SongDetailsPage : ContentPage
         public int Viewport { get; set; }
         public int ScrollTop { get; set; }
         public string? Error { get; set; }
+
+        public int chordListHeight { get; set; }
     }
 
     private class TopLineResult
@@ -1128,4 +1175,72 @@ public partial class SongDetailsPage : ContentPage
         _ = RegenerateHtmlAsync(song);
 
     }
+
+    // ── Suwak prędkości przewijania ────────────────────────────────────────
+    /// <summary>
+    /// Dotknięcie prawej krawędzi ekranu — pokaż/ukryj suwak prędkości.
+    /// </summary>
+    private async void OnRightEdgeTapped(object sender, TappedEventArgs e)
+    {
+        if (SpeedSliderPanel.IsVisible)
+            await HideSpeedSliderAsync();
+        else
+            await ShowSpeedSliderAsync();
+    }
+
+    private async Task ShowSpeedSliderAsync()
+    {
+        SpeedSliderPanel.IsVisible = true;
+        SpeedSliderPanel.Opacity = 0;
+        SpeedSliderTooltip.IsVisible = true;
+        SpeedSliderTooltip.Opacity = 0;
+
+        await Task.WhenAll(
+            SpeedSliderPanel.FadeTo(1, 200),
+            SpeedSliderTooltip.FadeTo(1, 200));
+
+        _hideSpeedSliderTimer?.Stop();
+        _hideSpeedSliderTimer?.Start();
+    }
+
+    private async Task HideSpeedSliderAsync()
+    {
+        await Task.WhenAll(
+                   SpeedSliderPanel.FadeTo(0, 200),
+                   SpeedSliderTooltip.FadeTo(0, 200));
+
+        SpeedSliderPanel.IsVisible = false;
+        SpeedSliderTooltip.IsVisible = false;
+        _hideSpeedSliderTimer?.Stop();
+    }
+
+    /// <summary>
+    /// Zmiana wartości suwaka — aktualizuj etykietę i zapisz do repozytorium.
+    /// </summary>
+    private async void OnSpeedSliderValueChanged(object sender, ValueChangedEventArgs e)
+    {
+        // Zaokrąglij do 0.05
+        var rounded = Math.Round(e.NewValue / 0.05) * 0.05;
+        SpeedSliderLabel.Text = $"{rounded:F1}×";
+
+        // Zresetuj timer ukrywania — użytkownik nadal korzysta z suwaka
+        _hideSpeedSliderTimer?.Stop();
+        _hideSpeedSliderTimer?.Start();
+
+        if (_suppressSliderSave)
+            return;
+
+        try
+        {
+            _songCustomSettings ??= await _customSettingsRepository.GetOrCreateAsync(_songEntity.Id);
+            _songCustomSettings.ScrollingSpeedFactor = (float)rounded;
+            await _customSettingsRepository.UpsertAsync(_songCustomSettings);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SpeedSlider save error: {ex.Message}");
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
 }

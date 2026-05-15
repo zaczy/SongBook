@@ -33,6 +33,11 @@ public class UserViewModel : INotifyPropertyChanged
         Load();
 
         AuthenticateCommand = new Command(async () => await AuthenticateAsync());
+
+        if(string.IsNullOrEmpty(this.AppGuid))
+            {
+            this.AppGuid = Guid.NewGuid().ToString();
+            }
     }
 
     /// <summary>
@@ -619,5 +624,38 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Czy kompensować zwolniony start przewijania (przyspieszyć na początku, żeby szybciej osiągnąć docelową prędkość)
+    /// </summary>
+    public bool ScrollingStartCompensate
+    {
+        get => _prefs?.ScrollingStartCompensate ?? false;
+        set
+        {
+            if (_prefs != null && _prefs.ScrollingStartCompensate != value)
+            {
+                _prefs.ScrollingStartCompensate = value;
+                Save();
+                OnPropertyChanged(nameof(ScrollingStartCompensate));
+            }
+        }
+    }
 
+    /// <summary>
+    /// Unikalny identyfikator aplikacji (generowany przy pierwszym uruchomieniu)
+    /// </summary>
+    public string AppGuid
+    {
+        get => _prefs?.AppGuid ?? string.Empty;
+
+        set
+        {
+            if (_prefs != null && _prefs.AppGuid != value)
+            {
+                _prefs.AppGuid = value;
+                Save();
+                OnPropertyChanged(nameof(AppGuid));
+            }
+        }
+    }
 }

@@ -10,6 +10,7 @@ using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Chords;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Enums;
+using Zaczy.SongBook.WPF.Pages;
 
 namespace Zaczy.SongBook.WPF
 {
@@ -58,12 +59,8 @@ namespace Zaczy.SongBook.WPF
             var differences = await CompareWithServer();
             if (differences != null && differences.Count > 0)
             {
-                var message = string.Join(Environment.NewLine, differences);
-                MessageBox.Show(
-                    message,
-                    $"Różnice względem serwera ({differences.Count})",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                SongSyncWindow songSyncWindow = new SongSyncWindow(differences, ViewModel);
+                songSyncWindow.ShowDialog();
             }
 
             // Inicjalizuj WebView2 jednorazowo
@@ -375,11 +372,12 @@ namespace Zaczy.SongBook.WPF
                 var factory = new SongBookDbContextFactory();
                 var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
 
-                await songApi.GetFromApi(songRepository);
+                var differentSongs = await songApi.CompareWithApiAsync(songRepository);
+                await songApi.CreateOrUpdateSongsAsync(songRepository, differentSongs);
             }
         }
 
-        private async Task<List<string>?> CompareWithServer()
+        private async Task<List<SongComparisionResults>?> CompareWithServer()
         {
             if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
             {
@@ -388,7 +386,7 @@ namespace Zaczy.SongBook.WPF
                 var factory = new SongBookDbContextFactory();
                 var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
 
-                var differencies = await songApi.GetFromApi(songRepository, true);
+                var differencies = await songApi.CompareWithApiAsync(songRepository);
                 return differencies;
             }
 

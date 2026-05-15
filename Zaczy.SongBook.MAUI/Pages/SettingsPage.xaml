@@ -400,6 +400,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Switch 
@@ -430,6 +431,24 @@
                     MaxLines="5"
                     />
 
+                <Switch 
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    IsToggled="{Binding ScrollingStartCompensate, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label 
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Text="Kompensacja wolnego początku przewijania"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5">
+                </Label>
+
+
             </Grid>
 
             <Label
@@ -449,11 +468,17 @@
             <Grid 
                 Grid.Row="12"
                 Grid.Column="1"
-                VerticalOptions="Center">
+                VerticalOptions="Center"
+                IsVisible="{Binding IsAdmin}"
+                >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
                 <Switch 
                     Grid.Column="0"
@@ -469,6 +494,7 @@
                     FontSize="10"
                     MaxLines="5">
                 </Label>
+                
             </Grid>
 
             <StackLayout 

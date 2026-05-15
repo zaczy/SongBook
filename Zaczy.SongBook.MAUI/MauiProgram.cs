@@ -13,6 +13,7 @@ using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Maui.Data;
 using Zaczy.SongBook.MAUI.Data;
+using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.Pages;
 using Zaczy.SongBook.MAUI.Spotify;
 using Zaczy.SongBook.MAUI.ViewModels;
@@ -111,6 +112,7 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddSingleton<SongRepositoryLite>();
             builder.Services.AddSingleton<SongCategoryRepositoryLite>();
             builder.Services.AddSingleton<EventApi>();
+            builder.Services.AddSingleton<SongCustomSettingsRepositoryLite>();
 
             // Register ViewModels and Pages in DI
             builder.Services.AddTransient<SongListViewModel>();
