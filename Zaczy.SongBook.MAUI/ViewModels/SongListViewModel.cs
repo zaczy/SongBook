@@ -1,3 +1,7 @@
+using MauiIcons.Core;
+using MauiIcons.Core.Base;
+using MauiIcons.Fluent;
+using MauiIcons.Fluent.Filled;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 using System;
@@ -7,20 +11,41 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Zaczy.SongBook;
+using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.MAUI.Data;
-using Zaczy.SongBook.Api;
-using Zaczy.SongBook;
 using Zaczy.SongBook.MAUI.Pages;
+using Zaczy.SongBook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
 
 public class SongListViewModel : INotifyPropertyChanged
 {
+    public ICommand LoadCommand { get; }
+    public ICommand FilterCommand { get; }
+    public ICommand ClearCommand { get; }
+    public ICommand FetchCommand { get; }
+    public ICommand PageCommand { get; }
+    public ICommand CategoriesCommand { get; }
+    public ICommand SettingsPageCommand { get; }
 
-    public SongListViewModel(SongRepositoryLite repo, IOptions<Settings> options)
+    private readonly UserViewModel _userViewModel;
+
+    public UserViewModel UserViewModel
+    {
+        get => _userViewModel;
+    }
+
+    public SongListViewModel(
+        SongRepositoryLite repo, 
+        IOptions<Settings> options, 
+        UserViewModel userViewModel
+        )
     {
         _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+        _userViewModel = userViewModel;
+        
         _apiBaseUrl = options.Value.ApiBaseUrl;
         LoadCommand = new Command(async () => await LoadSongsAsync());
         FilterCommand = new Command(async () => await LoadSongsAsync());
@@ -35,6 +60,8 @@ public class SongListViewModel : INotifyPropertyChanged
 
         // Command to import from API and refresh local DB/UI
         FetchCommand = new Command(async () => await FetchFromApiAndLoadAsync());
+
+        SettingsPageCommand = new Command(async () => await LoadSettingsPage());
     }
 
     private readonly SongRepositoryLite _repo;
@@ -95,13 +122,6 @@ public class SongListViewModel : INotifyPropertyChanged
         }
     }
 
-    public ICommand LoadCommand { get; }
-    public ICommand FilterCommand { get; }
-    public ICommand ClearCommand { get; }
-    public ICommand FetchCommand { get; }
-    public ICommand PageCommand { get; }
-    public ICommand CategoriesCommand { get; }
-
     /// <summary>
     /// Pobierz listê utworów z bazy lokalnej (z uwzglêdnieniem filtrów)
     /// </summary>
@@ -127,6 +147,8 @@ public class SongListViewModel : INotifyPropertyChanged
             {
                 query = query.Where(s => (!string.IsNullOrEmpty(s.Title) && s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
                                         || (!string.IsNullOrEmpty(s.Artist) && s.Artist.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                        || (!string.IsNullOrEmpty(s.LyricsAuthor) && s.LyricsAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                        || (!string.IsNullOrEmpty(s.MusicAuthor) && s.MusicAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
                                         );
             }
 
@@ -308,5 +330,105 @@ public class SongListViewModel : INotifyPropertyChanged
     public bool IsEmptySongs => Songs == null || Songs.Count == 0;
     public bool HasSongs => Songs != null && Songs.Count > 0;
 
+    
+    private bool _isGroupListener;
+    public bool IsGroupListener
+    {
+        get => _isGroupListener;
+        set
+        {
+            if(_isGroupListener != value)
+            {
+                _isGroupListener = value;
+                OnPropertyChanged(nameof(IsGroupListener));
+                OnPropertyChanged(nameof(ListeningGroupIcon));
+            }
+        }
+    }
+    private bool _isGroupLeader;
+    public bool IsGroupLeader
+    {
+        get => _isGroupLeader;
+        set
+        {
+            if (_isGroupLeader != value)
+            {
+                _isGroupLeader = value;
+                OnPropertyChanged(nameof(IsGroupLeader));
+                OnPropertyChanged(nameof(ListeningGroupIcon));
+            }
+        }
+    }
+    public BaseIcon ListeningGroupIcon
+    {
+        get
+        {
+            bool isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
+            if (IsGroupLeader)
+                //return new BaseIcon
+                //{
+                //    Icon = FluentFilledIcons.PersonVoice20Filled,
+                //    IconSize = 28,
+                //    IconColor = Colors.Gold
+                //};
+                return new BaseIcon() 
+                { 
+                    Icon = MauiIcons.Fluent.Filled.FluentFilledIcons.CommunicationPerson20Filled,
+                    IconColor = isDark ? Color.FromArgb("b66650") : Color.FromArgb("FFD700")
+                };
+            else if (IsGroupListener)
+                return new BaseIcon()
+                {
+                    Icon = MauiIcons.Fluent.Filled.FluentFilledIcons.PersonVoice20Filled,
+                    IconColor = isDark ? Color.FromArgb("b66650") : Color.FromArgb("FFD700")
+                };
+            else
+                return new BaseIcon
+                {
+                    Icon = FluentIcons.PersonVoice20,
+                    IconSize = 28,
+                    IconColor = Colors.Gray
+                };
+        }
+    }
+
+    /// <summary>
+    /// Otwórz inn¹ stronê aplikacji
+    /// </summary>
+    /// <param name="targetPage"></param>
+    /// <returns></returns>
+    public async Task LoadOtherPage(Page targetPage)
+    {
+        try
+        {
+            await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var currentPage = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                var navigation = currentPage?.Navigation ?? Shell.Current?.Navigation;
+
+                if (navigation != null)
+                {
+                    await navigation.PushAsync(targetPage);
+                    return;
+                }
+
+#pragma warning disable CS0618
+                var fallbackPage = Application.Current?.MainPage;
+                if (fallbackPage?.Navigation != null)
+                    await fallbackPage.Navigation.PushAsync(targetPage);
+#pragma warning restore CS0618
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Opening page error: {ex.Message}");
+        }
+    }
+
+    private async Task LoadSettingsPage()
+    {
+        if(_userViewModel != null)
+            await this.LoadOtherPage(new SettingsPage(_userViewModel));
+    }
 }

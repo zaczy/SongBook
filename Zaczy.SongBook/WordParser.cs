@@ -112,7 +112,7 @@ public class WordParser
         int maxLength = 0;
         foreach (var line in lines)
         {
-            var start = Chord.ChordPartStart(line.Replace("\t"," "));
+            var start = ChordService.ChordPartStart(line.Replace("\t"," "));
             if(start > 2)
                 maxLength = Math.Max(maxLength, start);
         }
@@ -132,7 +132,7 @@ public class WordParser
                     startsWithZwrotkaInfo = (i == 0);
                 }
 
-                var start = Chord.ChordPartStart(line);
+                var start = ChordService.ChordPartStart(line);
                 if (start > 2)
                 {
                     var textPart = line.Substring(0, start);

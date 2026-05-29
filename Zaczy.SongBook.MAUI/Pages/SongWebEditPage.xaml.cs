@@ -8,7 +8,7 @@ using Zaczy.SongBook.MAUI;
 using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.ViewModels;
 
-namespace Zaczy.Songbook.MAUI.Pages;
+namespace Zaczy.SongBook.MAUI.Pages;
 
 public partial class SongWebEditPage : ContentPage
 {

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Zaczy.SongBook.Extensions;
 
 namespace Zaczy.SongBook.Chords;
 
-public class Chord
+public class ChordService
 {
     public string? Name { get; set; }
     public string Fingering { get; set; } = string.Empty;
@@ -167,7 +163,7 @@ public class Chord
         {
             if (!string.IsNullOrWhiteSpace(token) && IsChord(token) && !chords.Contains(token))
             {
-                if(customChordsOnly != true || !Chord.IsStandardChord(token))
+                if(customChordsOnly != true || !ChordService.IsStandardChord(token))
                     chords.Add(token);
             }
         }

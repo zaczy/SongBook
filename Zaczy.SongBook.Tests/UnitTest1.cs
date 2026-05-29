@@ -46,7 +46,7 @@ namespace Zaczy.SongBook.Tests
             {
                 foreach (var line in song.Lines)
                 {
-                    Console.WriteLine(line + (Chord.IsChordLine(line) ? "[akordy]" : ""));
+                    Console.WriteLine(line + (ChordService.IsChordLine(line) ? "[akordy]" : ""));
                 }
             }
 
@@ -81,7 +81,7 @@ namespace Zaczy.SongBook.Tests
             {
                 foreach (var line in song.Lines)
                 {
-                    Console.WriteLine(line + (Chord.IsChordLine(line) ? "[akordy]" : ""));
+                    Console.WriteLine(line + (ChordService.IsChordLine(line) ? "[akordy]" : ""));
                 }
             }
 
@@ -155,7 +155,7 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordCDur_ReturnsCorrectSvg()
         {
-            var chord = ChordsLibrary.ChordByAscii("C", "x32010");
+            var chord = GuitarChordsLibrary.ChordByAscii("C", "x32010");
 
             string svg = chord?.ToSvg() ?? String.Empty;
             File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
@@ -172,7 +172,7 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordC5_ReturnsCorrectSvg()
         {
-            var chord = ChordsLibrary.ChordByAscii("C5", "8axxxx");
+            var chord = GuitarChordsLibrary.ChordByAscii("C5", "8axxxx");
 
             string svg = chord?.ToSvg() ?? String.Empty;
             File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
@@ -188,7 +188,7 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordC5s_ReturnsCorrectSvg()
         {
-            var chord = ChordsLibrary.ChordByAscii("C5s", "#80a0000");
+            var chord = GuitarChordsLibrary.ChordByAscii("C5s", "#80a0000");
 
             string svg = chord.ToSvg();
             File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
@@ -252,9 +252,9 @@ namespace Zaczy.SongBook.Tests
         public void GuitarChord_ChordsLibrary_ReturnsCorrectVisualisation()
         {
 
-            foreach(var kv in ChordsLibrary.ChordsDict)
+            foreach(var kv in GuitarChordsLibrary.ChordsDict)
             {
-                var chord = ChordsLibrary.StandardChord(kv.Key, kv.Value);
+                var chord = GuitarChordsLibrary.StandardChord(kv.Key, kv.Value);
 
                 if (chord != null)
                     Console.WriteLine(chord.ToString());

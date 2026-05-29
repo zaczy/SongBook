@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Chords;
 using Zaczy.SongBook.Enums;
 using Zaczy.SongBook.Extensions;
 using static System.Net.Mime.MediaTypeNames;
-using System.Text.RegularExpressions;
 
 namespace Zaczy.SongBook;
 
@@ -150,8 +151,8 @@ public class SongVisualization
         sb.AppendLine("body { margin: 0; margin-top: 8px; } ");
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
-        sb.AppendLine("     .lyrics-line.annotated { line-height: 1.8em; margin-top: 0.7em; }");
-        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.98em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; transform: translateY(-1.0em); white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine("     .lyrics-line.annotated { line-height: 1.85em; margin-top: 0.7em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.95em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
         sb.AppendLine(@"    .chords2 { font-size: 0.7em; }");
         sb.AppendLine(@"    .chords { font-size: 0.9em; }");
 
@@ -255,14 +256,14 @@ public class SongVisualization
                     i += c;
                     continue;
                 }
-                if (Chord.IsChordLine(line))
+                if (ChordService.IsChordLine(line))
                 {
                     if (VisualizationOptions?.SkipLyricChords != true)
                         lyrics += $"<span class=\"chords\">{spacesBefore}{line}</span>\n";
                 }
                 else
                 {
-                    int chordStart = Chord.ChordPartStart(line);
+                    int chordStart = ChordService.ChordPartStart(line);
 
                     if (chordStart > 0)
                     {
@@ -295,8 +296,10 @@ public class SongVisualization
                 sb.AppendLine("<div class=\"chord-list\">");
                 foreach (var chord in songInternalDetails.Chords.OrderBy(c => c))
                 {
+                    var chordsLibrary = GuitarChordsLibrary.ConstructForInstrument(VisualizationOptions?.Instrument ?? InstrumentType.Guitar);
+
                     var chordSuggestion = songInternalDetails.GetChordSuggestion(chord);
-                    var guitarChord = ChordsLibrary.StandardChord(chord, chordSuggestion);
+                    var guitarChord = chordsLibrary.StandardChord(chord, chordSuggestion);
                     if (guitarChord != null)
                     {
                         sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
@@ -306,11 +309,13 @@ public class SongVisualization
             }
             else if (songInternalDetails?.SpecialChordsSuggestions?.Count > 0)
             {
+                var chordsLibrary = GuitarChordsLibrary.ConstructForInstrument(VisualizationOptions?.Instrument ?? InstrumentType.Guitar);
+
                 sb.AppendLine("<br/><br/>");
                 sb.AppendLine("<div class=\"chord-list\">");
                 foreach (var suggestion in songInternalDetails.SpecialChordsSuggestions)
                 {
-                    var guitarChord = ChordsLibrary.StandardChord(suggestion.Key, suggestion.Value);
+                    var guitarChord = chordsLibrary.StandardChord(suggestion.Key, suggestion.Value);
                     if (guitarChord != null)
                     {
                         sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
@@ -428,7 +433,7 @@ public class SongVisualization
 
             string headerPrefix = string.Empty;
 
-            if (Chord.IsChordLine(line))
+            if (ChordService.IsChordLine(line))
             {
                 if(VisualizationOptions?.SkipLyricChords == true)
                 {
@@ -437,7 +442,7 @@ public class SongVisualization
 
                 string lyricsLine = string.Empty;
                 string? nextLine = i < song.Lines.Count - 1 ? song.Lines[i + 1] : null;
-                if (!string.IsNullOrEmpty(nextLine) && !Chord.IsChordLine(nextLine))
+                if (!string.IsNullOrEmpty(nextLine) && !ChordService.IsChordLine(nextLine))
                 {
                     headerPrefix = string.Empty;
                     if (firstBlockLyricsLine == true)
@@ -524,7 +529,7 @@ public class SongVisualization
                 }
             }
 
-            if (Chord.IsChordLine(line))
+            if (ChordService.IsChordLine(line))
             {
                 lyrics += VisualizationOptions?.SkipLyricChords != true ? $@"<span class=""lyrics-line{cssClassApply}""><span class=""chords"">{clearChordForHtml(line)}</span></span><br/>" : string.Empty;
             }
@@ -533,7 +538,7 @@ public class SongVisualization
                 string? nextLine = (i < song.Lines.Count - 2) ? song.Lines[i + 1] : null;
                 blockType = SongInternalDetails.RecognizeBlockType(song.Lines, i + 1);
 
-                int chordStart = Chord.ChordPartStart(line);
+                int chordStart = ChordService.ChordPartStart(line);
 
                 if (chordStart > 0)
                 {

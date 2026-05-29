@@ -11,6 +11,7 @@ using Zaczy.Songbook.MAUI.Services;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Enums;
 using Zaczy.SongBook.Extensions;
+using Zaczy.SongBook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
 
@@ -272,6 +273,43 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>
+    /// Instrument do wyświetlania diagramów akordów
+    /// </summary>
+    public InstrumentType ChordsInstrument
+    {
+        get => _prefs?.ChordsInstrument ?? InstrumentType.Guitar;
+        set
+        {
+            if (_prefs != null && _prefs.ChordsInstrument != value)
+            { 
+                _prefs.ChordsInstrument = value;
+                Save();
+                OnPropertyChanged(nameof(ChordsInstrument));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Czy aktywny jest tryb grupowy (w którym lider ustawia piosenkę, a pozostali członkowie grupy mogą tylko przewijać i proponować zmiany)
+    /// </summary>
+    public bool GroupModeActive
+    {
+        get => _prefs?.GroupModeActive ?? false;
+        set 
+        {
+            if (_prefs != null && _prefs.GroupModeActive != value)
+            {
+                _prefs.GroupModeActive = value;
+                Save();
+                OnPropertyChanged(nameof(GroupModeActive));
+            }
+        }
+    }
+
+
+
 
     /// <summary>
     /// Email zalogowanego użytkownika
@@ -642,6 +680,40 @@ public class UserViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Broadcast przez sieć
+    /// </summary>
+    public bool BroadcastWeb
+    {
+        get => _prefs?.BroadcastWeb ?? true;
+        set
+        {
+            if (_prefs != null && _prefs.BroadcastWeb != value)
+            {
+                _prefs.BroadcastWeb = value;
+                Save();
+                OnPropertyChanged(nameof(BroadcastWeb));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Broadcast przez sieć
+    /// </summary>
+    public bool BroadcastBluetooth
+    {
+        get => _prefs?.BroadcastBluetooth ?? true;
+        set
+        {
+            if (_prefs != null && _prefs.BroadcastBluetooth != value)
+            {
+                _prefs.BroadcastBluetooth = value;
+                Save();
+                OnPropertyChanged(nameof(BroadcastBluetooth));
+            }
+        }
+    }
+
+    /// <summary>
     /// Unikalny identyfikator aplikacji (generowany przy pierwszym uruchomieniu)
     /// </summary>
     public string AppGuid
@@ -658,4 +730,61 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    public PermissionsDecision BluetoothPermissionsDecision
+    {
+        get => _prefs?.BluetoothPermissionsDecision ?? PermissionsDecision.Unknown;
+        set
+        {
+            if (_prefs != null && _prefs.BluetoothPermissionsDecision != value)
+            {
+                _prefs.BluetoothPermissionsDecision = value;
+                Save();
+                OnPropertyChanged(nameof(BluetoothPermissionsDecision));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Czy pozwolić na zmianę piosenki liderowi grupy
+    /// </summary>
+    public bool EnableGroupListeningWhenDirector
+    {
+        get => _prefs?.EnableGroupListeningWhenDirector ?? true;
+        set
+        {
+            if (_prefs != null && _prefs.EnableGroupListeningWhenDirector != value)
+            {
+                _prefs.EnableGroupListeningWhenDirector = value;
+                Save();
+                OnPropertyChanged(nameof(BroadcastBluetooth));
+            }
+        }
+    }
+
+
+    public List<int> RejectedLeaderProposals { get; set; } = new List<int>();
+
+    /// <summary>
+    /// DOdaj element to pobliżenia listy odrzuconych propozycji lidera. Dzięki temu, 
+    /// jeśli serwer nadal proponuje piosenkę, możemy odrzucić żądanie ustawienia
+    /// </summary>
+    /// <param name="proposalId"></param>
+    public void AddToRejectedLeaderProposals(int proposalId)
+    {
+        if (!RejectedLeaderProposals.Contains(proposalId))
+        {
+            RejectedLeaderProposals.Add(proposalId);
+            OnPropertyChanged(nameof(RejectedLeaderProposals));
+        }
+
+        // Pozostaw na liście tylko ostatnie 20 odrzuconych propozycji, żeby nie zajmowały zbyt dużo pamięci
+        if (RejectedLeaderProposals.Count > 20)
+        {
+           while(RejectedLeaderProposals.Count > 20)
+                RejectedLeaderProposals.RemoveAt(0);
+            OnPropertyChanged(nameof(RejectedLeaderProposals));
+        }
+    }
+
 }

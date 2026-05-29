@@ -8,7 +8,7 @@
     x:DataType="vm:UserViewModel"
     Title="Ustawienia">
     <ScrollView>
-        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
+        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
         
         <Label 
             Grid.Row="0" 
@@ -82,25 +82,6 @@
                     Margin="8,0,0,0" />
         </Grid>
 
-            <!--Label 
-                Text="Szybkość przewijania automatycznego tekstu" 
-                Grid.Row="2"
-                Grid.Column="0" 
-                FontSize="{OnIdiom 12, Tablet=16 }"
-                Margin="0,15,0,20"
-               />
-            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center" Grid.Column="1" Grid.Row="2">
-                <Slider x:Name="ScrollSpeedSlider"
-                            Minimum="0"
-                            Maximum="50"
-                            Value="{Binding AutoScrollSpeed, Mode=TwoWay}"
-                            VerticalOptions="Center" />
-                <Label Text="{Binding AutoScrollSpeed, StringFormat='{}{0:F0} px/s'}"
-                           Grid.Column="1"
-                           VerticalOptions="Center"
-                           Margin="8,0,0,0" />
-            </Grid-->
-
         <Label 
             Text="Prezentacja tekstu piosenki" 
             Grid.Row="3"
@@ -129,14 +110,44 @@
                 />
         </StackLayout>
 
+        <!-- NOWY WIERSZ 4: Wybór instrumentu -->
         <Label
-            Text="Ukryj tabulatury"
+            Text="Instrument (diagramy akordów)"
             Grid.Row="4"
             Grid.Column="0"
             FontSize="{OnIdiom 12, Tablet=16 }"
             Margin="0,10,1,0" />
 
-        <Grid Grid.Row="4" Grid.Column="1" VerticalOptions="Center">
+        <StackLayout
+            VerticalOptions="Center"
+            Grid.Row="4"
+            Grid.Column="1"
+            >
+            <RadioButton
+                x:Name="RadioGuitar"
+                Content="Gitara"
+                FontSize="{OnIdiom 12, Tablet=16 }"
+                CheckedChanged="OnChordsInstrumentRadioChanged"
+                Margin="0"
+                />
+            <RadioButton
+                x:Name="RadioUkulele"
+                FontSize="{OnIdiom 12, Tablet=16 }"
+                Content="Ukulele"
+                CheckedChanged="OnChordsInstrumentRadioChanged"
+                Margin="0,-5,0,0"
+                />
+        </StackLayout>
+
+        <!-- Poprzedni wiersz 4 → teraz 5 -->
+        <Label
+            Text="Ukryj tabulatury"
+            Grid.Row="5"
+            Grid.Column="0"
+            FontSize="{OnIdiom 12, Tablet=16 }"
+            Margin="0,10,1,0" />
+
+        <Grid Grid.Row="5" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -165,14 +176,14 @@
 
 
         <Label 
-            Grid.Row="5" 
+            Grid.Row="6" 
             Text="Akordy" 
             FontAttributes="Bold" 
             FontSize="{OnIdiom 10, Tablet=12 }"
             Grid.ColumnSpan="2" />
 
         <BoxView
-            Grid.Row="5"
+            Grid.Row="6"
             HeightRequest="1"
             Color="{AppThemeBinding Dark=#FFF, Light=#000}"
             Margin="0,18,0,0"
@@ -181,12 +192,12 @@
 
         <Label
             Text="Nie pokazuj akordów"
-            Grid.Row="6"
+            Grid.Row="7"
             Grid.Column="0"
             FontSize="{OnIdiom 12, Tablet=16 }"
             Margin="0,10,1,0" />
 
-        <Grid Grid.Row="6" Grid.Column="1" VerticalOptions="Center">
+        <Grid Grid.Row="7" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -216,12 +227,12 @@
 
         <Label
             Text="Przenieś akordy do linii z tekstem"
-            Grid.Row="7"
+            Grid.Row="8"
             Grid.Column="0"
             FontSize="{OnIdiom 12, Tablet=16 }"
             Margin="0,10,1,0" />
 
-        <Grid Grid.Row="7" Grid.Column="1" VerticalOptions="Center">
+        <Grid Grid.Row="8" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -252,12 +263,12 @@
 
         <Label
             Text="Pokaż diagramy tylko niestandardowych akordów"
-            Grid.Row="8"
+            Grid.Row="9"
             Grid.Column="0"
             FontSize="{OnIdiom 12, Tablet=16 }"
             Margin="0,10,1,0" />
 
-        <Grid Grid.Row="8" Grid.Column="1" VerticalOptions="Center">
+        <Grid Grid.Row="9" Grid.Column="1" VerticalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -287,30 +298,29 @@
             </Grid>
 
         <Label 
-            Grid.Row="9" 
+            Grid.Row="10" 
             Text="Użytkownik" 
             FontAttributes="Bold" 
             FontSize="{OnIdiom 10, Tablet=12 }"
-            Grid.ColumnSpan="2" 
-            />
+            Grid.ColumnSpan="2" />
 
         <BoxView
-            Grid.Row="9"
+            Grid.Row="10"
             HeightRequest="1"
             Color="{AppThemeBinding Dark=#FFF, Light=#000}"
             Margin="{OnIdiom '0,18,0,0', Tablet='0,24,0,0'}"
             Grid.ColumnSpan="2"
             />
-
-        <Label
-            Grid.Row="10"
+            
+            <Label
+            Grid.Row="11"
             Grid.Column="0"
             Text="Zalogowany użytkownik"
             FontSize="{OnIdiom 12, Tablet=16 }"
             />
 
         <Label
-            Grid.Row="10"
+            Grid.Row="11"
             Text="Zarejestrowanie użytkownika i zalogowanie się umożliwia dostęp do prywatnych kategorii piosenek zarządzanych przez innych użytkowników"
             FontSize="{OnIdiom 10, Tablet=14 }"
             Opacity="0.5"
@@ -319,7 +329,7 @@
 
 
             <VerticalStackLayout
-                Grid.Row="10"
+                Grid.Row="11"
                 Grid.Column="1"
                 IsVisible="{Binding IsUserAuthenticated}"
                 >
@@ -353,7 +363,7 @@
 
 
             <VerticalStackLayout
-                Grid.Row="10"
+                Grid.Row="11"
                 Grid.Column="1"
                 IsVisible="{Binding IsUserAuthenticated, Converter={StaticResource InverseBooleanConverter}}"
                 >
@@ -380,7 +390,7 @@
 
             <Label
                 Text="Odtwarzacz Deezer (eksperymentalnie)"
-                Grid.Row="11"
+                Grid.Row="12"
                 Grid.Column="0"
                 FontSize="{OnIdiom 12, Tablet=16 }"
                 Margin="0,10,1,0" 
@@ -388,7 +398,7 @@
                 />
 
             <Grid 
-                Grid.Row="11" 
+                Grid.Row="12" 
                 Grid.Column="1" 
                 VerticalOptions="Center"
                 IsVisible="{Binding DeezerArl, Converter={StaticResource StringNotEmptyConverter}}"                
@@ -447,16 +457,15 @@
                     FontSize="10"
                     MaxLines="5">
                 </Label>
-
-
             </Grid>
 
             <Label
                 Text="Pokaż diagnostykę przewijania"
-                Grid.Row="12"
+                Grid.Row="13"
                 Grid.Column="0"
                 FontSize="{OnIdiom 12, Tablet=16 }"
                 Margin="0,10,1,0" 
+                IsVisible="{Binding IsAdmin}"
                 >
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding DeezerPlayerEnabled}" Value="True">
@@ -466,7 +475,7 @@
             </Label>
 
             <Grid 
-                Grid.Row="12"
+                Grid.Row="13"
                 Grid.Column="1"
                 VerticalOptions="Center"
                 IsVisible="{Binding IsAdmin}"
@@ -494,11 +503,100 @@
                     FontSize="10"
                     MaxLines="5">
                 </Label>
-                
+            </Grid>
+
+            <Label
+                Grid.Row="14" 
+                Text="Tryb wspólnego śpiewu" 
+                FontAttributes="Bold" 
+                FontSize="{OnIdiom 10, Tablet=12 }"
+                Grid.ColumnSpan="2" 
+                />
+
+            <BoxView
+                Grid.Row="14"
+                HeightRequest="1"
+                Color="{AppThemeBinding Dark=#FFF, Light=#000}"
+                Margin="{OnIdiom '0,18,0,0', Tablet='0,24,0,0'}"
+                Grid.ColumnSpan="2"
+                />
+
+            <Label
+                Text="Tryb wspólnego śpiewu (automatyczny wybór piosenki)"
+                Grid.Row="15"
+                Grid.Column="0"
+                FontSize="{OnIdiom 12, Tablet=16 }"
+                Margin="0,10,1,0">
+            </Label>
+
+            <Grid 
+                Grid.Row="15"
+                Grid.Column="1"
+                VerticalOptions="Center"
+                >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Switch 
+                    Grid.Column="0"
+                    IsToggled="{Binding GroupModeActive, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label 
+                    Grid.Column="1"
+                    Text="Użytkownik, który aktywuje się jako Dyrygent może wysłać na urządzenia pozostałych uczestników grupy aktualnie śpiewaną piosenkę"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5">
+                </Label>
+
+                <Switch 
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    IsToggled="{Binding BroadcastWeb, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label 
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Text="Łączność internetowa"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5">
+                </Label>
+
+                <Switch 
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    IsToggled="{Binding BroadcastBluetooth, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label 
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Text="Łączność Bluetooth"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5">
+                </Label>
+
             </Grid>
 
             <StackLayout 
-                Grid.Row="13" 
+                Grid.Row="16" 
                 Orientation="Horizontal" 
                 VerticalOptions="End"
                 Spacing="12"
@@ -512,14 +610,14 @@
             </StackLayout>
 
         <Label 
-            Grid.Row="14" 
+            Grid.Row="17" 
             Grid.Column="1"
             Text="{Binding ApplicationVersion}" 
             FontSize="Micro"
             Opacity="0.4"
             HorizontalOptions="End"
             />
-
         </Grid>
+
     </ScrollView>
 </ContentPage>

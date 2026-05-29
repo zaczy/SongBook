@@ -8,12 +8,22 @@ public partial class App : Application
 {
     private readonly SongsPage _startPage;
     private readonly EventApi _eventApi;
+
     public App(EventApi eventApi, SongsPage startPage)
     {
         InitializeComponent();
 
         _startPage = startPage;
         _eventApi = eventApi;
+
+        // Podepnij handlery nieobsłużonych wyjątków
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+        // Android-specific: wyjątki na wątku UI
+#if ANDROID
+            Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += AndroidUnhandledExceptionRaiser;
+#endif
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -23,25 +33,27 @@ public partial class App : Application
 
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        // Obsługa nieprzechwyconych wyjątków
         var exception = e.ExceptionObject as Exception;
         if (exception != null)
         {
-            exception.SaveExceptionToFileAsync(" unhandled", eventApi: _eventApi).Wait();
-            Console.WriteLine($"Nieprzechwycony wyjątek: {exception?.Message}");
+            System.Diagnostics.Debug.WriteLine($"[CRASH] UnhandledException: {exception}");
+            exception.SaveExceptionToFileAsync("unhandled_domain", eventApi: _eventApi).GetAwaiter().GetResult();
         }
-        // Możesz dodać dodatkowe logowanie lub akcje naprawcze
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        if (e.Exception != null)
-        {
-            e.Exception.SaveExceptionToFileAsync(" unobserved", eventApi: _eventApi).Wait();     
-            // Obsługa nieprzechwyconych wyjątków zadań
-            Console.WriteLine($"Nieprzechwycony wyjątek zadania: {e.Exception.Message}");
-        }
-
+        System.Diagnostics.Debug.WriteLine($"[CRASH] UnobservedTaskException: {e.Exception}");
+        e.Exception?.SaveExceptionToFileAsync("unobserved_task", eventApi: _eventApi).GetAwaiter().GetResult();
         e.SetObserved();
     }
+
+#if ANDROID
+    private void AndroidUnhandledExceptionRaiser(object? sender, Android.Runtime.RaiseThrowableEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine($"[CRASH] AndroidUnhandledException: {e.Exception}");
+        e.Exception?.SaveExceptionToFileAsync("unhandled_android", eventApi: _eventApi).GetAwaiter().GetResult();
+        e.Handled = true;
+    }
+#endif
 }

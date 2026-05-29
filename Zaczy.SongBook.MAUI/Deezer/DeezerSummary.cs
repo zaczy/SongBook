@@ -8,7 +8,7 @@ using Zaczy.SongBook.Extensions;
 using Zaczy.SongBook.MAUI.Deezer;
 using Zaczy.SongBook.MAUI.ViewModels;
 
-namespace Zaczy.Songbook.MAUI.Deezer;
+namespace Zaczy.SongBook.MAUI.Deezer;
 
 public class DeezerSummary
 {

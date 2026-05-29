@@ -11,6 +11,10 @@
         BorderThickness="1"
         Title="Synchronizacja piosenek" Height="600" Width="900">
 
+    <mah:MetroWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </mah:MetroWindow.Resources>
+    
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -33,7 +37,7 @@
         <!-- DataGrid -->
         <DataGrid Grid.Row="1"
                   x:Name="SyncDataGrid"
-                  ItemsSource="{Binding}"
+                  ItemsSource="{Binding Items}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
@@ -119,7 +123,20 @@
                     Style="{DynamicResource MahApps.Styles.Button.Square.Accent}"
                     Padding="16,6"
                     Margin="0,0,8,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                    Visibility="{Binding IsApiToLocal, Converter={StaticResource BoolToVisibility}}"
+                    
+                    />
+            <Button Content="Wyślij zaznaczone na serwer"
+                    x:Name="SyncUpSelectedButton"
+                    Click="SyncUpSelected_Click"
+                    Style="{DynamicResource MahApps.Styles.Button.Square.Accent}"
+                    Padding="16,6"
+                    Margin="0,0,8,0"
+                    IsEnabled="False"
+                    Visibility="{Binding IsLocalToApi, Converter={StaticResource BoolToVisibility}}"
+                    
+                    />
             <Button Content="Zamknij"
                     Click="Close_Click"
                     Style="{DynamicResource MahApps.Styles.Button.Square}"

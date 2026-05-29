@@ -360,5 +360,44 @@
                 MinimumWidthRequest="{OnIdiom Default=32, Phone=22}" />
         </HorizontalStackLayout>
 
+        <!-- Obszar dotyku lewego dolnego rogu — wywołuje pokazanie przycisku SendSongToListeners -->
+        <BoxView
+            x:Name="BottomLeftTouchArea"
+            Grid.Row="4"
+            WidthRequest="60"
+            HeightRequest="60"
+            HorizontalOptions="Start"
+            VerticalOptions="End"
+            BackgroundColor="Transparent"
+            x:DataType="pages:SongDetailsPage">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBottomLeftTapped" NumberOfTapsRequired="1" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Przycisk wysyłania piosenki do słuchaczy — pojawia się na 5 sekund po dotknięciu rogu -->
+        <Border
+            x:Name="SendToListenersPanel"
+            Grid.Row="4"
+            HorizontalOptions="Start"
+            VerticalOptions="End"
+            BackgroundColor="#CC000000"
+            StrokeThickness="0"
+            IsVisible="False"
+            Opacity="0"
+            Padding="10,8"
+            Margin="8,0,0,8"
+            x:DataType="pages:SongDetailsPage">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+            <ImageButton
+                x:Name="SendToListenersBtn"
+                Source="{mi:Fluent Wifi120, IconSize=28, IconColor=#FFF}"
+                BackgroundColor="Transparent"
+                MinimumHeightRequest="44"
+                MinimumWidthRequest="44"
+                Clicked="OnSendSongToListenersClicked" />
+        </Border>
     </Grid>
 </ContentPage>

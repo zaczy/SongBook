@@ -8,6 +8,7 @@
     xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
     x:DataType="vm:SongListViewModel"            
     x:Class="Zaczy.SongBook.MAUI.Pages.SongsPage"
+    x:Name="Root"
     Title="Piosenki">
 
     <ContentPage.ToolbarItems>
@@ -48,12 +49,20 @@
                     MinimumWidthRequest="32"
                     BackgroundColor="Transparent"
                     />
-                <ImageButton 
+                <!--<ImageButton 
                     Source="{mi:Fluent ArrowClockwise20, IconSize=20, IconColor=#999}"
                     Command="{Binding LoadCommand}"
                     HorizontalOptions="End"
                     MinimumHeightRequest="28"
                     MinimumWidthRequest="28"
+                    BackgroundColor="Transparent"
+                    />-->
+                <ImageButton 
+                    Source="{mi:FluentFilled Settings20Filled, IconSize=20, IconColor=#999}"
+                    Command="{Binding SettingsPageCommand}"
+                    HorizontalOptions="End"
+                    MinimumHeightRequest="16"
+                    MinimumWidthRequest="16"
                     BackgroundColor="Transparent"
                     />
             </StackLayout>
@@ -103,14 +112,52 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
+            <Grid
+                Grid.Row="3">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
             <Entry 
+                Grid.Column="0"
                 Placeholder="'Która strona?' :)"
                 Text="{Binding PageFilter}"
                 Keyboard="Numeric"
                 Completed="OnPageFilterCompleted" 
-                Grid.Row="3"
                 IsVisible="{Binding HasSongs}"
+                Margin="10,0,10,0"
                 />
+
+            <!--<ImageButton 
+                Source="{mi:Fluent BluetoothSearching20, IconSize=20, IconColor={AppThemeBinding Light=#761610, Dark=#b66650}}"
+                x:Name="BTTestButton"
+                Grid.Row="3"
+                HorizontalOptions="End"
+                MinimumHeightRequest="22"
+                MinimumWidthRequest="22"
+                BackgroundColor="Transparent"
+                Grid.Column="1"
+                Margin="0,0,10,0"
+                Clicked="OnBluetoothButtonClicked"
+                />-->
+
+                <ImageButton
+                    x:Name="GroupsButton"
+                    mi:MauiIcon.Value="{Binding ListeningGroupIcon}"
+                    Grid.Row="3"
+                    HorizontalOptions="End"
+                    MinimumHeightRequest="22"
+                    MinimumWidthRequest="22"
+                    BackgroundColor="Transparent"
+                    Grid.Column="1"
+                    Margin="0,0,10,0"
+                    IsVisible="{Binding UserViewModel.GroupModeActive}"
+                    Clicked="GroupsButton_Clicked"
+                    />
+
+
+            </Grid>
 
             <!-- Overlay loading indicator bound to VM.IsBusy -->
             <AbsoluteLayout Grid.Row="0" Grid.RowSpan="4" IsVisible="{Binding IsBusy}" Opacity="0.3">

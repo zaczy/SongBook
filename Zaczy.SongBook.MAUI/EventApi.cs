@@ -32,7 +32,7 @@ public class EventApi
         string appVersion = AppInfo.Current.VersionString;
         string buildNumber = AppInfo.Current.BuildString;
 
-        var apiClient = new ApiClient(_settings.ApiBaseUrl);
+        var apiClient = new ApiClient(_settings.ApiBaseUrl, _settings.ApiTimeout);
 
         var request = new 
         {

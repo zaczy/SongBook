@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zaczy.SongBook.Chords;
 
-public class ChordsLibrary
+public class GuitarChordsLibrary: IChordsLibrary
 {
 
     public static Dictionary<string, string?> ChordsDict = new Dictionary<string, string?>
@@ -28,7 +28,7 @@ public class ChordsLibrary
     /// <param name="name"></param>
     /// <param name="definition"></param>
     /// <returns></returns>
-    public static GuitarChord? ChordByAscii(string name, string definition)
+    public ChordBase? ChordByAscii(string name, string definition)
     {
         int barFret = -1;
         if (definition?.StartsWith("#") == true && definition?.Length == 8)
@@ -81,7 +81,7 @@ public class ChordsLibrary
         return chord;
     }
 
-    public static GuitarChord? StandardChord(string name, string? variation=null)
+    public ChordBase? StandardChord(string name, string? variation=null)
     {
         if(string.IsNullOrEmpty(name))
             return null;
@@ -118,12 +118,12 @@ public class ChordsLibrary
                 break;
 
             case "c":
-                chord = StandardChord("a");
+                chord = StandardChord("a") as GuitarChord;
                 chord!.TransponeUpBar(3);
                 break;
 
             case "c7":
-                chord = StandardChord("a7");
+                chord = StandardChord("a7") as GuitarChord;
                 chord!.TransponeUpBar(3);
                 break;
 
@@ -139,14 +139,14 @@ public class ChordsLibrary
                 }
                 else if (string.IsNullOrEmpty(variation))
                 {
-                    chord = StandardChord("A7");
+                    chord = StandardChord("A7") as GuitarChord;
                     chord!.TransponeUpBar(4);
                     chord.Name = name;
                 }
                 break;
 
             case "cis":
-                chord = StandardChord("a");
+                chord = StandardChord("a") as GuitarChord;
                 chord!.TransponeUpBar(4);
                 break;
 
@@ -164,6 +164,14 @@ public class ChordsLibrary
                 chord.Tones.Add(new GuitarChordTone(2, 3, 3));  // struna 5, palec 3, próg 3
                 break;
 
+            case "D7":
+                chord = new GuitarChord("D7", openStrings: new HashSet<int> { 4 }, mutedStrings: new HashSet<int> { 5, 6 });
+                chord.Tones.Add(new GuitarChordTone(3, 2, 2));  // struna 2, palec 1, próg 1
+                chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna 4, palec 2, próg 2
+                chord.Tones.Add(new GuitarChordTone(1, 3, 2));  // struna 5, palec 3, próg 3
+                break;
+
+
             case "Dis":
                 if(variation == "xx1232")
                 {
@@ -175,7 +183,7 @@ public class ChordsLibrary
                 }
                 else if(string.IsNullOrEmpty(variation))
                 {
-                    chord = StandardChord("A");
+                    chord = StandardChord("A") as GuitarChord;
                     chord!.TransponeUpBar(5);
 
                 }
@@ -216,7 +224,7 @@ public class ChordsLibrary
                 break;
 
             case "F7":
-                chord = StandardChord("E7");
+                chord = StandardChord("E7") as GuitarChord;
                 chord!.TransponeUpBar(1);
                 break;
 
@@ -240,12 +248,12 @@ public class ChordsLibrary
             case "f":
                 if (variation == "8poz")
                 {
-                    chord = StandardChord("a");
+                    chord = StandardChord("a") as GuitarChord;
                     chord!.TransponeUpBar(8);
                 }
                 else
                 {
-                    chord = StandardChord("e");
+                    chord = StandardChord("e") as GuitarChord;
                     chord!.TransponeUpBar(1);
                 }
                 break;
@@ -253,7 +261,7 @@ public class ChordsLibrary
             case "f7":
                 if (variation == "8poz")
                 {
-                    chord = StandardChord("a7");
+                    chord = StandardChord("a7") as GuitarChord;
                     chord!.TransponeUpBar(8);
                 }
                 else
@@ -268,12 +276,12 @@ public class ChordsLibrary
                 break;
 
             case "Fis":
-                chord = StandardChord("F");
+                chord = StandardChord("F") as GuitarChord;
                 chord!.TransponeUpBar(1);
                 break;
 
             case "fis":
-                chord = StandardChord("e");
+                chord = StandardChord("e") as GuitarChord;
                 chord!.TransponeUpBar(2);
                 break;
 
@@ -285,17 +293,17 @@ public class ChordsLibrary
                 break;
 
             case "g":
-                chord = StandardChord("e");
+                chord = StandardChord("e") as GuitarChord;
                 chord!.TransponeUpBar(3);
                 break;
 
             case "Gis":
-                chord = StandardChord("E");
+                chord = StandardChord("E") as GuitarChord;
                 chord!.TransponeUpBar(4);
                 break;
 
             case "gis":
-                chord = StandardChord("e");
+                chord = StandardChord("e") as GuitarChord;
                 chord!.TransponeUpBar(4);
                 break;
 
@@ -345,12 +353,12 @@ public class ChordsLibrary
                 break;
 
             case "B":
-                chord = StandardChord("A");
+                chord = StandardChord("A") as GuitarChord;
                 chord!.TransponeUpBar(1);
                 break;
 
             case "H":
-                chord = StandardChord("A");
+                chord = StandardChord("A") as GuitarChord;
                 chord!.TransponeUpBar(2);
                 break;
 
@@ -363,7 +371,7 @@ public class ChordsLibrary
                 break;
 
             case "h":
-                chord = StandardChord("a");
+                chord = StandardChord("a") as GuitarChord;
                 chord!.TransponeUpBar(2);
                 break;
 
@@ -372,12 +380,32 @@ public class ChordsLibrary
                 break;
         }
 
-        if(!string.IsNullOrEmpty(variation))
-            chord = ChordByAscii(name, variation);
+        if (!string.IsNullOrEmpty(variation))
+        {
+
+            var vchord = ChordByAscii(name, variation);
+            if (vchord != null)
+                chord = vchord as GuitarChord;
+        }
 
         if (chord != null)
             chord.Name = name;
 
         return chord;
     }
+
+
+    public static IChordsLibrary ConstructForInstrument(InstrumentType instrumentType)
+    {
+        switch(instrumentType)
+        {
+            case InstrumentType.Guitar:
+                return new GuitarChordsLibrary();
+            case InstrumentType.Ukulele:
+                return new UkuleleChordsLibrary();
+            default:
+                throw new NotSupportedException($"Instrument type {instrumentType} is not supported");
+        }
+    }
+
 }

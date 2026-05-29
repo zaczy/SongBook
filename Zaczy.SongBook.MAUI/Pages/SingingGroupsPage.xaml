@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:data="clr-namespace:Zaczy.SongBook.MAUI.Data;assembly=Zaczy.SongBook.MAUI"
+    xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages;assembly=Zaczy.SongBook.MAUI"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    x:Class="Zaczy.SongBook.MAUI.Pages.SingingGroupsPage"
+    x:Name="Root"
+    x:DataType="pages:SingingGroupsPage"
+    Title="Grupowe śpiewanie">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem
+            BindingContext="{x:Reference Root}"
+            Command="{Binding FetchGroupsCommand}"
+            Order="Primary"
+            IconImageSource="sync2_ico.png"
+            Priority="0" />
+        <ToolbarItem
+            IconImageSource="fluent_add_24_filled.png"
+            BindingContext="{x:Reference Root}"
+            Command="{Binding CreateGroupCommand}"
+            Order="Primary"
+            Priority="1" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="0">
+
+            <Label Padding="10,20,10,20" FontSize="Micro">
+Poniżej widoczne są aktywne grupy śpiewające pobrane z serwera oraz grupa lokalna umożliwiająca komunikację poprzez Bluetooth z urządzeniami
+w pobliżu (wymagane jest włączenie Bluetooth i przyznanie odpowiednich uprawnień).
+
+Wybierz grupę i swoją rolę, aby do niej dołączyć.
+            </Label>
+
+            <!-- Empty state -->
+            <Label
+                Text="Brak grup śpiewających. Wybierz opcję Odśwież, żeby pobrać z serwera."
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Margin="20"
+                FontSize="14"
+                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+                IsVisible="{Binding IsEmptyGroups}" />
+
+            <!-- Lista grup -->
+            <VerticalStackLayout
+                BindableLayout.ItemsSource="{Binding Groups}"
+                Spacing="0">
+
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="data:SingingGroupEntity">
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="0"
+                            StrokeThickness="2">
+
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsLocalOnly}" Value="true">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnGroupTapped" NumberOfTapsRequired="1" />
+                            </Border.GestureRecognizers>
+
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" Padding="12,10">
+
+                                <!-- Group name -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding GroupName}"
+                                       FontAttributes="Bold"
+                                       FontSize="{OnIdiom 14, Tablet=18}"
+                                       VerticalOptions="Center" />
+
+                                <!-- Selected checkmark -->
+                                <Image Grid.Row="0" Grid.Column="1"
+                                       Source="{mi:Fluent Checkmark24, IconSize=20, IconColor={AppThemeBinding Dark={StaticResource White}, Light={StaticResource Primary}}}"
+                                       WidthRequest="28"
+                                       HeightRequest="28"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End"
+                                       IsVisible="{Binding IsSelected}" />
+
+                                <!-- Leader -->
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                       FontSize="11"
+                                       Opacity="0.7"
+                                       Margin="0,4,0,0"
+                                       IsVisible="{Binding HasLeader}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Lider: " FontAttributes="Bold" />
+                                            <Span Text="{Binding Leader}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Description}"
+                                       FontSize="10"
+                                       Opacity="0.5"
+                                       Margin="0,2,0,0" />
+
+                                <!-- Last set date -->
+                                <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding LastSetDate, StringFormat='Ostatnie spotkanie: {0:dd.MM.yyyy HH:mm}'}"
+                                       FontSize="10"
+                                       Opacity="0.5"
+                                       Margin="0,2,0,0"
+                                       IsVisible="{Binding IsOnline}" />
+
+                                <!-- Role badge -->
+                                <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Margin="0,6,0,2"
+                                        Padding="8,3"
+                                        HorizontalOptions="Start"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        IsVisible="{Binding HasRole}">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="4" />
+                                    </Border.StrokeShape>
+                                    <Label Text="{Binding RoleBadge}"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           TextColor="White" />
+                                </Border>
+
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+
+            <!-- Przełączniki synchronizacji -->
+            <Grid
+                ColumnDefinitions="Auto, *"
+                RowDefinitions="Auto,Auto, Auto"
+                Padding="0,5,0,0">
+
+                <Switch
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    IsToggled="{Binding UserViewModel.EnableGroupListeningWhenDirector, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" 
+                    IsVisible="{Binding AmIDirector}"
+                    />
+
+                <Label
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    Text="Pozwól innym dyrygentom zmieniać wybraną piosenkę"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    IsVisible="{Binding AmIDirector}"
+                    MaxLines="5" />
+
+                <Switch
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    IsToggled="{Binding UserViewModel.BroadcastWeb, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Text="Używaj łącza internetowego do synchronizacji piosenek"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5" />
+
+                <Switch
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    IsToggled="{Binding UserViewModel.BroadcastBluetooth, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Text="Używaj Bluetooth do synchronizacji piosenek"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

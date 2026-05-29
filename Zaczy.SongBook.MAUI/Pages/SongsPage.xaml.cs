@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+ï»¿using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using MauiIcons.Core;
 using Microsoft.Extensions.Options;
@@ -8,173 +8,233 @@ using System;
 using Zaczy.SongBook;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Db;
+using Zaczy.SongBook.MAUI.Extensions;
+using Zaczy.SongBook.MAUI.Services;
 using Zaczy.SongBook.MAUI.ViewModels;
 
-namespace Zaczy.SongBook.MAUI.Pages
+namespace Zaczy.SongBook.MAUI.Pages;
+
+public partial class SongsPage : ContentPage
 {
-    public partial class SongsPage : ContentPage
+    private readonly SongListViewModel _songListViewModel;
+    private readonly UserViewModel _userViewModel;
+    private readonly EventApi _eventApi;
+    private readonly Settings _settings;
+    private readonly IAudioManager _audioManager;
+    private readonly SongCustomSettingsRepositoryLite _customSettingsRepository;
+    private readonly SingingGroupRepositoryLite _singingGroupRepositoryLite;
+    private readonly ListenersGroupBroadcastService _listenersGroupBroadcastService;
+
+    //private SingingGroupEntity? _currentlySelectedSingingGroup;
+
+    public SongListViewModel SongListViewModel => _songListViewModel;
+    public UserViewModel UserViewModel => _userViewModel;
+    //IBluetoothGroupService? _bluetoothGroupService;
+
+    public SongsPage(
+        SongListViewModel vm,
+        UserViewModel viewModel,
+        EventApi eventApi,
+        IOptions<Settings> settings,
+        IAudioManager audioManager,
+        SongCustomSettingsRepositoryLite customSettingsRepository,
+        SingingGroupRepositoryLite singingGroupRepositoryLite,
+        //IBluetoothGroupService? bluetoothGroupService 
+        ListenersGroupBroadcastService listenersGroupBroadcastService
+        )
     {
-        private readonly SongListViewModel _songListViewModel;
-        private readonly UserViewModel _userViewModel;
-        private readonly EventApi _eventApi;
-        private readonly Settings _settings;
-        private readonly IAudioManager _audioManager;
-        private readonly SongCustomSettingsRepositoryLite _customSettingsRepository;
+        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.BluetoothSearching20, IconColor = Colors.Green };
+        _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
+        _ = new MauiIcon() { Icon = MauiIcons.Fluent.Filled.FluentFilledIcons.Settings20Filled, IconColor = Colors.Green };
 
-        /// <summary>
-        /// Konstruktor 
-        /// </summary>
-        /// <param name="vm"></param>
-        /// <param name="viewModel"></param>
-        /// <param name="eventApi"></param>
-        /// <param name="settings"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public SongsPage(
-            SongListViewModel vm, 
-            UserViewModel viewModel, 
-            EventApi eventApi, 
-            IOptions<Settings> settings, 
-            IAudioManager audioManager,
-            SongCustomSettingsRepositoryLite customSettingsRepository)
+        InitializeComponent();
+
+        _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
+        _userViewModel = viewModel;
+        BindingContext = _songListViewModel;
+        _eventApi = eventApi;
+        _settings = settings.Value;
+        _audioManager = audioManager;
+        _customSettingsRepository = customSettingsRepository ?? throw new ArgumentNullException(nameof(customSettingsRepository));
+        _singingGroupRepositoryLite = singingGroupRepositoryLite ?? throw new ArgumentNullException(nameof(singingGroupRepositoryLite));
+        //_bluetoothGroupService = bluetoothGroupService;
+        _listenersGroupBroadcastService = listenersGroupBroadcastService ?? throw new ArgumentNullException(nameof(listenersGroupBroadcastService));
+
+        // register to receive updates
+        WeakReferenceMessenger.Default.Register<SongsPage, ValueChangedMessage<SongEntity>>(this, (page, message) =>
         {
-            _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ArrowClockwise20, IconColor = Colors.Green };
-            _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
-
-            InitializeComponent();
-
-            _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-            _userViewModel = viewModel;
-            BindingContext = _songListViewModel;
-            _eventApi = eventApi;
-            _settings = settings.Value;
-            _audioManager = audioManager;
-            _customSettingsRepository = customSettingsRepository ?? throw new ArgumentNullException(nameof(customSettingsRepository));
-
-            // register to receive updates
-            WeakReferenceMessenger.Default.Register<SongsPage, ValueChangedMessage<SongEntity>>(this, (page, message) =>
+            try
             {
-                try
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    var updatedSong = message.Value;
+                    var existing = _songListViewModel.Songs.FirstOrDefault(s => s.Id == updatedSong.Id);
+                    if (existing != null)
                     {
-                        var updatedSong = message.Value;
-                        var existing = _songListViewModel.Songs.FirstOrDefault(s => s.Id == updatedSong.Id);
-                        if (existing != null)
+                        var idx = _songListViewModel.Songs.IndexOf(existing);
+                        if (idx >= 0)
                         {
-                            var idx = _songListViewModel.Songs.IndexOf(existing);
-                            if (idx >= 0)
-                            {
-                                // replace item to force UI refresh
-                                _songListViewModel.Songs[idx] = updatedSong;
-                            }
-                            else
-                            {
-                                // update properties in place
-                                existing.Title = updatedSong.Title;
-                                existing.Artist = updatedSong.Artist;
-                                existing.Capo = updatedSong.Capo;
-                                existing.Lyrics = updatedSong.Lyrics;
-                                existing.UpdatedAt = updatedSong.UpdatedAt;
-                            }
+                            // replace item to force UI refresh
+                            _songListViewModel.Songs[idx] = updatedSong;
                         }
                         else
                         {
-                            // not present — add and keep ordering
-                            _songListViewModel.Songs.Add(updatedSong);
-                            var sorted = _songListViewModel.Songs.OrderBy(s => s.Title ?? string.Empty).ToList();
-                            _songListViewModel.Songs.Clear();
-                            foreach (var s in sorted)
-                                _songListViewModel.Songs.Add(s);
+                            // update properties in place
+                            existing.Title = updatedSong.Title;
+                            existing.Artist = updatedSong.Artist;
+                            existing.Capo = updatedSong.Capo;
+                            existing.Lyrics = updatedSong.Lyrics;
+                            existing.UpdatedAt = updatedSong.UpdatedAt;
                         }
-                    });
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"SongUpdated handler error: {ex.Message}");
-                }
-            });
-
-            _ = this.GetUserDataFromServer();
-        }
-
-        private async Task GetUserDataFromServer()
-        {
-
-            if (!string.IsNullOrEmpty(_userViewModel.UserEmail))
+                    }
+                    else
+                    {
+                        // not present â€” add and keep ordering
+                        _songListViewModel.Songs.Add(updatedSong);
+                        var sorted = _songListViewModel.Songs.OrderBy(s => s.Title ?? string.Empty).ToList();
+                        _songListViewModel.Songs.Clear();
+                        foreach (var s in sorted)
+                            _songListViewModel.Songs.Add(s);
+                    }
+                });
+            }
+            catch (Exception ex)
             {
-                var userApi = new UserApi(_settings.ApiBaseUrl);
-                var user = await userApi.GetUserByEmailAsync(_userViewModel.UserEmail);
-                if(user != null)
-                {
-                    _userViewModel.IsAdmin = user.IsAdmin;
-                    _userViewModel.IsEditor = user.IsEditor;
-                    _userViewModel.DeezerArl = user.DeezerArl;
-                }
+                System.Diagnostics.Debug.WriteLine($"SongUpdated handler error: {ex.Message}");
+            }
+        });
+
+        _ = this.GetUserDataFromServer();
+    }
+
+    /// <summary>
+    /// Pobierz dane uÅ¼ytkownika z serwera (czy jest adminem, edytorem, arl do Deezer) i zaktualizuj ViewModel.
+    /// </summary>
+    /// <returns></returns>
+    private async Task GetUserDataFromServer()
+    {
+
+        if (!string.IsNullOrEmpty(_userViewModel.UserEmail))
+        {
+            var userApi = new UserApi(_settings.ApiBaseUrl);
+            var user = await userApi.GetUserByEmailAsync(_userViewModel.UserEmail);
+            if(user != null)
+            {
+                _userViewModel.IsAdmin = user.IsAdmin;
+                _userViewModel.IsEditor = user.IsEditor;
+                _userViewModel.DeezerArl = user.DeezerArl;
             }
         }
+    }
 
-        /// <summary>
-        /// Wykonywane, kiedy strona staje siê widoczna. Jeœli lista piosenek jest pusta, ³aduje je z bazy danych. 
-        /// Dziêki temu dane s¹ odœwie¿ane przy ka¿dym wejœciu na stronê, ale tylko jeœli jest to potrzebne (np. po dodaniu nowej piosenki).
-        /// Jeœli dane s¹ ju¿ za³adowane, nie wykonuje ponownie operacji ³adowania.
-        /// </summary>
-        protected override async void OnAppearing()
+    /// <summary>
+    /// Wykonywane, kiedy strona staje siÄ™ widoczna. JeÅ›li lista piosenek jest pusta, Å‚aduje je z bazy danych. 
+    /// DziÄ™ki temu dane sÄ… odÅ›wieÅ¼ane przy kaÅ¼dym wejÅ›ciu na stronÄ™, ale tylko jeÅ›li jest to potrzebne (np. po dodaniu nowej piosenki).
+    /// JeÅ›li dane sÄ… juÅ¼ zaÅ‚adowane, nie wykonuje ponownie operacji Å‚adowania.
+    /// </summary>
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        RefreshListeningGroupsProperties();
+
+        if (_songListViewModel.Songs.Count == 0)
+            await _songListViewModel.LoadSongsAsync();
+
+        StartGroupPolling();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        StopGroupPolling();
+    }
+
+    /// <summary>
+    /// Uruchom polling statusu grupy Å›piewajÄ…cej.
+    /// </summary>
+    private void StartGroupPolling()
+    {
+
+        _listenersGroupBroadcastService.StartGroupPolling();
+    }
+
+    private void StopGroupPolling()
+    {
+        _listenersGroupBroadcastService.StopGroupPolling();
+    }
+
+
+    // Handler wired from XAML TapGestureRecognizer. CommandParameter is the SongEntity.
+    private async void OnItemTapped(object sender, EventArgs e)
+    {
+        // sender is the TapGestureRecognizer; get CommandParameter
+        if (sender is TapGestureRecognizer tg && tg.CommandParameter is SongEntity song)
         {
-            base.OnAppearing();
-
-            if (_songListViewModel.Songs.Count == 0)
-                await _songListViewModel.LoadSongsAsync();
+            // push details page
+            await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService));
         }
-
-        // Handler wired from XAML TapGestureRecognizer. CommandParameter is the SongEntity.
-        private async void OnItemTapped(object sender, EventArgs e)
+        else
         {
-            // sender is the TapGestureRecognizer; get CommandParameter
-            if (sender is TapGestureRecognizer tg && tg.CommandParameter is SongEntity song)
+            // fallback: get BindingContext from parent element (safer in some templates)
+            if (sender is Element el && el.BindingContext is SongEntity ctxSong)
             {
-                // push details page
-                await Navigation.PushAsync(new SongDetailsPage(song, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository));
-            }
-            else
-            {
-                // fallback: get BindingContext from parent element (safer in some templates)
-                if (sender is Element el && el.BindingContext is SongEntity ctxSong)
-                {
-                    await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository));
-                }
+                await Navigation.PushAsync(new SongDetailsPage(ctxSong, _userViewModel, _eventApi, _songListViewModel.Repo, _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService));
             }
         }
+    }
 
-        /// <summary>
-        /// Fitrowanie po tytule i odœwie¿enie listy. Command jest w ViewModelu, wiêc sprawdzamy jego dostêpnoœæ i wykonujemy.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnTitleFilterCompleted(object sender, EventArgs e)
+    /// <summary>
+    /// Fitrowanie po tytule i odÅ›wieÅ¼enie listy. Command jest w ViewModelu, wiÄ™c sprawdzamy jego dostÄ™pnoÅ›Ä‡ i wykonujemy.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnTitleFilterCompleted(object sender, EventArgs e)
+    {
+        if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
         {
-            if (BindingContext is SongListViewModel vm && vm.FilterCommand != null && vm.FilterCommand.CanExecute(null))
-            {
-                vm.FilterCommand.Execute(null);
-            }
+            vm.FilterCommand.Execute(null);
         }
+    }
 
-        /// <summary>
-        /// Filtrowanie po stronie serwera (paginacja) i odœwie¿enie listy. Command jest w ViewModelu, wiêc sprawdzamy jego dostêpnoœæ i wykonujemy.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnPageFilterCompleted(object sender, EventArgs e)
+    /// <summary>
+    /// Filtrowanie po stronie serwera (paginacja) i odÅ›wieÅ¼enie listy. Command jest w ViewModelu, wiÄ™c sprawdzamy jego dostÄ™pnoÅ›Ä‡ i wykonujemy.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnPageFilterCompleted(object sender, EventArgs e)
+    {
+        if (BindingContext is SongListViewModel vm && vm.PageCommand != null && vm.PageCommand.CanExecute(null))
         {
-            if (BindingContext is SongListViewModel vm && vm.PageCommand != null && vm.PageCommand.CanExecute(null))
-            {
-                vm.PageCommand.Execute(null);
-            }
+            vm.PageCommand.Execute(null);
         }
+    }
 
-        private void OnItemTapped(object sender, TappedEventArgs e)
-        {
+    private void OnItemTapped(object sender, TappedEventArgs e)
+    {
 
-        }
+    }
+
+    private void RefreshListeningGroupsProperties()
+    {
+        _listenersGroupBroadcastService.CurrentlySelectedSingingGroup =  _singingGroupRepositoryLite.GetSelectedAsync().Result;
+
+        _songListViewModel.IsGroupListener = _listenersGroupBroadcastService.CurrentlySelectedSingingGroup?.SelectedRole == SingingGroupRole.Artysta;
+        _songListViewModel.IsGroupLeader = _listenersGroupBroadcastService.CurrentlySelectedSingingGroup?.SelectedRole == SingingGroupRole.Dyrygent;
+
+        _listenersGroupBroadcastService.AmILeader = _songListViewModel.IsGroupLeader;
+    }
+
+    private void OnBluetoothButtonClicked(object sender, EventArgs e)
+    {
+        if(_listenersGroupBroadcastService != null)
+            _ = _listenersGroupBroadcastService.RunBluetoothPollingAsync();   
+    }
+
+    private async void GroupsButton_Clicked(object sender, EventArgs e)
+    {
+        await _songListViewModel.LoadOtherPage(new SingingGroupsPage(_listenersGroupBroadcastService));
     }
 }

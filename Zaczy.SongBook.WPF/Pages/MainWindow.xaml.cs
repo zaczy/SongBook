@@ -59,7 +59,7 @@ namespace Zaczy.SongBook.WPF
             var differences = await CompareWithServer();
             if (differences != null && differences.Count > 0)
             {
-                SongSyncWindow songSyncWindow = new SongSyncWindow(differences, ViewModel);
+                SongSyncWindow songSyncWindow = new SongSyncWindow(differences, ViewModel, SongSyncDirection.ApiToLocal);
                 songSyncWindow.ShowDialog();
             }
 
@@ -141,6 +141,11 @@ namespace Zaczy.SongBook.WPF
             await EnsureWebView2InitializedAsync();
 
             var visualization = new SongVisualization();
+
+            visualization.VisualizationOptions = new SongVisualizationOptions()
+            {
+                Instrument = InstrumentType.Ukulele
+            };
 
             // Przyjmujemy, że lokalne zasoby (css, czcionki) znajdą się w folderze "<app>/assets"
             // Skopiuj do projektu zasoby np. assets/css/... i ustaw CopyToOutputDirectory=CopyIfNewer
@@ -376,8 +381,23 @@ namespace Zaczy.SongBook.WPF
                 await songApi.CreateOrUpdateSongsAsync(songRepository, differentSongs);
             }
         }
+        
+        private async void SyncDownSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
 
-        private async Task<List<SongComparisionResults>?> CompareWithServer()
+            if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
+            {
+                var differences = await CompareWithServer();
+                if (differences != null && differences.Count > 0)
+                {
+                    SongSyncWindow songSyncWindow = new SongSyncWindow(differences, ViewModel, SongSyncDirection.ApiToLocal);
+                    songSyncWindow.ShowDialog();
+                }
+
+            }
+        }
+
+        private async Task<List<SongComparisionResults>?> CompareWithServer(bool checkLocalOnly = false)
         {
             if (!string.IsNullOrEmpty(ViewModel?.AppSettings?.Settings?.ApiBaseUrl) && !string.IsNullOrEmpty(ViewModel?.AppSettings?.ConnectionStrings?.SongBookDb))
             {
@@ -386,12 +406,23 @@ namespace Zaczy.SongBook.WPF
                 var factory = new SongBookDbContextFactory();
                 var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
 
-                var differencies = await songApi.CompareWithApiAsync(songRepository);
+                var differencies = await songApi.CompareWithApiAsync(songRepository, checkLocalOnly);
                 return differencies;
             }
 
             return null;
         }
 
+        private async void SyncUpSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Porównaj z serwerem i pokaż różnice
+            var differences = await CompareWithServer(true);
+            if (differences != null && differences.Count > 0)
+            {
+                SongSyncWindow songSyncWindow = new SongSyncWindow(differences, ViewModel, SongSyncDirection.LocalToApi);
+                songSyncWindow.ShowDialog();
+            }
+
+        }
     }
 }

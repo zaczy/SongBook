@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace Zaczy.SongBook;
 
+public enum InstrumentType
+{
+    Guitar,
+    Ukulele,
+}
+
 public class SongVisualizationOptions
 {
 
@@ -47,4 +53,7 @@ public class SongVisualizationOptions
 
     public bool MoveChordsToLyricsLine { get; set; } = false;
     public string? ChordDiagramColor { get; set; }
+
+    public InstrumentType Instrument { get; set; } = InstrumentType.Ukulele; 
+
 }

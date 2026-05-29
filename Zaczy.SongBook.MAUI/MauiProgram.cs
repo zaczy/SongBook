@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 using Plugin.Maui.Audio;
 using System.Collections.Generic;
-using Zaczy.Songbook.MAUI.Pages;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Maui.Data;
@@ -17,6 +16,10 @@ using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.Pages;
 using Zaczy.SongBook.MAUI.Spotify;
 using Zaczy.SongBook.MAUI.ViewModels;
+using MauiIcons.Fluent.Filled;
+using Zaczy.SongBook.MAUI.Services;
+using Zaczy.SongBook.MAUI.Extensions;
+using Zaczy.Songbook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI
 {
@@ -29,6 +32,7 @@ namespace Zaczy.SongBook.MAUI
                 .UseMauiApp<App>()
                 .UseFontAwesomeSolidMauiIcons()
                 .UseFluentMauiIcons()
+                .UseFluentFilledMauiIcons()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -113,6 +117,7 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddSingleton<SongCategoryRepositoryLite>();
             builder.Services.AddSingleton<EventApi>();
             builder.Services.AddSingleton<SongCustomSettingsRepositoryLite>();
+            builder.Services.AddSingleton<SingingGroupRepositoryLite>();
 
             // Register ViewModels and Pages in DI
             builder.Services.AddTransient<SongListViewModel>();
@@ -125,7 +130,12 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddTransient<CategoriesPage>();
 
             builder.Services.AddSingleton(AudioManager.Current);
+            builder.Services.AddSingleton<ListenersGroupBroadcastService>();
             builder.Services.AddTransient<IAudioManager>(provider => AudioManager.Current);
+
+#if ANDROID
+            //builder.Services.AddSingleton<IBluetoothGroupService, BluetoothGroupService>();
+#endif
 
 #if DEBUG
             builder.Logging.AddDebug();
@@ -133,10 +143,23 @@ namespace Zaczy.SongBook.MAUI
             var app = builder.Build();
 
             // Seed initial data if needed
-            using (var scope = app.Services.CreateScope())
+            try
             {
+                using var scope = app.Services.CreateScope();
                 var repo = scope.ServiceProvider.GetRequiredService<SongRepositoryLite>();
                 repo.SeedIfEmpty();
+            }
+            catch (Exception ex)
+            {
+                ex.SaveExceptionToFileAsync(" app start", eventApi: new EventApi(new Settings() { ApiBaseUrl = "https://api.zaczy.net/api" })).GetAwaiter().GetResult();
+                System.Diagnostics.Debug.WriteLine($"[STARTUP] Seed error: {ex}");
+                // Zapisz do pliku nawet bez EventApi (może jeszcze nie działać)
+                try
+                {
+                    var logPath = Path.Combine(FileSystem.AppDataDirectory, "startup_crash.log");
+                    File.AppendAllText(logPath, $"{DateTime.Now:O} {ex}\n");
+                }
+                catch { /* ostatnia deska ratunku */ }
             }
 
             return app;

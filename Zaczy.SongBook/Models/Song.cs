@@ -316,18 +316,18 @@ public class Song: INotifyPropertyChanged
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            if (Chord.IsChordLine(line))
+            if (ChordService.IsChordLine(line))
             {
-                Lines[i] = Chord.TransposeLine(line, semitones);
+                Lines[i] = ChordService.TransposeLine(line, semitones);
                 continue;
             }
 
-            int chordStart = Chord.ChordPartStart(line);
+            int chordStart = ChordService.ChordPartStart(line);
             if (chordStart > 0)
             {
                 var textPart = line.Substring(0, chordStart);
                 var chordPart = line.Substring(chordStart);
-                Lines[i] = textPart + Chord.TransposeLine(chordPart, semitones);
+                Lines[i] = textPart + ChordService.TransposeLine(chordPart, semitones);
             }
         }
 

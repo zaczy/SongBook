@@ -2,8 +2,8 @@
 <ContentPage 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:pages="clr-namespace:Zaczy.Songbook.MAUI.Pages"
-    x:Class="Zaczy.Songbook.MAUI.Pages.SongWebEditPage"
+    xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages"
+    x:Class="Zaczy.SongBook.MAUI.Pages.SongWebEditPage"
     x:DataType="pages:SongWebEditPage"
     Title="Edytuj piosenkę">
 

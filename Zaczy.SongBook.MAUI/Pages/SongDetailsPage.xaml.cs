@@ -13,8 +13,6 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
-using Zaczy.Songbook.MAUI.Deezer;
-using Zaczy.Songbook.MAUI.Pages;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Extensions;
@@ -22,6 +20,8 @@ using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.Deezer;
 using Zaczy.SongBook.MAUI.Extensions;
+using Zaczy.SongBook.MAUI.Pages;
+using Zaczy.SongBook.MAUI.Services;
 using Zaczy.SongBook.MAUI.ViewModels;
 using Timer = System.Timers.Timer;
 
@@ -31,7 +31,6 @@ public partial class SongDetailsPage : ContentPage
 {
     private readonly Timer _hideControlsTimer;
     private readonly Timer _hideDeezerStatusTimer;
-    //private readonly Timer _loadingDeezerStatusTimer;
     private readonly UserViewModel _userViewModel;
     private readonly SongEntity _songEntity;
     private SongVisualization _visualization;
@@ -62,10 +61,18 @@ public partial class SongDetailsPage : ContentPage
     }
 
     private readonly SongCustomSettingsRepositoryLite _customSettingsRepository;
+    private readonly SingingGroupRepositoryLite _singingGroupRepositoryLite;
 
     private SongCustomSettingsEntity? _songCustomSettings;
     private bool _suppressSliderSave;
     private Timer? _hideSpeedSliderTimer;
+    //private SingingGroupEntity? _currentlySelectedSingingGroup;
+    private readonly ListenersGroupBroadcastService? _listenersGroupBroadcastService;
+
+    public int? GroupSongId { get; set; }
+
+    //private readonly IBluetoothGroupService? _bluetoothGroupService;
+
 
     /// <summary>
     /// Konstruktor
@@ -84,7 +91,10 @@ public partial class SongDetailsPage : ContentPage
         SongRepositoryLite songRepository, 
         Settings settings,
         IAudioManager audioManager,
-        SongCustomSettingsRepositoryLite customSettingsRepository
+        SongCustomSettingsRepositoryLite customSettingsRepository,
+        SingingGroupRepositoryLite singingGroupRepositoryLite,
+        //IBluetoothGroupService? bluetoothGroupService   // opcjonalny — może być null na non-Android
+        ListenersGroupBroadcastService? listenersGroupBroadcastService
         )
     {
         _userViewModel = userViewModel;
@@ -94,6 +104,10 @@ public partial class SongDetailsPage : ContentPage
         _settings = settings;
         _audioManager = audioManager; 
         _customSettingsRepository = customSettingsRepository;
+        _singingGroupRepositoryLite = singingGroupRepositoryLite;
+        //_bluetoothGroupService = bluetoothGroupService;
+        _listenersGroupBroadcastService = listenersGroupBroadcastService;
+
 
         _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin || 
             _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail, _settings.ApiBaseUrl).Result;
@@ -319,6 +333,9 @@ public partial class SongDetailsPage : ContentPage
         }
 
         _ = RegenerateHtmlAsync();
+
+        StartGroupPolling();
+
     }
 
     /// <summary>
@@ -326,6 +343,12 @@ public partial class SongDetailsPage : ContentPage
     /// </summary>
     protected override void OnDisappearing()
     {
+
+        StopGroupPolling();
+
+        if(GroupSongId != null)
+            _userViewModel?.AddToRejectedLeaderProposals(_songEntity.Id);
+
         base.OnDisappearing();
 
         // Zatrzymaj i zwolnij odtwarzacz Deezer
@@ -351,7 +374,7 @@ public partial class SongDetailsPage : ContentPage
 
         try
         {
-            _userViewModel.ScrollingInProgress = false;
+            _userViewModel!.ScrollingInProgress = false;
             _ = LyricsWebView.EvaluateJavaScriptAsync("stopAutoScroll();");
         }
         catch (Exception ex)
@@ -932,7 +955,8 @@ public partial class SongDetailsPage : ContentPage
                 CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
                 SkipLyricChords = UserViewModel.SkipLyricChords,
                 SkipTabulatures = UserViewModel.SkipTabulatures,
-                MoveChordsToLyricsLine = UserViewModel.MoveChordsToLyricsLine
+                MoveChordsToLyricsLine = UserViewModel.MoveChordsToLyricsLine,
+                Instrument = UserViewModel.ChordsInstrument
             }
         };
 
@@ -1044,7 +1068,7 @@ public partial class SongDetailsPage : ContentPage
     {
         try
         {
-            var editPage = new SongWebEditPage(_songEntity, _userViewModel,  _settings, _songRepository);
+            var editPage = new SongBook.MAUI.Pages.SongWebEditPage(_songEntity, _userViewModel,  _settings, _songRepository);
             await Navigation.PushAsync(editPage);
         }
         catch (Exception ex)
@@ -1225,6 +1249,7 @@ public partial class SongDetailsPage : ContentPage
 
         // Zresetuj timer ukrywania — użytkownik nadal korzysta z suwaka
         _hideSpeedSliderTimer?.Stop();
+        _hideSpeedSliderTimer?.Stop();
         _hideSpeedSliderTimer?.Start();
 
         if (_suppressSliderSave)
@@ -1243,4 +1268,216 @@ public partial class SongDetailsPage : ContentPage
     }
 
     // ──────────────────────────────────────────────────────────────────────
+
+    // ── Polling grupy śpiewającej ──────────────────────────────────────────
+    //private CancellationTokenSource? _pollingCts;
+
+    /// <summary>
+    /// Uruchom polling statusu grupy śpiewającej.
+    /// </summary>
+    private void StartGroupPolling()
+    {
+        //_currentlySelectedSingingGroup = _singingGroupRepositoryLite.GetSelectedAsync().Result;
+
+        //if (_currentlySelectedSingingGroup  == null || _settings.ListeningGroupCheckInterval <= 0 || _currentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
+        //    return;
+
+        //StopGroupPolling();
+        //_pollingCts = new CancellationTokenSource();
+
+        //// Skanowanie BLE (gdy dostępne) — jako uzupełnienie pollingu API
+        //if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
+        //{
+        //    _ = _eventApi.SendEventAsync("Blutu", "_bluetoothGroupService.StartScanningAsync");
+        //    _ = _listenersGroupBroadcastService.BluetoothGroupService.StartScanningAsync(
+        //        onSongIdReceived: OnBluetoothSongIdReceived,
+        //        ct: _pollingCts.Token);
+        //}
+
+        //if (_settings.ListeningGroupCheckInterval > 0 && false)
+        //    _ = RunGroupPollingAsync(_pollingCts.Token);
+        
+        if(_listenersGroupBroadcastService != null)
+            _listenersGroupBroadcastService.StartGroupPolling();
+
+    }
+
+    /// <summary>
+    /// Zatrzymaj odświeżanie statusu grupy śpiewającej.
+    /// </summary>
+    private void StopGroupPolling()
+    {
+        _listenersGroupBroadcastService?.StopGroupPolling();
+
+        //_pollingCts?.Cancel();
+        //_pollingCts?.Dispose();
+        //_pollingCts = null;
+
+        //if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
+        //    _ = _listenersGroupBroadcastService.BluetoothGroupService.StopScanningAsync();
+
+    }
+
+    /// <summary>
+    /// Pętla pollingu — co <see cref="Settings.ListeningGroupCheckInterval"/> sekund sprawdza status grupy
+    /// i przechodzi na inną piosenkę jeśli CurrentSongId uległ zmianie.
+    /// </summary>
+    private async Task RunGroupPollingAsync(CancellationToken ct)
+    {
+        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
+            return;
+
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(_settings.ListeningGroupCheckInterval));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(ct))
+            {
+                await CheckGroupStatusAsync();
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    /// <summary>
+    /// Pobierz informacje o aktualnym statusie grupy śpiewającej z API. 
+    /// Jeśli CurrentSongId jest różne od aktualnie wyświetlanej piosenki, przejdź na stronę nowej piosenki.
+    /// </summary>
+    /// <returns></returns>
+    private async Task CheckGroupStatusAsync()
+    {
+        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
+            return;
+
+        try
+        {
+            var groupSongId = await SingingGroupApi.CurrentSongForListenersGroupAsync(_settings.ApiBaseUrl, _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.Id);
+
+            if (groupSongId == null || groupSongId == _songEntity.Id || _userViewModel.RejectedLeaderProposals.Contains((int)groupSongId))
+                return;
+
+            if(_songRepository == null)
+                return;
+
+            var song = await _songRepository.GetByIdAsync((int)groupSongId);
+            if (song == null)
+                return;
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var newPage = new SongDetailsPage(
+                    song, _userViewModel, _eventApi,
+                    _songRepository, _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService)
+                {
+                    GroupSongId = song.Id
+                };
+
+                var stack = Navigation.NavigationStack;
+                Navigation.InsertPageBefore(newPage, this);
+                await Navigation.PopAsync(animated: false);
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SongDetailsPage.CheckGroupStatusAsync error: {ex.Message}");
+        }
+    }
+
+    private Timer? _hideSendToListenersTimer;
+
+    /// <summary>
+    /// Prawy dolny róg - pokaż panel "Wyślij do słuchaczy" z opcją Dyrygenta do wysłania aktualnej piosenki 
+    /// do grupy śpiewającej. Panel automatycznie znika po 5 sekundach lub po ponownym tapnięciu w prawy dolny róg.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnBottomLeftTapped(object sender, TappedEventArgs e)
+    {
+        _ = ShowSendToListenersPanelAsync();
+    }
+
+    private async Task ShowSendToListenersPanelAsync()
+    {
+        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
+            return;
+
+        _hideSendToListenersTimer?.Stop();
+
+        SendToListenersPanel.IsVisible = true;
+        SendToListenersPanel.Opacity = 0;
+        await SendToListenersPanel.FadeTo(1, 200);
+
+        _hideSendToListenersTimer ??= new Timer(5000) { AutoReset = false };
+        _hideSendToListenersTimer.Elapsed -= OnSendToListenersTimerElapsed;
+        _hideSendToListenersTimer.Elapsed += OnSendToListenersTimerElapsed;
+        _hideSendToListenersTimer.Start();
+    }
+
+    /// <summary>
+    /// Ukryj przyciski "Wyślij do słuchaczy" po upływie czasu lub ponownym tapnięciu w prawy dolny róg.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnSendToListenersTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await SendToListenersPanel.FadeTo(0, 200);
+            SendToListenersPanel.IsVisible = false;
+        });
+    }
+
+    /// <summary>
+    /// Wyślij namiar na bieżącą piosenkę
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void OnSendSongToListenersClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
+            {
+                await DisplayAlert("Uwaga", "Musisz być Dyrygentem aktywnej grupy, aby wysłać piosenkę.", "OK");
+                return;
+            }
+
+            if (_userViewModel?.BroadcastWeb == true && _listenersGroupBroadcastService?.CurrentlySelectedSingingGroup?.IsLocalOnly != true)
+            {
+                try
+                {
+                    var api = new SingingGroupApi(_settings.ApiBaseUrl);
+                    await api.ChangeSongAsync(_listenersGroupBroadcastService!.CurrentlySelectedSingingGroup.Id, _songEntity.Id);
+                }
+                catch (Exception ex)
+                {
+                    _ = _eventApi.SendEventAsync("GroupChangeSong", $"OChangeSongAsync: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"OChangeSongAsync: {ex.Message}");
+                }
+            }
+
+            if (_userViewModel?.BroadcastBluetooth == true)
+            {
+                await _eventApi.SendEventAsync("Bluetooth", 
+                    $"BLE send attempt: BluetoothGroupService={(  _listenersGroupBroadcastService?.BluetoothGroupService != null ? "OK" : "NULL")}, songId={_songEntity.Id}");
+
+                if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
+                {
+                    await _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
+                    await _listenersGroupBroadcastService.BluetoothGroupService.StopAdvertisingAsync();
+                    await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id);
+                }
+            }
+
+            // Krótki sygnał wizualny potwierdzający wysłanie
+            await SendToListenersBtn.FadeTo(0.2, 150);
+            await SendToListenersBtn.FadeTo(1.0, 150);
+
+            OnSendToListenersTimerElapsed(null, new System.Timers.ElapsedEventArgs(DateTime.Now));
+        }
+        catch (Exception ex)
+        {
+            _ = _eventApi.SendEventAsync("Bluetooth", $"OnSendSongToListenersClicked error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"OnSendSongToListenersClicked error: {ex.Message}");
+        }
+    }
 }

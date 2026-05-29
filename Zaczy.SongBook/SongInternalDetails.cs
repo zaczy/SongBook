@@ -50,15 +50,15 @@ public class SongInternalDetails
                 string line = song.Lines[i];
                 string? nextLine = i < song.Lines.Count - 1 ? song.Lines[i + 1] : string.Empty;
 
-                if (Chord.IsChordLine(line) && !Chord.IsChordLine(nextLine))
+                if (ChordService.IsChordLine(line) && !ChordService.IsChordLine(nextLine))
                 {
-                    var chords = Chord.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
+                    var chords = ChordService.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);
                     songInternalDetails.ChordLinesAboveLyricsCount++;
                 }
-                else if (Chord.ChordPartStart(line) > 1)
+                else if (ChordService.ChordPartStart(line) > 1)
                 {
-                    var chords = Chord.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
+                    var chords = ChordService.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);
                     songInternalDetails.ChordLinesAfterText++;
                 }
@@ -104,7 +104,7 @@ public class SongInternalDetails
                     {
                         var chordName = parts[0].Trim() ?? String.Empty;
                         var chordDiagram = parts[1].Trim() ?? String.Empty;
-                        if (!string.IsNullOrEmpty(chordName) && !string.IsNullOrEmpty(chordDiagram) && Chord.IsChord(chordName))
+                        if (!string.IsNullOrEmpty(chordName) && !string.IsNullOrEmpty(chordDiagram) && ChordService.IsChord(chordName))
                         {
                             if(!suggestions.ContainsKey(chordName))
                                 suggestions.Add(chordName, chordDiagram);

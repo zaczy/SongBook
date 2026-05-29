@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Enums;
+using Zaczy.SongBook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
 
@@ -31,4 +32,11 @@ public class UserPreferences
     public bool ShowDiagnostics { get; set; } = false;
     public bool ScrollingStartCompensate { get; set; }
     public string? AppGuid { get; set; }
+
+    public InstrumentType ChordsInstrument { get; set; } = InstrumentType.Guitar;
+    public bool GroupModeActive { get; set; } = true;
+    public PermissionsDecision BluetoothPermissionsDecision { get; set; }
+    public bool BroadcastWeb { get; set; } = true;
+    public bool BroadcastBluetooth { get; set; } = true;
+    public bool EnableGroupListeningWhenDirector { get; set; } = true;
 }

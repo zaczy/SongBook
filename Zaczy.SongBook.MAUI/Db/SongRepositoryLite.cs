@@ -39,9 +39,9 @@ namespace Zaczy.SongBook.MAUI.Data
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public Task<SongEntity>? GetByIdAsync(int id)
+        public Task<SongEntity?> GetByIdAsync(int id)
         {
-            var result = Task.FromResult(_col.FindById(id));
+            var result = Task.FromResult<SongEntity?>(_col.FindById(id));
             return result;
         }
 

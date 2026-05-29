@@ -28,7 +28,20 @@ public class SongApi
 
         var songs = await songRepository.GetAllAsync();
 
-        var request = new SongsAllRequest() { Songs = songs };
+        await SyncSelectedApiAsync(songs);
+    }
+
+
+    /// <summary>
+    /// Wyślij wybrane piosenki do API, aby zsynchronizować dane. API powinno obsługiwać endpoint POST /songs/sync, który przyjmuje listę piosenek i aktualizuje bazę danych na serwerze.
+    /// </summary>
+    /// <param name="songList"></param>
+    /// <returns></returns>
+    public async Task SyncSelectedApiAsync(List<SongEntity> songList)
+    {
+        var apiClient = new ApiClient(_baseUrl);
+
+        var request = new SongsAllRequest() { Songs = songList };
 
         var response = await apiClient.PostAsync("/songs/sync", request);
     }
@@ -85,7 +98,7 @@ public class SongApi
     /// </summary>
     /// <param name="songRepository">Repozytorium do zapisu piosenek</param>
     /// <returns></returns>
-    public async Task<List<SongComparisionResults>?> CompareWithApiAsync(SongRepository songRepository)
+    public async Task<List<SongComparisionResults>?> CompareWithApiAsync(SongRepository songRepository, bool checkLocalOnly=false)
     {
         var apiClient = new ApiClient(_baseUrl, 15000);
 
@@ -101,8 +114,6 @@ public class SongApi
             {
                 try
                 {
-                    // Sprawdź czy piosenka już istnieje w bazie danych
-                    //var existingSong = await songRepository.SearchIdAsync(song.Id);
                     var existingSong = await songRepository.SearchOnlySongAsync(new Song(song));
 
                     if (existingSong != null)
@@ -126,7 +137,32 @@ public class SongApi
                     System.Diagnostics.Debug.WriteLine($"GetFromApi: Error processing song ID {song.Id}: {ex.Message}");
                 }
             }
-            
+
+            // Piosenki istniejące lokalnie, których nie ma w API
+            if (checkLocalOnly)
+            {
+                var localSongs = await songRepository.GetAllAsync();
+                var apiTitles = response.Data
+                    .Select(s => s.Title)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var localSong in localSongs)
+                {
+                    if (!apiTitles.Contains(localSong.Title ?? string.Empty))
+                    {
+                        string message = $"\"{localSong.Title}\" - istnieje tylko lokalnie";
+                        differenciesList!.Add(new SongComparisionResults()
+                        {
+                            DiffSummary = message,
+                            SongTitle = localSong.Title,
+                            DiffSpecification = null,
+                            BaseSongEntity = localSong,
+                            ApiSong = null
+                        });
+                    }
+                }
+            }
+
             System.Diagnostics.Debug.WriteLine($"GetFromApi: Successfully synchronized {response.Data.Count} songs");
         }
         else

@@ -27,8 +27,9 @@
                 <MenuItem Header="_Nowy" Click="NewMenuItem_Click"/>
                 <MenuItem Header="_Otwórz z pliku" Click="OpenMenuItem_Click"/>
                 <MenuItem Header="_Zapisz w bazie danych" Click="SaveMenuItem_Click"/>
-                <MenuItem Header="_Wyślij do Chmury" Click="SyncUpButton_Click"/>
-                <MenuItem Header="_Pobierz z Chmury" Click="SyncDownButton_Click"/>
+                <!--<MenuItem Header="_Wyślij do Chmury" Click="SyncUpButton_Click"/>-->
+                <MenuItem Header="_Wyślij do Chmury" Click="SyncUpSelectedButton_Click"/>
+                <MenuItem Header="_Pobierz z Chmury" Click="SyncDownSelectedButton_Click"/>
                 <Separator/>
                 <MenuItem Header="E_xit"/>
             </MenuItem>
