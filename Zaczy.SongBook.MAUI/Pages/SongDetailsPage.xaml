@@ -391,13 +391,22 @@
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="12" />
             </Border.StrokeShape>
+            <StackLayout Orientation="Vertical">
             <ImageButton
                 x:Name="SendToListenersBtn"
-                Source="{mi:Fluent Wifi120, IconSize=28, IconColor=#FFF}"
+                mi:MauiIcon.Value="{Binding Source={x:Reference Root}, Path=UserViewModel.SendToGroupIcon}"
                 BackgroundColor="Transparent"
                 MinimumHeightRequest="44"
                 MinimumWidthRequest="44"
                 Clicked="OnSendSongToListenersClicked" />
+            <Label
+                Text="Wyślij współśpiewaczom"
+                FontSize="9"
+                TextColor="White"
+                HorizontalTextAlignment="Center"
+                VerticalOptions="Center"
+                Margin="0,0,0,0" />
+            </StackLayout>
         </Border>
     </Grid>
 </ContentPage>

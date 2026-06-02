@@ -173,7 +173,7 @@ public class ListenersGroupBroadcastService
         }
         catch (Exception ex)
         {
-            await ex.SaveExceptionToFileAsync("InitBluetooth", eventApi: _eventApi);
+            _ = ex.SaveExceptionToFileAsync("InitBluetooth", eventApi: _eventApi);
         }
     }
 
@@ -213,13 +213,24 @@ public class ListenersGroupBroadcastService
                 var song = await repo.GetByIdAsync(songId);
                 if (song == null) return;
 
-                await navigation.PushAsync(new SongDetailsPage(
+                var newPage = new SongDetailsPage(
                     song, _userViewModel, _eventApi,
                     repo, _settings, _audioManager,
                     _customSettingsRepository, _singingGroupRepositoryLite, this)
                 {
                     GroupSongId = song.Id
-                });
+                };
+
+                var currentPage = navigation.NavigationStack.LastOrDefault();
+                if (currentPage is SongDetailsPage)
+                {
+                    navigation.InsertPageBefore(newPage, currentPage);
+                    await navigation.PopAsync(animated: false);
+                }
+                else
+                {
+                    await navigation.PushAsync(newPage);
+                }
             }
             catch (Exception ex)
             {
@@ -313,23 +324,33 @@ public class ListenersGroupBroadcastService
                 if (song == null)
                     return;
 
-                System.Diagnostics.Debug.WriteLine($"Wykryto zmianę: {song?.Id} {song?.Title} ");
-
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
 
                     var navigation = GetNavigation();
                     if (navigation == null) return;
 
-                    await navigation.PushAsync(new SongDetailsPage(
+                    var newPage = new SongDetailsPage(
                         song!, _userViewModel, _eventApi,
                         _songListViewModel.Repo,
                         _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite,
-                        this
-                        )
+                        this)
                     {
                         GroupSongId = song!.Id
-                    });
+                    };
+
+                    var currentPage = navigation.NavigationStack.LastOrDefault();
+                    if (currentPage is SongDetailsPage)
+                    {
+                        // Zastąp bieżącą stronę nową — "Wstecz" nie wróci do poprzedniej piosenki
+                        navigation.InsertPageBefore(newPage, currentPage);
+                        await navigation.PopAsync(animated: false);
+                    }
+                    else
+                    {
+                        // Jeśli bieżąca strona to nie SongDetailsPage (np. lista piosenek) — normalny push
+                        await navigation.PushAsync(newPage);
+                    }
                 });
             }
         }

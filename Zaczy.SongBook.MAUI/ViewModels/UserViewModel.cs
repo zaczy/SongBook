@@ -469,6 +469,20 @@ public class UserViewModel : INotifyPropertyChanged
     // Exposed icon that the view can bind to (mi:MauiIcon.Value)
     public BaseIcon ToggleIcon => ScrollingInProgress ? _pauseToggle : _playToggle;
 
+    public BaseIcon SendToGroupIcon
+    {
+        get
+        {
+            return new BaseIcon()
+            {
+                Icon = (BroadcastBluetooth ? FluentIcons.BluetoothSearching20 : FluentIcons.Wifi120),
+                IconSize = 28,
+                IconColor = Colors.White
+            };
+        }
+    }
+
+
     public string ApplicationVersion => $"Wersja aplikacji {AppInfo.Current.VersionString}";
 
     public ICommand AuthenticateCommand { get; }

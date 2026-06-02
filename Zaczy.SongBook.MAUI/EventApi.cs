@@ -34,7 +34,7 @@ public class EventApi
 
         var apiClient = new ApiClient(_settings.ApiBaseUrl, _settings.ApiTimeout);
 
-        var request = new 
+        var request = new
         {
             @event = eventName,
             connect_time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -47,10 +47,17 @@ public class EventApi
             {  "Authorization", $"Bearer {_settings.ApiToken}" }
         };
 
-        var response = await apiClient.PostAsync("/playerEvent", request, headers);
-        if (!response.IsSuccess)
+        try
         {
-            System.Diagnostics.Debug.WriteLine($"SendEventAsync: API error: {response.ErrorMessage} {response.ErrorDetails}");
+            var response = await apiClient.PostAsync("/playerEvent", request, headers);
+            if (!response.IsSuccess)
+            {
+                System.Diagnostics.Debug.WriteLine($"SendEventAsync: API error: {response.ErrorMessage} {response.ErrorDetails}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SendEventAsync: Exception: {ex}");
         }
     }
 }

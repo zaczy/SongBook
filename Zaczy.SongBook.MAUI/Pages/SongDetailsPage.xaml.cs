@@ -116,7 +116,7 @@ public partial class SongDetailsPage : ContentPage
         _visualization = this.CreateVisualizationOptions();
 
         _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.LockOpen, IconColor = Colors.Green };
-        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.ChevronUp24, IconColor = Colors.Green };
+        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.BluetoothSearching20, IconColor = Colors.Green };
         
         InitializeComponent();
         
@@ -1441,30 +1441,27 @@ public partial class SongDetailsPage : ContentPage
                 return;
             }
 
+            if (_userViewModel?.BroadcastBluetooth == true)
+            {
+                if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
+                {
+                    _ = _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
+                    await _listenersGroupBroadcastService.BluetoothGroupService.StopAdvertisingAsync();
+                    await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id);
+                }
+            }
+
             if (_userViewModel?.BroadcastWeb == true && _listenersGroupBroadcastService?.CurrentlySelectedSingingGroup?.IsLocalOnly != true)
             {
                 try
                 {
                     var api = new SingingGroupApi(_settings.ApiBaseUrl);
-                    await api.ChangeSongAsync(_listenersGroupBroadcastService!.CurrentlySelectedSingingGroup.Id, _songEntity.Id);
+                    _ = api.ChangeSongAsync(_listenersGroupBroadcastService!.CurrentlySelectedSingingGroup.Id, _songEntity.Id);
                 }
                 catch (Exception ex)
                 {
                     _ = _eventApi.SendEventAsync("GroupChangeSong", $"OChangeSongAsync: {ex.Message}");
                     System.Diagnostics.Debug.WriteLine($"OChangeSongAsync: {ex.Message}");
-                }
-            }
-
-            if (_userViewModel?.BroadcastBluetooth == true)
-            {
-                await _eventApi.SendEventAsync("Bluetooth", 
-                    $"BLE send attempt: BluetoothGroupService={(  _listenersGroupBroadcastService?.BluetoothGroupService != null ? "OK" : "NULL")}, songId={_songEntity.Id}");
-
-                if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
-                {
-                    await _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
-                    await _listenersGroupBroadcastService.BluetoothGroupService.StopAdvertisingAsync();
-                    await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id);
                 }
             }
 
