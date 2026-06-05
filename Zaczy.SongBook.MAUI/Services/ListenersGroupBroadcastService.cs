@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
+using Zaczy.SongBook.Data;
 using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Db;
 using Zaczy.SongBook.MAUI.Extensions;
@@ -90,6 +91,11 @@ public class ListenersGroupBroadcastService
     }
 
     /// <summary>
+    /// Wywoływane gdy odebrano propozycję zmiany piosenki dla Dyrygenta (zamiast automatycznej nawigacji).
+    /// </summary>
+    public Action<SongEntity>? OnSongProposedForDirector { get; set; }
+
+    /// <summary>
     /// Zwraca aktywną INavigation z aktywnego okna.
     /// </summary>
     private static INavigation? GetNavigation()
@@ -158,7 +164,7 @@ public class ListenersGroupBroadcastService
 
         try
         {
-            _bluetoothGroupService = new BluetoothGroupService(_eventApi);
+            _bluetoothGroupService = new BluetoothGroupService(_eventApi, _userViewModel);
 
             _currentlySelectedSingingGroup = await _singingGroupRepositoryLite.GetSelectedAsync();
             if (_currentlySelectedSingingGroup?.SelectedRole == SingingGroupRole.Artysta 
@@ -198,7 +204,8 @@ public class ListenersGroupBroadcastService
         if (songId == 0) return;
         if (_userViewModel.RejectedLeaderProposals.Contains(songId)) return;
 
-        _ = _eventApi.SendEventAsync("BLE_RECV", $"Received songId via BLE: {songId}");
+        if (_userViewModel.ExtendedApiLogging)
+            _ = _eventApi.SendEventAsync("BLE_RECV", $"Received songId via BLE: {songId}");
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
@@ -224,8 +231,15 @@ public class ListenersGroupBroadcastService
                 var currentPage = navigation.NavigationStack.LastOrDefault();
                 if (currentPage is SongDetailsPage)
                 {
-                    navigation.InsertPageBefore(newPage, currentPage);
-                    await navigation.PopAsync(animated: false);
+                    // Dyrygent: przekaż propozycję do aktywnej strony przez callback
+                    if (OnSongProposedForDirector != null)
+                        OnSongProposedForDirector(song);
+                    else
+                    {
+
+                        navigation.InsertPageBefore(newPage, currentPage);
+                        await navigation.PopAsync(animated: false);
+                    }
                 }
                 else
                 {
@@ -299,34 +313,38 @@ public class ListenersGroupBroadcastService
     /// <returns></returns>
     private async Task CheckGroupStatusInternetAsync()
     {
-        if (CurrentlySelectedSingingGroup == null || (CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent && (!_userViewModel.EnableGroupListeningWhenDirector || _userViewModel.ScrollingInProgress)))
+        if (CurrentlySelectedSingingGroup == null || (_userViewModel?.BroadcastWeb != true))
             return;
 
-        if(_userViewModel?.BroadcastWeb != true)
+        if (CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent
+            && (_userViewModel.EnableGroupListeningWhenDirector != true || _userViewModel.ScrollingInProgress))
             return;
 
         try
         {
-            var groupSongId = await SingingGroupApi.CurrentSongForListenersGroupAsync(_settings.ApiBaseUrl, CurrentlySelectedSingingGroup.Id);
+            var groupSongId = await SingingGroupApi.CurrentSongForListenersGroupAsync(
+                _settings.ApiBaseUrl, CurrentlySelectedSingingGroup.Id);
 
+            if (groupSongId == null || _userViewModel.RejectedLeaderProposals.Contains((int)groupSongId))
+                return;
 
-            if (groupSongId != null && !_userViewModel.RejectedLeaderProposals.Contains((int)groupSongId))
+            var repo = _songListViewModel.Repo;
+            if (repo == null) return;
+
+            var song = await repo.GetByIdAsync((int)groupSongId);
+            if (song == null) return;
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-
-                System.Diagnostics.Debug.WriteLine($"Sprawdzam status grupy: {CurrentlySelectedSingingGroup?.Id}");
-
-                var repo = _songListViewModel.Repo;
-
-                if (repo == null)
-                    return;
-
-                var song = await repo.GetByIdAsync((int)groupSongId);
-                if (song == null)
-                    return;
-
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                if (CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent
+                    && OnSongProposedForDirector != null)
                 {
-
+                    // Dyrygent: przekaż propozycję do aktywnej strony przez callback
+                    OnSongProposedForDirector(song);
+                }
+                else
+                {
+                    // Artysta: nawiguj bezpośrednio
                     var navigation = GetNavigation();
                     if (navigation == null) return;
 
@@ -342,17 +360,15 @@ public class ListenersGroupBroadcastService
                     var currentPage = navigation.NavigationStack.LastOrDefault();
                     if (currentPage is SongDetailsPage)
                     {
-                        // Zastąp bieżącą stronę nową — "Wstecz" nie wróci do poprzedniej piosenki
                         navigation.InsertPageBefore(newPage, currentPage);
                         await navigation.PopAsync(animated: false);
                     }
                     else
                     {
-                        // Jeśli bieżąca strona to nie SongDetailsPage (np. lista piosenek) — normalny push
                         await navigation.PushAsync(newPage);
                     }
-                });
-            }
+                }
+            });
         }
         catch (Exception ex)
         {

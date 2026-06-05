@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.MAUI.Services;
+using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Services;
 
@@ -19,8 +20,6 @@ public partial class BluetoothGroupService
     {
         try
         {
-            //_ = _eventApi.SendEventAsync("BLE", $"Wejœcie do StartAdvertisingAsync, song ID {songId}");
-
             var manager = Android.App.Application.Context
                 .GetSystemService(Android.Content.Context.BluetoothService) as BluetoothManager;
 
@@ -30,7 +29,8 @@ public partial class BluetoothGroupService
 
             if (_advertiser == null)
             {
-                _ = _eventApi.SendEventAsync("BLE", "Bluetooth LE Advertiser is null.");
+                if(_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE", "Bluetooth LE Advertiser is null.");
                 return Task.CompletedTask;
             }
 
@@ -43,33 +43,21 @@ public partial class BluetoothGroupService
                 .SetTimeout(60_000)!
                 .Build();
 
-            //_ = _eventApi.SendEventAsync("BLE", $"Bluetooth LE Advertiser {songId}/3");
-
-
-            // G³ówny pakiet advertisement — UUID serwisu + dane piosenki
             var advertiseData = new AdvertiseData.Builder()
                 .AddServiceUuid(Android.OS.ParcelUuid.FromString(ServiceUuid.ToString()))!
                 .AddManufacturerData(0x1234, songIdBytes)!
-                .SetIncludeDeviceName(false)!   // nazwa NIE w g³ównym pakiecie (ograniczony rozmiar)
+                .SetIncludeDeviceName(false)!
                 .Build();
 
-            //_ = _eventApi.SendEventAsync("BLE", $"Bluetooth LE Advertiser {songId}/4");
-
-            // Scan response — tu umieszczamy czyteln¹ nazwê (widoczna w BLE Scanner)
             var scanResponse = new AdvertiseData.Builder()
-                .SetIncludeDeviceName(false)!   // nie u¿ywamy nazwy adaptera
-                //.SetIncludeDeviceName(true)!   // nie u¿ywamy nazwy adaptera
-                .AddServiceData(                // zakoduj nazwê jako Service Data
+                .SetIncludeDeviceName(false)!
+                .AddServiceData(
                     Android.OS.ParcelUuid.FromString(ServiceUuid.ToString()),
                     System.Text.Encoding.UTF8.GetBytes(BleLocalName))!
                 .Build();
 
-            //_ = _eventApi.SendEventAsync("BLE", $"Build finished, starting BLE Advertising for song ID {songId}");
-
-
-            _advertiseCallback = new SongBookAdvertiseCallback(_eventApi);
+            _advertiseCallback = new SongBookAdvertiseCallback(_eventApi, _userViewModel);
             _advertiser.StartAdvertising(settings, advertiseData, scanResponse, _advertiseCallback);
-
         }
         catch (Exception ex)
         {
@@ -92,21 +80,25 @@ public partial class BluetoothGroupService
     private class SongBookAdvertiseCallback : AdvertiseCallback
     {
         private readonly EventApi _eventApi;
+        private readonly UserViewModel _userViewModel;
 
-        public SongBookAdvertiseCallback(EventApi eventApi) : base()
+        public SongBookAdvertiseCallback(EventApi eventApi, UserViewModel userViewModel) : base()
         {
             _eventApi = eventApi;
+            _userViewModel = userViewModel;
         }
 
         public override void OnStartSuccess(AdvertiseSettings? settingsInEffect)
         {
-            _ = _eventApi.SendEventAsync("BLE", "BLE Advertising started.");
+            if (_userViewModel.ExtendedApiLogging)
+                _ = _eventApi.SendEventAsync("BLE", "BLE Advertising started.");
             System.Diagnostics.Debug.WriteLine("BLE Advertising started.");
         }
 
         public override void OnStartFailure(AdvertiseFailure errorCode)
         {
-            _ = _eventApi.SendEventAsync("BLE", $"BLE Advertising failed: {errorCode}");
+            if (_userViewModel.ExtendedApiLogging)
+                _ = _eventApi.SendEventAsync("BLE", $"BLE Advertising failed: {errorCode}");
             System.Diagnostics.Debug.WriteLine($"BLE Advertising failed: {errorCode}");
         }
     }

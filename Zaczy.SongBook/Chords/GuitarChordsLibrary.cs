@@ -171,6 +171,13 @@ public class GuitarChordsLibrary: IChordsLibrary
                 chord.Tones.Add(new GuitarChordTone(1, 3, 2));  // struna 5, palec 3, próg 3
                 break;
 
+            case "d7":
+                chord = new GuitarChord("d7", openStrings: new HashSet<int> { 4 }, mutedStrings: new HashSet<int> { 5, 6 });
+                chord.Tones.Add(new GuitarChordTone(1, 2, 1));  // struna 1, palec 1, próg 1
+                chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna 4, palec 2, próg 2
+                chord.Tones.Add(new GuitarChordTone(3, 3, 2));  // struna 5, palec 3, próg 3
+                break;
+
 
             case "Dis":
                 if(variation == "xx1232")

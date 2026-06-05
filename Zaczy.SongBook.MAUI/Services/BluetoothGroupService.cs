@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
+using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Services;
 
@@ -17,19 +18,21 @@ public partial class BluetoothGroupService : IBluetoothGroupService
     private Action<int>? _onSongIdReceived;
     private readonly EventApi _eventApi;
     private CancellationTokenSource? _scanCts;
+    private readonly UserViewModel _userViewModel;
 
-    public BluetoothGroupService(EventApi eventApi)
+    public BluetoothGroupService(EventApi eventApi, UserViewModel userViewModel)
     {
         _ble = CrossBluetoothLE.Current;
         _adapter = CrossBluetoothLE.Current.Adapter;
 
         // NIE ustawiaj ScanTimeout = 0 — Plugin.BLE traktuje to jako "skanuj przez 0ms"
         // int.MaxValue = praktycznie nieskoñczone skanowanie (~24 dni)
-        _adapter.ScanTimeout = 10_000;
+        _adapter.ScanTimeout = 600_000;
 
         _adapter.DeviceAdvertised += OnDeviceAdvertised;
         _adapter.DeviceDiscovered += OnDeviceAdvertised;
         _eventApi = eventApi;
+        _userViewModel = userViewModel;
     }
 
     /// <inheritdoc/>
@@ -37,11 +40,13 @@ public partial class BluetoothGroupService : IBluetoothGroupService
     {
         _onSongIdReceived = onSongIdReceived;
 
-        _ = _eventApi.SendEventAsync("BLE_SCAN", $"BLE State: {_ble.State}, starting scan...");
+        if(_userViewModel.ExtendedApiLogging)
+            _ = _eventApi.SendEventAsync("BLE_SCAN", $"BLE State: {_ble.State}, starting scan...");
 
         if (_ble.State != BluetoothState.On)
         {
-            _ = _eventApi.SendEventAsync("BLE_SCAN", $"BLE not ready, state={_ble.State}");
+            if (_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"BLE not ready, state={_ble.State}");
             return Task.CompletedTask;
         }
 
@@ -53,13 +58,15 @@ public partial class BluetoothGroupService : IBluetoothGroupService
         {
             try
             {
-                _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan loop started.");
+                if (_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan loop started.");
 
                 // Pêtla: po ka¿dym zakoñczeniu skanu (timeout) startuj ponownie
                 // dopóki token nie jest anulowany
                 while (!token.IsCancellationRequested)
                 {
-                    _ = _eventApi.SendEventAsync("BLE_SCAN", "Starting scan iteration...");
+                    if (_userViewModel.ExtendedApiLogging)
+                        _ = _eventApi.SendEventAsync("BLE_SCAN", "Starting scan iteration...");
 
                     await _adapter.StartScanningForDevicesAsync(
                         serviceUuids: null,
@@ -71,16 +78,19 @@ public partial class BluetoothGroupService : IBluetoothGroupService
 
                     if (!token.IsCancellationRequested)
                     {
-                        _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan iteration ended, restarting in 500ms...");
+                        if (_userViewModel.ExtendedApiLogging)
+                            _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan iteration ended, restarting in 500ms...");
                         await Task.Delay(500, token); // krótka przerwa przed kolejn¹ iteracj¹
                     }
                 }
 
-                _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan loop exited.");
+                if (_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan loop exited.");
             }
             catch (OperationCanceledException)
             {
-                _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan cancelled.");
+                if (_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE_SCAN", "Scan cancelled.");
             }
             catch (Exception ex)
             {
@@ -107,13 +117,15 @@ public partial class BluetoothGroupService : IBluetoothGroupService
     {
         var records = e.Device.AdvertisementRecords;
 
-        _ = _eventApi.SendEventAsync("BLE_SCAN", $"Device: {e.Device.Name ?? "N/A"} [{e.Device.Id}], records: {records?.Count ?? -1}");
+        if (_userViewModel.ExtendedApiLogging)
+            _ = _eventApi.SendEventAsync("BLE_SCAN", $"Device: {e.Device.Name ?? "N/A"} [{e.Device.Id}], records: {records?.Count ?? -1}");
 
         if (records == null) return;
 
         foreach (var record in records)
         {
-            _ = _eventApi.SendEventAsync("BLE_SCAN", $"  type={record.Type} len={record.Data?.Length ?? -1} hex={ToHex(record.Data)}");
+            if (_userViewModel.ExtendedApiLogging)
+                _ = _eventApi.SendEventAsync("BLE_SCAN", $"  type={record.Type} len={record.Data?.Length ?? -1} hex={ToHex(record.Data)}");
 
             if (record.Type == Plugin.BLE.Abstractions.AdvertisementRecordType.ManufacturerSpecificData
                 && record.Data?.Length >= 6)
@@ -121,11 +133,13 @@ public partial class BluetoothGroupService : IBluetoothGroupService
                 var companyId = BitConverter.ToUInt16(record.Data, 0);
                 var songId    = BitConverter.ToInt32(record.Data, 2);
 
-                _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData companyId=0x{companyId:X4} songId={songId}");
+                if (_userViewModel.ExtendedApiLogging)
+                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData companyId=0x{companyId:X4} songId={songId}");
 
                 if (companyId == 0x1234 && songId > 0)
                 {
-                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} received!");
+                    if (_userViewModel.ExtendedApiLogging)
+                        _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} received!");
                     _onSongIdReceived?.Invoke(songId);
                     return;
                 }

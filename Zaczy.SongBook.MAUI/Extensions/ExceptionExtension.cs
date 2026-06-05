@@ -30,6 +30,6 @@ public static class ExceptionExtension
             message += $"\nSzczegóły\n: {moreDetails}";
 
         if(eventApi != null)
-            _ = eventApi.SendEventAsync($"exception{eventPostfix}", message);
+            await eventApi.SendEventAsync($"exception{eventPostfix}", message);
     }
 }

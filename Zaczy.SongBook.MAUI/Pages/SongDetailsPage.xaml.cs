@@ -39,19 +39,19 @@ public partial class SongDetailsPage : ContentPage
     private bool _isSubscribed;
     private VisualizationCssOptions _visualizationCssOptions;
     private bool _previousKeepScreenOn;
-    
+
     private readonly EventApi _eventApi;
     private readonly SongRepositoryLite _songRepository;
     private readonly Settings _settings;
     private readonly IAudioManager _audioManager; // Dodaj to
-    
+
     private bool _suppressTopTouch;
     private IAudioPlayer? _deezerPlayer; // Zmień na IAudioPlayer
     private bool _isDeezerLoading = false;
 
     public UserViewModel UserViewModel => _userViewModel;
     public SongEntity Song => _songEntity;
-    
+
     private DeezerSummary? _deezerSummary;
     private int _currentToneAdjustLevel;
 
@@ -85,10 +85,10 @@ public partial class SongDetailsPage : ContentPage
     /// <param name="audioManager"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public SongDetailsPage(
-        SongEntity songEntity, 
-        UserViewModel userViewModel, 
-        EventApi eventApi, 
-        SongRepositoryLite songRepository, 
+        SongEntity songEntity,
+        UserViewModel userViewModel,
+        EventApi eventApi,
+        SongRepositoryLite songRepository,
         Settings settings,
         IAudioManager audioManager,
         SongCustomSettingsRepositoryLite customSettingsRepository,
@@ -102,14 +102,14 @@ public partial class SongDetailsPage : ContentPage
         _eventApi = eventApi;
         _songRepository = songRepository ?? throw new ArgumentNullException(nameof(songRepository));
         _settings = settings;
-        _audioManager = audioManager; 
+        _audioManager = audioManager;
         _customSettingsRepository = customSettingsRepository;
         _singingGroupRepositoryLite = singingGroupRepositoryLite;
         //_bluetoothGroupService = bluetoothGroupService;
         _listenersGroupBroadcastService = listenersGroupBroadcastService;
 
 
-        _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin || 
+        _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin ||
             _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail, _settings.ApiBaseUrl).Result;
 
         _visualizationCssOptions = new VisualizationCssOptions();
@@ -117,13 +117,13 @@ public partial class SongDetailsPage : ContentPage
 
         _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.LockOpen, IconColor = Colors.Green };
         _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.BluetoothSearching20, IconColor = Colors.Green };
-        
+
         InitializeComponent();
-        
+
         _visualizationCssOptions.Add(".lyrics-line", "font-family", "PoltawskiVariable");
         _visualizationCssOptions.Add("pre", "font-weight", "600");
 
-        if(DeviceInfo.Idiom == DeviceIdiom.Tablet)
+        if (DeviceInfo.Idiom == DeviceIdiom.Tablet)
         {
             _visualizationCssOptions.Add("body", "padding-top", "30px");
         }
@@ -155,7 +155,7 @@ public partial class SongDetailsPage : ContentPage
 
         // initialize fonts and then generate initial HTML
         _ = InitializeAsync();
-        }
+    }
 
     /// <summary>
     /// Dopasuj css dla trybu ciemnego
@@ -336,6 +336,8 @@ public partial class SongDetailsPage : ContentPage
 
         StartGroupPolling();
 
+        //if (_listenersGroupBroadcastService != null)
+        //    _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
     }
 
     /// <summary>
@@ -344,9 +346,12 @@ public partial class SongDetailsPage : ContentPage
     protected override void OnDisappearing()
     {
 
+        //if (_listenersGroupBroadcastService != null)
+        //    _listenersGroupBroadcastService.OnSongProposedForDirector = null;
+
         StopGroupPolling();
 
-        if(GroupSongId != null)
+        if (GroupSongId != null)
             _userViewModel?.AddToRejectedLeaderProposals(_songEntity.Id);
 
         base.OnDisappearing();
@@ -415,7 +420,7 @@ public partial class SongDetailsPage : ContentPage
     /// Do not attempt to evaluate JS immediately — wait for Navigated (OnLyricsWebViewNavigated).
     /// </summary>
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously        
-    private async Task RegenerateHtmlAsync(Song? _song=null)
+    private async Task RegenerateHtmlAsync(Song? _song = null)
     {
         try
         {
@@ -438,7 +443,7 @@ public partial class SongDetailsPage : ContentPage
             // set the HTML; wait for Navigated event to apply font-size via JS
             LyricsWebView.Source = new HtmlWebViewSource { Html = htmlDocument };
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             string msg = ex.Message;
 
@@ -607,12 +612,12 @@ public partial class SongDetailsPage : ContentPage
             _songEntity.SongDurationTxt = _deezerSummary?.DurationTxt;
         }
 
-        int songDuration = _songEntity?.SongDuration ?? 3 * 60; 
+        int songDuration = _songEntity?.SongDuration ?? 3 * 60;
 
         try
         {
             var posStr = await LyricsWebView.EvaluateJavaScriptAsync("window.getScrollPosition().toString();");
-            var remainingLyricsInfo = await GetRemainingScrollInfoAsync(); 
+            var remainingLyricsInfo = await GetRemainingScrollInfoAsync();
             if (double.TryParse(posStr?.Trim('"'), out var pos))
             {
                 if (pos == 0 || true)
@@ -652,8 +657,8 @@ public partial class SongDetailsPage : ContentPage
 
                         // mianownik: czas efektywny (nigdy nie < 1s)
                         double effectiveDuration = Math.Max(1.0, songDuration - rampCorrection);
-                        
-                        if(!_userViewModel.ScrollingStartCompensate)
+
+                        if (!_userViewModel.ScrollingStartCompensate)
                             effectiveDuration = songDuration;
 
                         _currentSongScrollSpeed = double.Round(remainingLyricsInfo.RemainingPx / effectiveDuration, 2);
@@ -673,7 +678,7 @@ public partial class SongDetailsPage : ContentPage
                 else
                 {
                     var topLineInfo = await GetTopVisibleLineExampleAsync();
-                    if(topLineInfo?.TotalLines > 0 && remainingLyricsInfo != null)
+                    if (topLineInfo?.TotalLines > 0 && remainingLyricsInfo != null)
                     {
                         // estimate total document height based on current scrollTop and remainingPercent
                         var estimatedDocHeight = (topLineInfo.ScrollTop * 100) / (100 - remainingLyricsInfo.RemainingPercent);
@@ -694,8 +699,8 @@ public partial class SongDetailsPage : ContentPage
                 _currentSongScrollSpeed = remainingLyricsInfo != null ? (int)(remainingLyricsInfo.RemainingPx / songDuration) : 30;
                 await LyricsWebView.EvaluateJavaScriptAsync($"startAutoScroll({_currentSongScrollSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)}, 0, {_songEntity!.ScrollingDelay ?? 0}, '{_songEntity.ScrollingStartFunction ?? "quad"}');");
             }
-            
-            
+
+
             _userViewModel.ScrollingInProgress = true;
 
             if (_userViewModel.ShowDiagnostics && _userViewModel.IsAdmin)
@@ -960,13 +965,13 @@ public partial class SongDetailsPage : ContentPage
             }
         };
 
-        if(_userViewModel.LyricsDarkMode == true)
+        if (_userViewModel.LyricsDarkMode == true)
         {
             var lyricsDarkText = Application.Current?.Resources["LyricsDarkText"] as Color;
             visualization.VisualizationOptions.ChordDiagramColor = lyricsDarkText?.ToHex();
         }
 
-        if(fontsPath != null)
+        if (fontsPath != null)
             visualization.CssFontsPath = fontsPath;
 
         return visualization;
@@ -1018,7 +1023,7 @@ public partial class SongDetailsPage : ContentPage
                 json = json.Replace("\\\"", "\"");
                 json = json.Replace("\\\\", "\\");
             }
-            else 
+            else
             {
                 json = json.Replace("\\\"", "\"");
                 json = json.Replace("\\\\", "\\");
@@ -1068,7 +1073,7 @@ public partial class SongDetailsPage : ContentPage
     {
         try
         {
-            var editPage = new SongBook.MAUI.Pages.SongWebEditPage(_songEntity, _userViewModel,  _settings, _songRepository);
+            var editPage = new SongBook.MAUI.Pages.SongWebEditPage(_songEntity, _userViewModel, _settings, _songRepository);
             await Navigation.PushAsync(editPage);
         }
         catch (Exception ex)
@@ -1083,8 +1088,8 @@ public partial class SongDetailsPage : ContentPage
         {
             if (_deezerPlayer != null)
             {
-                if(UserViewModel.DeezerPlaying == true)
-                    {
+                if (UserViewModel.DeezerPlaying == true)
+                {
                     // Zatrzymaj odtwarzanie
                     //_deezerPlayer.Stop();
                     //_deezerPlayer.Dispose();
@@ -1094,7 +1099,7 @@ public partial class SongDetailsPage : ContentPage
                     //CleanupDeezerTempFile();
                     return;
                 }
-                else if(UserViewModel.DeezerPlaying == false)
+                else if (UserViewModel.DeezerPlaying == false)
                 {
                     UserViewModel.DeezerPlaying = true;
                     _deezerPlayer.Play();
@@ -1112,7 +1117,7 @@ public partial class SongDetailsPage : ContentPage
                 if (_deezerSummary?.DeezerTrack != null)
                 {
                     _isDeezerLoading = true;
-                    MainThread.BeginInvokeOnMainThread(async () => { while (_isDeezerLoading) { DeezerPlayer.Opacity = 1; await DeezerPlayer.RotateYTo(180, 1500); await DeezerPlayer.RotateYTo(-180, 1500); }  DeezerPlayer.CancelAnimations(); });
+                    MainThread.BeginInvokeOnMainThread(async () => { while (_isDeezerLoading) { DeezerPlayer.Opacity = 1; await DeezerPlayer.RotateYTo(180, 1500); await DeezerPlayer.RotateYTo(-180, 1500); } DeezerPlayer.CancelAnimations(); });
 
                     UserViewModel.DeezerPlayerActive = true;
                     var deezerService = new DeezerService(_userViewModel.DeezerArl);
@@ -1296,8 +1301,8 @@ public partial class SongDetailsPage : ContentPage
 
         //if (_settings.ListeningGroupCheckInterval > 0 && false)
         //    _ = RunGroupPollingAsync(_pollingCts.Token);
-        
-        if(_listenersGroupBroadcastService != null)
+
+        if (_listenersGroupBroadcastService != null)
             _listenersGroupBroadcastService.StartGroupPolling();
 
     }
@@ -1324,7 +1329,7 @@ public partial class SongDetailsPage : ContentPage
     /// </summary>
     private async Task RunGroupPollingAsync(CancellationToken ct)
     {
-        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
+        if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
             return;
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(_settings.ListeningGroupCheckInterval));
@@ -1345,7 +1350,7 @@ public partial class SongDetailsPage : ContentPage
     /// <returns></returns>
     private async Task CheckGroupStatusAsync()
     {
-        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
+        if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
             return;
 
         try
@@ -1355,7 +1360,7 @@ public partial class SongDetailsPage : ContentPage
             if (groupSongId == null || groupSongId == _songEntity.Id || _userViewModel.RejectedLeaderProposals.Contains((int)groupSongId))
                 return;
 
-            if(_songRepository == null)
+            if (_songRepository == null)
                 return;
 
             var song = await _songRepository.GetByIdAsync((int)groupSongId);
@@ -1364,16 +1369,25 @@ public partial class SongDetailsPage : ContentPage
 
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                var newPage = new SongDetailsPage(
-                    song, _userViewModel, _eventApi,
-                    _songRepository, _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService)
+                if (_listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent)
                 {
-                    GroupSongId = song.Id
-                };
+                    // Dyrygent: pokaż baner z propozycją zamiast od razu nawigować
+                    await ShowSongProposalAsync(song);
+                }
+                else
+                {
+                    // Artysta: nawiguj bezpośrednio
+                    var newPage = new SongDetailsPage(
+                        song, _userViewModel, _eventApi,
+                        _songRepository, _settings, _audioManager,
+                        _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService)
+                    {
+                        GroupSongId = song.Id
+                    };
 
-                var stack = Navigation.NavigationStack;
-                Navigation.InsertPageBefore(newPage, this);
-                await Navigation.PopAsync(animated: false);
+                    Navigation.InsertPageBefore(newPage, this);
+                    await Navigation.PopAsync(animated: false);
+                }
             });
         }
         catch (Exception ex)
@@ -1397,7 +1411,7 @@ public partial class SongDetailsPage : ContentPage
 
     private async Task ShowSendToListenersPanelAsync()
     {
-        if(_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
+        if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
             return;
 
         _hideSendToListenersTimer?.Stop();
@@ -1445,7 +1459,8 @@ public partial class SongDetailsPage : ContentPage
             {
                 if (_listenersGroupBroadcastService?.BluetoothGroupService != null)
                 {
-                    _ = _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
+                    if(_userViewModel.ExtendedApiLogging)
+                        _ = _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
                     await _listenersGroupBroadcastService.BluetoothGroupService.StopAdvertisingAsync();
                     await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id);
                 }
@@ -1476,5 +1491,70 @@ public partial class SongDetailsPage : ContentPage
             _ = _eventApi.SendEventAsync("Bluetooth", $"OnSendSongToListenersClicked error: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"OnSendSongToListenersClicked error: {ex.Message}");
         }
+    }
+
+    // ── Propozycja zmiany piosenki dla Dyrygenta ───────────────────────────
+    private SongEntity? _pendingProposedSong;
+
+    /// <summary>
+    /// Pokaż baner z propozycją zmiany piosenki. Wywoływane gdy Dyrygent otrzyma sygnał o nowej piosence.
+    /// </summary>
+    private async Task ShowSongProposalAsync(SongEntity proposedSong)
+    {
+        _pendingProposedSong = proposedSong;
+
+        SongProposalLabel.Text = $"Propozycja: {proposedSong.Title}";
+        SongProposalBanner.IsVisible = true;
+        SongProposalBanner.Opacity = 0;
+        await SongProposalBanner.FadeTo(1, 250);
+    }
+
+    /// <summary>
+    /// Dyrygent zaakceptował propozycję — przejdź do zaproponowanej piosenki.
+    /// </summary>
+    private async void OnSongProposalAccepted(object sender, EventArgs e)
+    {
+        if (_pendingProposedSong == null) return;
+
+        var song = _pendingProposedSong;
+        _pendingProposedSong = null;
+
+        await HideSongProposalBannerAsync();
+
+        var newPage = new SongDetailsPage(
+            song, _userViewModel, _eventApi,
+            _songRepository, _settings, _audioManager,
+            _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService)
+        {
+            GroupSongId = song.Id
+        };
+
+        Navigation.InsertPageBefore(newPage, this);
+        await Navigation.PopAsync(animated: false);
+    }
+
+    /// <summary>
+    /// Dyrygent odrzucił propozycję — ukryj baner i dodaj do listy odrzuconych.
+    /// </summary>
+    private async void OnSongProposalRejected(object sender, EventArgs e)
+    {
+        if (_pendingProposedSong != null)
+        {
+            _userViewModel.AddToRejectedLeaderProposals(_pendingProposedSong.Id);
+            _pendingProposedSong = null;
+        }
+
+        await HideSongProposalBannerAsync();
+    }
+
+    private async Task HideSongProposalBannerAsync()
+    {
+        await SongProposalBanner.FadeTo(0, 200);
+        SongProposalBanner.IsVisible = false;
+    }
+
+    private void OnSongProposedForDirectorCallback(SongEntity proposedSong)
+    {
+        _ = ShowSongProposalAsync(proposedSong);
     }
 }

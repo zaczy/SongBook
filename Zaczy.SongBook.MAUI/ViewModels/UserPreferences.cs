@@ -39,4 +39,6 @@ public class UserPreferences
     public bool BroadcastWeb { get; set; } = true;
     public bool BroadcastBluetooth { get; set; } = true;
     public bool EnableGroupListeningWhenDirector { get; set; } = true;
+
+    public bool ExtendedApiLogging { get; set; } = false;
 }

@@ -304,8 +304,8 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
 
             if (_listenersGroupBroadcastService != null)
             {
-                if (_listenersGroupBroadcastService?.BtPermissionsDecision != PermissionsDecision.Granted)
-                    await _listenersGroupBroadcastService!.RunBluetoothPollingAsync(requeryForPermissions: true);
+                //if (_listenersGroupBroadcastService?.BtPermissionsDecision != PermissionsDecision.Granted)
+                await _listenersGroupBroadcastService!.RunBluetoothPollingAsync(requeryForPermissions: true);
 
                 _listenersGroupBroadcastService.StartGroupPolling();
             }

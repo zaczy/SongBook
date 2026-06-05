@@ -451,6 +451,23 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool ExtendedApiLogging
+    {
+        get 
+        { 
+            return _prefs?.ExtendedApiLogging ?? false;
+        }
+        set 
+        { 
+            if (_prefs != null && _prefs.ExtendedApiLogging != value)
+            {
+                _prefs.ExtendedApiLogging = value;
+                Save();
+                OnPropertyChanged(nameof(ExtendedApiLogging));
+            }
+        }
+    }
+
     // BaseIcon instances for toggle (MVVM-friendly)
     private readonly BaseIcon _playToggle = new BaseIcon
     {
