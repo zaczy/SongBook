@@ -23,6 +23,8 @@ public interface IBluetoothGroupService
 
     /// <summary>
     /// Zatrzymaj skanowanie.
+    /// WA¯NE: Zawsze wywo³uj z await lub fire-and-forget (_). 
+    /// NIE u¿ywaj .Result ani .Wait() - spowoduje to deadlock!
     /// </summary>
     Task StopScanningAsync();
 }

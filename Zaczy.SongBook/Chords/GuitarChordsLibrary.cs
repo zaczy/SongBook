@@ -242,6 +242,12 @@ public class GuitarChordsLibrary: IChordsLibrary
                 chord.Tones.Add(new GuitarChordTone(4, 3, 3));  // struna 5, palec 3, próg 3
                 break;
 
+            case "Fmaj7":
+                chord = new GuitarChord(name, openStrings: new HashSet<int> { 1 }, mutedStrings: new HashSet<int> { 5, 6 });
+                chord.Tones.Add(new GuitarChordTone(2, 1, 1));  // struna 2, palec 1, próg 1
+                chord.Tones.Add(new GuitarChordTone(3, 2, 2));  // struna 4, palec 2, próg 2
+                chord.Tones.Add(new GuitarChordTone(4, 3, 3));  // struna 5, palec 3, próg 3
+                break;
 
             case "F9/6":
                 chord = new GuitarChord("F9/6") {  MutedStrings = new HashSet<int> { 6, 5 } };
@@ -380,6 +386,13 @@ public class GuitarChordsLibrary: IChordsLibrary
             case "h":
                 chord = StandardChord("a") as GuitarChord;
                 chord!.TransponeUpBar(2);
+                break;
+
+            case "h7":
+                chord = new GuitarChord(name, openStrings: new HashSet<int> { 2, 4 }, mutedStrings: new HashSet<int> { 6 });
+                chord.Tones.Add(new GuitarChordTone(5, 1, 2));  // struna, palec, próg
+                chord.Tones.Add(new GuitarChordTone(3, 2, 2));  // struna, palec, próg
+                chord.Tones.Add(new GuitarChordTone(1, 3, 2));  // struna, palec, próg
                 break;
 
             default:

@@ -155,7 +155,9 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordCDur_ReturnsCorrectSvg()
         {
-            var chord = GuitarChordsLibrary.ChordByAscii("C", "x32010");
+
+            GuitarChordsLibrary library = new GuitarChordsLibrary();
+            var chord = library.ChordByAscii("C", "x32010");
 
             string svg = chord?.ToSvg() ?? String.Empty;
             File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
@@ -172,7 +174,8 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordC5_ReturnsCorrectSvg()
         {
-            var chord = GuitarChordsLibrary.ChordByAscii("C5", "8axxxx");
+            GuitarChordsLibrary library = new GuitarChordsLibrary();
+            var chord = library.ChordByAscii("C5", "8axxxx");
 
             string svg = chord?.ToSvg() ?? String.Empty;
             File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
@@ -188,21 +191,20 @@ namespace Zaczy.SongBook.Tests
         [Test]
         public void GuitarChord_AsciiChordC5s_ReturnsCorrectSvg()
         {
-            var chord = GuitarChordsLibrary.ChordByAscii("C5s", "#80a0000");
+            GuitarChordsLibrary library = new GuitarChordsLibrary();
+            var chord = library.ChordByAscii("C5s", "#80a0000");
 
-            string svg = chord.ToSvg();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}.svg", svg);
+            string svg = chord?.ToSvg() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}.svg", svg);
 
-            svg = chord.ToSvgHorizontal();
-            File.WriteAllText(@$"C:\Tmp\{chord.Name}_poziom.svg", svg);
-
-            Console.WriteLine(chord.ToString());
+            svg = chord?.ToSvgHorizontal() ?? String.Empty;
+            File.WriteAllText(@$"C:\Tmp\{chord?.Name}_poziom.svg", svg);
+            Console.WriteLine(chord!
+                .ToString());
 
             Console.WriteLine(svg);
             Assert.That(!string.IsNullOrEmpty(svg));
         }
-
-
 
         [Test]
         public void GuitarChord_BdurToSvg_ReturnsCorrectSvg()
@@ -254,7 +256,8 @@ namespace Zaczy.SongBook.Tests
 
             foreach(var kv in GuitarChordsLibrary.ChordsDict)
             {
-                var chord = GuitarChordsLibrary.StandardChord(kv.Key, kv.Value);
+                GuitarChordsLibrary library = new GuitarChordsLibrary();
+                var chord = library.StandardChord(kv.Key, kv.Value);
 
                 if (chord != null)
                     Console.WriteLine(chord.ToString());

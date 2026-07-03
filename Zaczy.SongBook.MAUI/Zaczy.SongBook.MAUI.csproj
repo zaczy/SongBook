@@ -44,22 +44,22 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -73,22 +73,22 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.16</ApplicationDisplayVersion>
-	  <ApplicationVersion>16</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
+	  <ApplicationVersion>19</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">

@@ -108,10 +108,6 @@ public partial class SongDetailsPage : ContentPage
         //_bluetoothGroupService = bluetoothGroupService;
         _listenersGroupBroadcastService = listenersGroupBroadcastService;
 
-
-        _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin ||
-            _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail, _settings.ApiBaseUrl).Result;
-
         _visualizationCssOptions = new VisualizationCssOptions();
         _visualization = this.CreateVisualizationOptions();
 
@@ -305,6 +301,8 @@ public partial class SongDetailsPage : ContentPage
     {
         base.OnAppearing();
 
+        _ = InitializeEditPrivilegesAsync();
+
         try
         {
             LyricsWebView.Navigating -= LyricsWebView_Navigating;
@@ -338,6 +336,18 @@ public partial class SongDetailsPage : ContentPage
 
         //if (_listenersGroupBroadcastService != null)
         //    _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
+    }
+
+    /// <summary>
+    /// Uprawienia edycji - sprawdź, czy użytkownik jest redaktorem, adminem lub ma indywidualne uprawnienia do edycji tej piosenki (zapytanie do API).
+    /// </summary>
+    /// <returns></returns>
+    private async Task InitializeEditPrivilegesAsync()
+    {
+        _songEntity.HasEditPrivileges = _userViewModel.IsEditor || _userViewModel.IsAdmin ||
+            await _songEntity.HasUserEditPrivileges(_userViewModel.UserEmail, _settings.ApiBaseUrl);
+
+        OnPropertyChanged(nameof(Song));
     }
 
     /// <summary>
@@ -1493,15 +1503,13 @@ public partial class SongDetailsPage : ContentPage
         }
     }
 
-    // ── Propozycja zmiany piosenki dla Dyrygenta ───────────────────────────
-    private SongEntity? _pendingProposedSong;
-
     /// <summary>
     /// Pokaż baner z propozycją zmiany piosenki. Wywoływane gdy Dyrygent otrzyma sygnał o nowej piosence.
     /// </summary>
     private async Task ShowSongProposalAsync(SongEntity proposedSong)
     {
-        _pendingProposedSong = proposedSong;
+        _userViewModel.PendingProposedSongAdd(proposedSong);
+
 
         SongProposalLabel.Text = $"Propozycja: {proposedSong.Title}";
         SongProposalBanner.IsVisible = true;
@@ -1514,10 +1522,12 @@ public partial class SongDetailsPage : ContentPage
     /// </summary>
     private async void OnSongProposalAccepted(object sender, EventArgs e)
     {
-        if (_pendingProposedSong == null) return;
+        //if (_pendingProposedSong == null) return;
 
-        var song = _pendingProposedSong;
-        _pendingProposedSong = null;
+        //var song = _pendingProposedSong;
+        //_pendingProposedSong = null;
+
+        SongEntity? song = null;
 
         await HideSongProposalBannerAsync();
 

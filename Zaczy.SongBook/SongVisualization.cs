@@ -127,6 +127,10 @@ public class SongVisualization
 
         sb.AppendLine(".block-refren { margin-left: 70px; border-left: 15px solid #F0F0F0; padding-left: 10px; margin-top: 1em; }");
         sb.AppendLine(".block-refren .block-header { display: none; }");
+
+        sb.AppendLine(".block-bridge { margin-left: 70px; padding-left: 35px; margin-top: 1em; }");
+        sb.AppendLine(".block-bridge .block-header { display: none; }");
+
         sb.AppendLine(".block-tabulatura { font-family: 'InconsolataVariable', Consolas, monospace; font-size: 0.8em; line-height: 1.2em; }");
         sb.AppendLine(".block-tabulatura .block-header { display: none; }");
 
@@ -159,7 +163,7 @@ public class SongVisualization
 
         sb.AppendLine("     .block-refren { margin-left: 5px; border-left: 13px solid #F0F0F0; padding-left: 5px; }");
         sb.AppendLine("     .block-refren .block-header { display: none; }");
-        sb.AppendLine("     .block-bridge { margin-left: 10px; }");
+        sb.AppendLine("     .block-bridge { margin-left: 15px; }");
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
@@ -186,7 +190,10 @@ public class SongVisualization
         {
             if (!string.IsNullOrEmpty(song.LyricsAuthor))
             {
-                songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
+                if(song.LyricsAuthor.StartsWith("tł.") || song.LyricsAuthor.StartsWith("tłum."))
+                    songMetadata += $"<div class=\"lyrics-author\">{song.LyricsAuthor}</div>";
+                else
+                    songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";
             }
             if (!string.IsNullOrEmpty(song.MusicAuthor))
             {

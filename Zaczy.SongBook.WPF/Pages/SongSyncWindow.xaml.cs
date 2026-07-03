@@ -108,8 +108,6 @@ public partial class SongSyncWindow : MetroWindow
             message += $"\"{s.SongTitle} (id: API {s.ApiSong?.Id}, local {s.BaseSongEntity?.Id})\"";
         }
 
-        MessageBox.Show(message);
-
         if (!string.IsNullOrEmpty(_viewModel.AppSettings.Settings.ApiBaseUrl) && !string.IsNullOrEmpty(_viewModel.AppSettings.ConnectionStrings.SongBookDb))
         {
             SongApi songApi = new SongApi(_viewModel.AppSettings.Settings.ApiBaseUrl);

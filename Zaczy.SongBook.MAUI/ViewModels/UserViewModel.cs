@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Zaczy.Songbook.MAUI.Services;
 using Zaczy.SongBook.Api;
+using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Enums;
 using Zaczy.SongBook.Extensions;
 using Zaczy.SongBook.MAUI.Services;
@@ -589,6 +590,26 @@ public class UserViewModel : INotifyPropertyChanged
     }
 
 
+    private List<SongEntity>? _pendingProposedSongs;
+    /// <summary>
+    /// Lista propozycji piosenek, które zostały zaproponowane przez innych dyrygentów
+    /// </summary>
+    public List<SongEntity>? PendingProposedSongs
+    {
+        get => _pendingProposedSongs;
+        set
+        {
+            if (_pendingProposedSongs != value)
+            {
+                _pendingProposedSongs = value;
+                OnPropertyChanged(nameof(PendingProposedSongs));
+                OnPropertyChanged(nameof(PendingProposedSongsExist));
+            }
+        }
+    }
+
+    public bool PendingProposedSongsExist => PendingProposedSongs != null && PendingProposedSongs.Count > 0;
+
 
     /// <summary>
     /// Przeprowadź proces logowania lub wylogowania użytkownika. 
@@ -818,4 +839,13 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 
+    public void PendingProposedSongAdd(SongEntity proposedSong)
+    {
+        if (PendingProposedSongs == null)
+            PendingProposedSongs = new List<SongEntity>();
+
+        PendingProposedSongs.Add(proposedSong);
+        OnPropertyChanged(nameof(PendingProposedSongs));
+        OnPropertyChanged(nameof(PendingProposedSongsExist));
+    }
 }

@@ -10,7 +10,7 @@
         Loaded="Window_Loaded"
         Title="SongBook" 
         Height="1000" 
-        Width="1800"
+        Width="1600"
         WindowStartupLocation="CenterScreen"
         GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
         BorderThickness="1"
