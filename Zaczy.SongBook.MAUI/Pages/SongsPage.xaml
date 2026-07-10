@@ -6,6 +6,7 @@
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:models="clr-namespace:Zaczy.SongBook;assembly=Zaczy.SongBook"
     xmlns:data="clr-namespace:Zaczy.SongBook.Data;assembly=Zaczy.SongBook"
+    xmlns:pages="clr-namespace:Zaczy.SongBook.MAUI.Pages"
     x:DataType="vm:SongListViewModel"            
     x:Class="Zaczy.SongBook.MAUI.Pages.SongsPage"
     x:Name="Root"
@@ -19,7 +20,7 @@
     </ContentPage.ToolbarItems>
 
     <ContentPage.Content>
-        <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
             <!-- Filters -->
             <StackLayout 
                 Orientation="Horizontal" 
@@ -68,7 +69,7 @@
             </StackLayout>
             
             <!-- Empty state message -->
-            <Label Grid.Row="2"
+            <Label Grid.Row="3"
                    Text="Brak piosenek do wyświetlenia. Przejdź do 'Katalogi piosenek' i wybierz jeden lub więcej katalogów piosenek do pobrania z serwera."
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
@@ -84,10 +85,107 @@
                 </Label.Triggers>
             </Label>
 
+            <!-- Lista propozycji zmiany piosenki (widoczna dla Dyrygenta) -->
+            <Border
+                x:Name="SongProposalsList"
+                Grid.Row="2"
+                Grid.RowSpan="1"
+                IsVisible="{Binding UserViewModel.PendingProposedSongsExist}"
+                BackgroundColor="#761610"
+                Grid.ColumnSpan="4"
+                StrokeThickness="0"
+                Opacity="1"
+                Padding="8,6"
+                Margin="0,2,0,20"
+                ZIndex="10">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <!--<Border.Background>
+                    <SolidColorBrush Color="{StaticResource Primary}" />
+                </Border.Background>--> 
+                <!--<Border.Triggers>
+                    <DataTrigger TargetType="Border" 
+                                 Binding="{Binding Source={x:Reference Root}, Path=UserViewModel.PendingProposedSongsExist}" 
+                                 Value="True">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </Border.Triggers>-->
+
+                <Grid RowDefinitions="Auto,Auto">
+                    <!-- Nagłówek -->
+                    <Label
+                        Grid.Row="0"
+                        Text="{Binding UserViewModel.PendingProposedSongs.Count, StringFormat='Propozycje ({0})'}"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="#90EE90"
+                        Margin="4,0,0,4" />
+
+                    <!-- Lista propozycji -->
+                    <CollectionView
+                        Grid.Row="1"
+                        ItemsSource="{Binding UserViewModel.PendingProposedSongs}"
+                        MaximumHeightRequest="200">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="data:SongEntity">
+                                <Grid 
+                                    ColumnDefinitions="*,Auto,Auto" 
+                                    Padding="4,3"
+                                    BackgroundColor="#22FFFFFF"
+                                    Margin="0,2">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnProposalItemTapped"  NumberOfTapsRequired="1"/>
+                                    </Grid.GestureRecognizers>
+
+                                    <!-- Informacja o piosence -->
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label
+                                            Text="{Binding Title}"
+                                            FontSize="13"
+                                            FontAttributes="Bold"
+                                            TextColor="White"
+                                            LineBreakMode="TailTruncation" />
+                                        <Label
+                                            Text="{Binding Artist}"
+                                            FontSize="11"
+                                            TextColor="#CCC"
+                                            LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Przycisk akceptacji -->
+                                    <ImageButton
+                                        Grid.Column="1"
+                                        Source="{mi:Fluent Checkmark24, IconSize=20, IconColor=#90EE90}"
+                                        BackgroundColor="Transparent"
+                                        MinimumHeightRequest="36"
+                                        MinimumWidthRequest="36"
+                                        Margin="4,0,0,0"
+                                        Clicked="OnSongProposalAccepted"
+                                        CommandParameter="{Binding .}" />
+
+                                    <!-- Przycisk odrzucenia -->
+                                    <ImageButton
+                                        Grid.Column="2"
+                                        Source="{mi:Fluent Dismiss24, IconSize=20, IconColor=#FF6B6B}"
+                                        BackgroundColor="Transparent"
+                                        MinimumHeightRequest="36"
+                                        MinimumWidthRequest="36"
+                                        Margin="2,0,0,0"
+                                        Clicked="OnSongProposalRejected"
+                                        CommandParameter="{Binding .}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+
+
             <!-- List -->
             <CollectionView ItemsSource="{Binding Songs}" 
                             SelectionMode="Single" 
-                            Grid.Row="2" 
+                            Grid.Row="3" 
                             x:Name="SongsCollection" 
                             Margin="12,20,12,10"
                             IsVisible="{Binding HasSongs}">
@@ -113,7 +211,7 @@
             </CollectionView>
 
             <Grid
-                Grid.Row="3">
+                Grid.Row="4">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -129,18 +227,6 @@
                 Margin="10,0,10,0"
                 />
 
-            <!--<ImageButton 
-                Source="{mi:Fluent BluetoothSearching20, IconSize=20, IconColor={AppThemeBinding Light=#761610, Dark=#b66650}}"
-                x:Name="BTTestButton"
-                Grid.Row="3"
-                HorizontalOptions="End"
-                MinimumHeightRequest="22"
-                MinimumWidthRequest="22"
-                BackgroundColor="Transparent"
-                Grid.Column="1"
-                Margin="0,0,10,0"
-                Clicked="OnBluetoothButtonClicked"
-                />-->
 
                 <ImageButton
                     x:Name="GroupsButton"

@@ -119,10 +119,10 @@ public class SingingGroupApi
     /// <param name="songId"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public async Task<SingingGroup> ChangeSongAsync(int groupId, int songId)
+    public async Task<SingingGroup> ChangeSongAsync(int groupId, int songId, string userRole)
     {
         var apiClient = new ApiClient(_baseUrl);
-        var response = await apiClient.PostAsync<SingingGroup, SingingGroup?>($"/songbook-singing-groups/{groupId}/change-current-song", new  SingingGroup { CurrentSongId = songId, LastSetDate = DateTime.Now });
+        var response = await apiClient.PostAsync<SingingGroup, SingingGroup?>($"/songbook-singing-groups/{groupId}/change-current-song", new  SingingGroup { CurrentSongId = songId, LastSetDate = DateTime.Now, CurrentSongUserRole = userRole });
         if (response.IsSuccess && response.Data != null)
         {
             return (SingingGroup)response.Data;

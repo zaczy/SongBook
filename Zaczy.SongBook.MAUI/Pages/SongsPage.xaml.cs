@@ -5,6 +5,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 using Plugin.Maui.Audio;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Zaczy.SongBook;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
@@ -16,10 +19,10 @@ using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages;
 
-public partial class SongsPage : ContentPage
+public partial class SongsPage : ContentPage, INotifyPropertyChanged
 {
     private readonly SongListViewModel _songListViewModel;
-    private readonly UserViewModel _userViewModel;
+    private UserViewModel _userViewModel;
     private readonly EventApi _eventApi;
     private readonly Settings _settings;
     private readonly IAudioManager _audioManager;
@@ -28,9 +31,26 @@ public partial class SongsPage : ContentPage
     private readonly ListenersGroupBroadcastService _listenersGroupBroadcastService;
 
     //private SingingGroupEntity? _currentlySelectedSingingGroup;
-
+    public new event PropertyChangedEventHandler? PropertyChanged;
     public SongListViewModel SongListViewModel => _songListViewModel;
-    public UserViewModel UserViewModel => _userViewModel;
+    //public UserViewModel UserViewModel => _userViewModel;
+    public UserViewModel UserViewModel
+    {
+        get
+        {
+            if (_userViewModel == null)
+                throw new InvalidOperationException("UserViewModel not initialized");
+            return _userViewModel;
+        }
+        set
+        {
+            if (_userViewModel != value)
+            {
+                _userViewModel = value;
+                OnPropertyChanged(nameof(UserViewModel));
+            }
+        }
+    }
     //IBluetoothGroupService? _bluetoothGroupService;
 
     public SongsPage(
@@ -49,10 +69,9 @@ public partial class SongsPage : ContentPage
         _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.ArrowRotateLeft, IconColor = Colors.Green };
         _ = new MauiIcon() { Icon = MauiIcons.Fluent.Filled.FluentFilledIcons.Settings20Filled, IconColor = Colors.Green };
 
-        InitializeComponent();
 
         _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        _userViewModel = viewModel;
+        UserViewModel = viewModel;
         BindingContext = _songListViewModel;
         _eventApi = eventApi;
         _settings = settings.Value;
@@ -61,6 +80,8 @@ public partial class SongsPage : ContentPage
         _singingGroupRepositoryLite = singingGroupRepositoryLite ?? throw new ArgumentNullException(nameof(singingGroupRepositoryLite));
         //_bluetoothGroupService = bluetoothGroupService;
         _listenersGroupBroadcastService = listenersGroupBroadcastService ?? throw new ArgumentNullException(nameof(listenersGroupBroadcastService));
+
+        InitializeComponent();
 
         // register to receive updates
         WeakReferenceMessenger.Default.Register<SongsPage, ValueChangedMessage<SongEntity>>(this, (page, message) =>
@@ -109,6 +130,11 @@ public partial class SongsPage : ContentPage
         _ = this.GetUserDataFromServer();
     }
 
+    protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
     /// <summary>
     /// Pobierz dane użytkownika z serwera (czy jest adminem, edytorem, arl do Deezer) i zaktualizuj ViewModel.
     /// </summary>
@@ -131,7 +157,7 @@ public partial class SongsPage : ContentPage
 
     /// <summary>
     /// Wykonywane, kiedy strona staje się widoczna. Jeśli lista piosenek jest pusta, ładuje je z bazy danych. 
-    /// Dzięki temu dane są odświeżane przy każdym wejściu na stronę, ale tylko jeśli jest to potrzebne (np. po dodaniu nowej piosenki).
+    /// Dzięki temu dane są odświeżane przy każdy wejściu na stronę, ale tylko jeśli jest to potrzebne (np. po dodaniu nowej piosenki).
     /// Jeśli dane są już załadowane, nie wykonuje ponownie operacji ładowania.
     /// </summary>
     protected override async void OnAppearing()
@@ -142,6 +168,9 @@ public partial class SongsPage : ContentPage
 
         if (_songListViewModel.Songs.Count == 0)
             await _songListViewModel.LoadSongsAsync();
+
+        if (_listenersGroupBroadcastService != null)
+            _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
 
         StartGroupPolling();
     }
@@ -237,4 +266,65 @@ public partial class SongsPage : ContentPage
     {
         await _songListViewModel.LoadOtherPage(new SingingGroupsPage(_listenersGroupBroadcastService));
     }
+
+    private async void OnProposalItemTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Grid grid && grid.BindingContext is SongEntity song)
+        {
+            await this.RunSongProposalAccepted(song);
+        }
+
+    }
+
+    /// <summary>
+    /// Akceptacja propozycji piosenki. 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void OnSongProposalAccepted(object sender, EventArgs e)
+    {
+        if (sender is not ImageButton button || button.CommandParameter is not SongEntity song)
+            return;
+
+        await this.RunSongProposalAccepted(song);
+
+        //Navigation.InsertPageBefore(newPage, this);
+        //await Navigation.PopAsync(animated: false);
+    }
+
+    public async Task RunSongProposalAccepted(SongEntity song)
+    {
+        _userViewModel.PendingProposedSongRemove(song);
+
+        var newPage = new SongDetailsPage(
+            song, _userViewModel, _eventApi,
+            _songListViewModel.Repo, _settings, _audioManager,
+            _customSettingsRepository, _singingGroupRepositoryLite, _listenersGroupBroadcastService)
+        {
+            GroupSongId = song.Id
+        };
+
+        await Navigation.PushAsync(newPage);
+    }
+
+    /// <summary>
+    /// Odrzucenie propozycji piosenki. 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnSongProposalRejected(object sender, EventArgs e)
+    {
+        if (sender is not ImageButton button || button.CommandParameter is not SongEntity song)
+            return;
+
+        _userViewModel.AddToRejectedLeaderProposals(song.Id);
+
+        _userViewModel.PendingProposedSongRemove(song);
+    }
+
+    private void OnSongProposedForDirectorCallback(SongEntity proposedSong)
+    {
+        _userViewModel.PendingProposedSongAdd(proposedSong);
+    }
+
 }

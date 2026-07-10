@@ -15,7 +15,7 @@ public partial class BluetoothGroupService : IBluetoothGroupService
 
     private readonly IBluetoothLE _ble;
     private readonly IAdapter _adapter;
-    private Action<int>? _onSongIdReceived;
+    private Action<int, string>? _onSongIdReceived;
     private readonly EventApi _eventApi;
     private CancellationTokenSource? _scanCts;
     private readonly UserViewModel _userViewModel;
@@ -36,7 +36,7 @@ public partial class BluetoothGroupService : IBluetoothGroupService
     }
 
     /// <inheritdoc/>
-    public Task StartScanningAsync(Action<int> onSongIdReceived, CancellationToken ct = default)
+    public Task StartScanningAsync(Action<int, string> onSongIdReceived, CancellationToken ct = default)
     {
         _onSongIdReceived = onSongIdReceived;
 
@@ -50,7 +50,7 @@ public partial class BluetoothGroupService : IBluetoothGroupService
             return Task.CompletedTask;
         }
 
-        // Po³¹cz zewnêtrzny token z wewnêtrznym — StopScanningAsync anuluje _scanCts
+        // Po³¹cz zewnêtrzny token z wewnêtrznym – StopScanningAsync anuluje _scanCts
         _scanCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var token = _scanCts.Token;
 
@@ -131,17 +131,77 @@ public partial class BluetoothGroupService : IBluetoothGroupService
                 && record.Data?.Length >= 6)
             {
                 var companyId = BitConverter.ToUInt16(record.Data, 0);
-                var songId    = BitConverter.ToInt32(record.Data, 2);
-
-                if (_userViewModel.ExtendedApiLogging)
-                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData companyId=0x{companyId:X4} songId={songId}");
-
-                if (companyId == 0x1234 && songId > 0)
+                
+                // Nowy format: sprawdŸ czy dane s¹ tekstem w formacie "songId;role"
+                if (record.Data.Length > 2)
                 {
-                    if (_userViewModel.ExtendedApiLogging)
-                        _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} received!");
-                    _onSongIdReceived?.Invoke(songId);
-                    return;
+                    try
+                    {
+                        // Spróbuj odczytaæ jako tekst ASCII (pomijaj¹c pierwsze 2 bajty - companyId)
+                        var textData = System.Text.Encoding.ASCII.GetString(record.Data, 2, record.Data.Length - 2);
+                        
+                        if (_userViewModel.ExtendedApiLogging)
+                            _ = _eventApi.SendEventAsync("BLE_SCAN", $"  Text data: '{textData}'");
+                        
+                        // Nowy format: "songId;role" (np. "123;A" lub "2;D")
+                        if (textData.Contains(';'))
+                        {
+                            var parts = textData.Split(';');
+                            if (parts.Length >= 2 && int.TryParse(parts[0], out var songId))
+                            {
+                                var role = parts[1];
+                                
+                                if (_userViewModel.ExtendedApiLogging)
+                                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData (new format) companyId=0x{companyId:X4} songId={songId} role={role}");
+
+                                if (companyId == 0x1234 && songId > 0)
+                                {
+                                    if (_userViewModel.ExtendedApiLogging)
+                                        _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} role={role} received!");
+                                    _onSongIdReceived?.Invoke(songId, role);
+                                    return;
+                                }
+                            }
+                        }
+                        // Stary format: brak œrednika, spróbuj odczytaæ jako liczbê binarn¹ (wsteczna kompatybilnoœæ)
+                        else if (record.Data.Length >= 6)
+                        {
+                            var songId = BitConverter.ToInt32(record.Data, 2);
+
+                            if (_userViewModel.ExtendedApiLogging)
+                                _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData (old format) companyId=0x{companyId:X4} songId={songId}");
+
+                            if (companyId == 0x1234 && songId > 0)
+                            {
+                                if (_userViewModel.ExtendedApiLogging)
+                                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} received (backward compatibility)!");
+                                _onSongIdReceived?.Invoke(songId, "Unknown"); // Dla wstecznej kompatybilnoœci przeka¿ "Unknown"
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Jeœli nie uda³o siê odczytaæ jako tekst, spróbuj starego formatu binarnego
+                        if (_userViewModel.ExtendedApiLogging)
+                            _ = _eventApi.SendEventAsync("BLE_SCAN", $"  Error parsing text data: {ex.Message}, trying old format...");
+                        
+                        if (record.Data.Length >= 6)
+                        {
+                            var songId = BitConverter.ToInt32(record.Data, 2);
+
+                            if (_userViewModel.ExtendedApiLogging)
+                                _ = _eventApi.SendEventAsync("BLE_SCAN", $"  ManufData (fallback to old format) companyId=0x{companyId:X4} songId={songId}");
+
+                            if (companyId == 0x1234 && songId > 0)
+                            {
+                                if (_userViewModel.ExtendedApiLogging)
+                                    _ = _eventApi.SendEventAsync("BLE_SCAN", $"  >>> SongBook songId={songId} received (backward compatibility)!");
+                                _onSongIdReceived?.Invoke(songId, "Unknown"); // Dla wstecznej kompatybilnoœci przeka¿ "Unknown"
+                                return;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -151,11 +211,11 @@ public partial class BluetoothGroupService : IBluetoothGroupService
         => data == null ? "null" : BitConverter.ToString(data).Replace("-", "");
 
     // Advertising jest platform-specific — patrz BluetoothGroupService.android.cs
-    public partial Task StartAdvertisingAsync(int songId, CancellationToken ct = default);
+    public partial Task StartAdvertisingAsync(int songId, string rolePostfix, CancellationToken ct = default);
     public partial Task StopAdvertisingAsync();
 
 #if !ANDROID
-    public partial Task StartAdvertisingAsync(int songId, CancellationToken ct)
+    public partial Task StartAdvertisingAsync(int songId, string rolePostfix, CancellationToken ct)
         => Task.CompletedTask;
 
     public partial Task StopAdvertisingAsync()

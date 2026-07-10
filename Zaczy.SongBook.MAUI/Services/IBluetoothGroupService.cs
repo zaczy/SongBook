@@ -9,7 +9,7 @@ public interface IBluetoothGroupService
     /// <summary>
     /// Rozg³oœ songId przez BLE (rola Dyrygenta).
     /// </summary>
-    Task StartAdvertisingAsync(int songId, CancellationToken ct = default);
+    Task StartAdvertisingAsync(int songId, string rolePostfix, CancellationToken ct = default);
 
     /// <summary>
     /// Zatrzymaj rozg³aszanie.
@@ -19,7 +19,7 @@ public interface IBluetoothGroupService
     /// <summary>
     /// Rozpocznij nas³uchiwanie na songId od Dyrygenta.
     /// </summary>
-    Task StartScanningAsync(Action<int> onSongIdReceived, CancellationToken ct = default);
+    Task StartScanningAsync(Action<int, string> onSongIdReceived, CancellationToken ct = default);
 
     /// <summary>
     /// Zatrzymaj skanowanie.

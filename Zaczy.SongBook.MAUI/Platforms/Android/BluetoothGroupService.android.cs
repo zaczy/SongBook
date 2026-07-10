@@ -1,6 +1,7 @@
 using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Zaczy.SongBook.Api;
@@ -16,7 +17,7 @@ public partial class BluetoothGroupService
     private BluetoothLeAdvertiser? _advertiser;
     private SongBookAdvertiseCallback? _advertiseCallback;
 
-    public partial Task StartAdvertisingAsync(int songId, CancellationToken ct)
+    public partial Task StartAdvertisingAsync(int songId, string rolePostfix, CancellationToken ct)
     {
         try
         {
@@ -29,12 +30,12 @@ public partial class BluetoothGroupService
 
             if (_advertiser == null)
             {
-                if(_userViewModel.ExtendedApiLogging)
+                if (_userViewModel.ExtendedApiLogging)
                     _ = _eventApi.SendEventAsync("BLE", "Bluetooth LE Advertiser is null.");
                 return Task.CompletedTask;
             }
 
-            var songIdBytes = BitConverter.GetBytes(songId);
+            var songIdBytes = Encoding.ASCII.GetBytes($"{songId};{rolePostfix}");
 
             var settings = new AdvertiseSettings.Builder()
                 .SetAdvertiseMode(AdvertiseMode.LowLatency)!

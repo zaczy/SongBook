@@ -17,7 +17,7 @@ public class UserPreferences
     public bool ShowOnlyCustomChords { get; set; }
     public bool SkipTabulatures { get; set; } = true;
     public bool SkipLyricChords { get; set; }
-    public bool LyricsDarkMode { get; set; }
+    public bool? LyricsDarkMode { get; set; } = null;
     public bool MoveChordsToLyricsLine { get; set; }
 
     // New properties for authentication

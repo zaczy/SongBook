@@ -121,7 +121,7 @@ public partial class SongDetailsPage : ContentPage
 
         if (DeviceInfo.Idiom == DeviceIdiom.Tablet)
         {
-            _visualizationCssOptions.Add("body", "padding-top", "30px");
+            _visualizationCssOptions.Add("body", "padding-top", "9px");
         }
 
         // prepare auto-scroll JS once
@@ -332,10 +332,11 @@ public partial class SongDetailsPage : ContentPage
 
         _ = RegenerateHtmlAsync();
 
+        if (_listenersGroupBroadcastService != null)
+            _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
+
         StartGroupPolling();
 
-        //if (_listenersGroupBroadcastService != null)
-        //    _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
     }
 
     /// <summary>
@@ -356,8 +357,8 @@ public partial class SongDetailsPage : ContentPage
     protected override void OnDisappearing()
     {
 
-        //if (_listenersGroupBroadcastService != null)
-        //    _listenersGroupBroadcastService.OnSongProposedForDirector = null;
+        if (_listenersGroupBroadcastService != null)
+            _listenersGroupBroadcastService.OnSongProposedForDirector = null;
 
         StopGroupPolling();
 
@@ -1421,7 +1422,7 @@ public partial class SongDetailsPage : ContentPage
 
     private async Task ShowSendToListenersPanelAsync()
     {
-        if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
+        if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null)
             return;
 
         _hideSendToListenersTimer?.Stop();
@@ -1459,9 +1460,11 @@ public partial class SongDetailsPage : ContentPage
     {
         try
         {
-            if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null || _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent)
+            if (_listenersGroupBroadcastService?.CurrentlySelectedSingingGroup == null 
+                //|| _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole != SingingGroupRole.Dyrygent
+                )
             {
-                await DisplayAlert("Uwaga", "Musisz być Dyrygentem aktywnej grupy, aby wysłać piosenkę.", "OK");
+                await DisplayAlert("Uwaga", "Musisz być członkiem aktywnej grupy, aby wysłać piosenkę.", "OK");
                 return;
             }
 
@@ -1471,8 +1474,10 @@ public partial class SongDetailsPage : ContentPage
                 {
                     if(_userViewModel.ExtendedApiLogging)
                         _ = _eventApi.SendEventAsync("Bluetooth", $"Wysyłam komunikat Bluetooth songId {_songEntity.Id}");
+                    
+                    string rolePostfix = _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent ? "D" : "A";
                     await _listenersGroupBroadcastService.BluetoothGroupService.StopAdvertisingAsync();
-                    await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id);
+                    await _listenersGroupBroadcastService.BluetoothGroupService.StartAdvertisingAsync(_songEntity.Id, rolePostfix);
                 }
             }
 
@@ -1481,7 +1486,7 @@ public partial class SongDetailsPage : ContentPage
                 try
                 {
                     var api = new SingingGroupApi(_settings.ApiBaseUrl);
-                    _ = api.ChangeSongAsync(_listenersGroupBroadcastService!.CurrentlySelectedSingingGroup.Id, _songEntity.Id);
+                    _ = api.ChangeSongAsync(_listenersGroupBroadcastService!.CurrentlySelectedSingingGroup.Id, _songEntity.Id, _listenersGroupBroadcastService.CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent ? "D" : "A");
                 }
                 catch (Exception ex)
                 {
@@ -1504,17 +1509,29 @@ public partial class SongDetailsPage : ContentPage
     }
 
     /// <summary>
-    /// Pokaż baner z propozycją zmiany piosenki. Wywoływane gdy Dyrygent otrzyma sygnał o nowej piosence.
+    /// Pokaż listę propozycji zmiany piosenki. Wywoływane gdy Dyrygent otrzyma sygnał o nowej piosence.
     /// </summary>
     private async Task ShowSongProposalAsync(SongEntity proposedSong)
     {
         _userViewModel.PendingProposedSongAdd(proposedSong);
 
+        // Animacja pojawienia się listy (jeśli była ukryta)
+        if (SongProposalsList.Opacity == 0)
+        {
+            SongProposalsList.IsVisible = true;
+            await SongProposalsList.FadeTo(1, 250);
+        }
+    }
 
-        SongProposalLabel.Text = $"Propozycja: {proposedSong.Title}";
-        SongProposalBanner.IsVisible = true;
-        SongProposalBanner.Opacity = 0;
-        await SongProposalBanner.FadeTo(1, 250);
+    /// <summary>
+    /// Obsługa tapnięcia w element listy propozycji (opcjonalne - można użyć do podglądu).
+    /// </summary>
+    private async void OnProposalItemTapped(object sender, EventArgs e)
+    {
+        if (sender is Grid grid && grid.BindingContext is SongEntity song)
+        {
+            await this.RunSongProposalAccepted(song);
+        }
     }
 
     /// <summary>
@@ -1522,14 +1539,18 @@ public partial class SongDetailsPage : ContentPage
     /// </summary>
     private async void OnSongProposalAccepted(object sender, EventArgs e)
     {
-        //if (_pendingProposedSong == null) return;
+        if (sender is not ImageButton button || button.CommandParameter is not SongEntity song)
+            return;
 
-        //var song = _pendingProposedSong;
-        //_pendingProposedSong = null;
+        await this.RunSongProposalAccepted(song);
+    }
 
-        SongEntity? song = null;
+    public async Task RunSongProposalAccepted(SongEntity song)
+    {
+        _userViewModel.PendingProposedSongRemove(song);
 
-        await HideSongProposalBannerAsync();
+        if (_userViewModel.PendingProposedSongs?.Count == 0)
+            await HideSongProposalsListAsync();
 
         var newPage = new SongDetailsPage(
             song, _userViewModel, _eventApi,
@@ -1541,30 +1562,43 @@ public partial class SongDetailsPage : ContentPage
 
         Navigation.InsertPageBefore(newPage, this);
         await Navigation.PopAsync(animated: false);
+
     }
 
     /// <summary>
-    /// Dyrygent odrzucił propozycję — ukryj baner i dodaj do listy odrzuconych.
+    /// Dyrygent odrzucił propozycję — usuń z listy i dodaj do odrzuconych.
     /// </summary>
     private async void OnSongProposalRejected(object sender, EventArgs e)
     {
-        if (_pendingProposedSong != null)
-        {
-            _userViewModel.AddToRejectedLeaderProposals(_pendingProposedSong.Id);
-            _pendingProposedSong = null;
-        }
+        if (sender is not ImageButton button || button.CommandParameter is not SongEntity song)
+            return;
 
-        await HideSongProposalBannerAsync();
+        // Dodaj do listy odrzuconych
+        _userViewModel.AddToRejectedLeaderProposals(song.Id);
+
+        // Usuń z listy oczekujących
+        _userViewModel.PendingProposedSongRemove(song);
+
+        // Ukryj listę jeśli pusta
+        if (_userViewModel.PendingProposedSongs?.Count == 0)
+            await HideSongProposalsListAsync();
     }
 
-    private async Task HideSongProposalBannerAsync()
+    private async Task HideSongProposalsListAsync()
     {
-        await SongProposalBanner.FadeTo(0, 200);
-        SongProposalBanner.IsVisible = false;
+        await SongProposalsList.FadeTo(0, 200);
+        SongProposalsList.IsVisible = false;
     }
 
     private void OnSongProposedForDirectorCallback(SongEntity proposedSong)
     {
+        //_userViewModel.PendingProposedSongAdd(proposedSong.Id, _songRepository);
+
         _ = ShowSongProposalAsync(proposedSong);
+    }
+
+    private void OnProposalItemTapped(object sender, TappedEventArgs e)
+    {
+        this.OnSongProposalAccepted(sender, new EventArgs());
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Plugin.Maui.Audio;
 using System;
+using System.Buffers.Text;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,6 @@ public class ListenersGroupBroadcastService
     private CancellationTokenSource? _pollingCts;
     private bool _amIDirector = false;
 
-
     public ListenersGroupBroadcastService(
         SingingGroupRepositoryLite singingGroupRepositoryLite,
         EventApi eventApi,
@@ -53,7 +53,6 @@ public class ListenersGroupBroadcastService
         _audioManager = audioManager;
         _settings = settings?.Value ?? new Settings();
     }
-
     public bool AmILeader
     {
         get => _amIDirector;
@@ -199,21 +198,43 @@ public class ListenersGroupBroadcastService
     /// <summary>
     /// Wywoływane gdy BLE advertisement zawiera nowe songId od Dyrygenta.
     /// </summary>
-    private void OnBluetoothSongIdReceived(int songId)
+    private void OnBluetoothSongIdReceived(int songId, string role)
     {
         if (songId == 0) return;
         if (_userViewModel.RejectedLeaderProposals.Contains(songId)) return;
 
         if (_userViewModel.ExtendedApiLogging)
-            _ = _eventApi.SendEventAsync("BLE_RECV", $"Received songId via BLE: {songId}");
+            _ = _eventApi.SendEventAsync("BLE_RECV", $"Received songId via BLE: {songId}, role: {role}");
+
+        if (_userViewModel.RejectedLeaderProposals.Contains(songId) || _userViewModel.PendingProposedSongs?.Any(se=>se.Id == songId) == true)
+            return;
+
+        this.NotifyUser(songId, role);
+    }
+
+    /// <summary>
+    /// Wyświetl powiadomienie
+    /// </summary>
+    /// <param name="songId"></param>
+    /// <param name="role"></param>
+    private void NotifyUser(int songId, string role)
+    {
+        var ail = AmILeader;
+
+        if (!ail && role == "A")
+            return;
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             try
             {
+                //if (CurrentlySelectedSingingGroup == null)
+                //    CurrentlySelectedSingingGroup = await _singingGroupRepositoryLite.GetSelectedAsync();
+
                 var navigation = GetNavigation();
                 if (navigation == null) return;
 
+                Boolean amILeaderLocal = AmILeader;
                 var repo = _songListViewModel.Repo;
                 if (repo == null) return;
 
@@ -228,22 +249,32 @@ public class ListenersGroupBroadcastService
                     GroupSongId = song.Id
                 };
 
+                var onSongProposedForDirectorLocal = OnSongProposedForDirector;
+
                 var currentPage = navigation.NavigationStack.LastOrDefault();
-                if (currentPage is SongDetailsPage)
+                if (currentPage is SongDetailsPage sdp)
                 {
+                    if (sdp.GroupSongId == song.Id || sdp.Song.Id == song.Id)
+                        return;
+
                     // Dyrygent: przekaż propozycję do aktywnej strony przez callback
-                    if (OnSongProposedForDirector != null)
-                        OnSongProposedForDirector(song);
+                    if (onSongProposedForDirectorLocal != null && amILeaderLocal)
+                        onSongProposedForDirectorLocal(song);
                     else
                     {
-
                         navigation.InsertPageBefore(newPage, currentPage);
                         await navigation.PopAsync(animated: false);
                     }
                 }
                 else
                 {
-                    await navigation.PushAsync(newPage);
+                    // Dyrygent: przekaż propozycję do aktywnej strony przez callback
+                    if (onSongProposedForDirectorLocal != null && amILeaderLocal)
+                        onSongProposedForDirectorLocal(song);
+                    else
+                    {
+                        await navigation.PushAsync(newPage);
+                    }
                 }
             }
             catch (Exception ex)
@@ -322,8 +353,15 @@ public class ListenersGroupBroadcastService
 
         try
         {
-            var groupSongId = await SingingGroupApi.CurrentSongForListenersGroupAsync(
-                _settings.ApiBaseUrl, CurrentlySelectedSingingGroup.Id);
+
+            var singingGroupApi = new SingingGroupApi(_settings.ApiBaseUrl);
+            var status = await singingGroupApi.GetServerGroupsStatusAsync(groupId: CurrentlySelectedSingingGroup.Id, ignoreOlderThanSeconds: 5 * 60);
+
+            //var groupSongId = await SingingGroupApi.CurrentSongForListenersGroupAsync(
+            //    _settings.ApiBaseUrl, CurrentlySelectedSingingGroup.Id);
+
+            var groupSongId = status?.CurrentSongId;
+            var groupSongRole = status?.CurrentSongUserRole ?? "Unknown";
 
             if (groupSongId == null || _userViewModel.RejectedLeaderProposals.Contains((int)groupSongId))
                 return;
@@ -331,44 +369,46 @@ public class ListenersGroupBroadcastService
             var repo = _songListViewModel.Repo;
             if (repo == null) return;
 
-            var song = await repo.GetByIdAsync((int)groupSongId);
-            if (song == null) return;
+            //var song = await repo.GetByIdAsync((int)groupSongId);
+            //if (song == null) return;
 
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                if (CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent
-                    && OnSongProposedForDirector != null)
-                {
-                    // Dyrygent: przekaż propozycję do aktywnej strony przez callback
-                    OnSongProposedForDirector(song);
-                }
-                else
-                {
-                    // Artysta: nawiguj bezpośrednio
-                    var navigation = GetNavigation();
-                    if (navigation == null) return;
+            this.NotifyUser((int)groupSongId, groupSongRole);
 
-                    var newPage = new SongDetailsPage(
-                        song!, _userViewModel, _eventApi,
-                        _songListViewModel.Repo,
-                        _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite,
-                        this)
-                    {
-                        GroupSongId = song!.Id
-                    };
+            //await MainThread.InvokeOnMainThreadAsync(async () =>
+            //{
+            //    if (CurrentlySelectedSingingGroup.SelectedRole == SingingGroupRole.Dyrygent
+            //        && OnSongProposedForDirector != null)
+            //    {
+            //        // Dyrygent: przekaż propozycję do aktywnej strony przez callback
+            //        OnSongProposedForDirector(song);
+            //    }
+            //    else
+            //    {
+            //        // Artysta: nawiguj bezpośrednio
+            //        var navigation = GetNavigation();
+            //        if (navigation == null) return;
 
-                    var currentPage = navigation.NavigationStack.LastOrDefault();
-                    if (currentPage is SongDetailsPage)
-                    {
-                        navigation.InsertPageBefore(newPage, currentPage);
-                        await navigation.PopAsync(animated: false);
-                    }
-                    else
-                    {
-                        await navigation.PushAsync(newPage);
-                    }
-                }
-            });
+            //        var newPage = new SongDetailsPage(
+            //            song!, _userViewModel, _eventApi,
+            //            _songListViewModel.Repo,
+            //            _settings, _audioManager, _customSettingsRepository, _singingGroupRepositoryLite,
+            //            this)
+            //        {
+            //            GroupSongId = song!.Id
+            //        };
+
+            //        var currentPage = navigation.NavigationStack.LastOrDefault();
+            //        if (currentPage is SongDetailsPage)
+            //        {
+            //            navigation.InsertPageBefore(newPage, currentPage);
+            //            await navigation.PopAsync(animated: false);
+            //        }
+            //        else
+            //        {
+            //            await navigation.PushAsync(newPage);
+            //        }
+            //    }
+            //});
         }
         catch (Exception ex)
         {

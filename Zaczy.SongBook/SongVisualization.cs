@@ -175,6 +175,8 @@ public class SongVisualization
             sb.AppendLine("</style>");
         }
 
+        sb.AppendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://api.zaczy.net/css/songbook-app-lyrics.css\">");
+
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
         if (!skipHeaders)

@@ -176,19 +176,22 @@ public class SongListViewModel : INotifyPropertyChanged
         if(_pageFilter == null)
             return;
 
-        int pageNumber = int.Parse(_pageFilter);
 
         if (IsBusy) return;
+
         try
         {
-            IsBusy = true;
-            var all = await _repo.GetAllAsync();
-            var query = all.AsEnumerable();
-            query = query.Where(s => s.Id == pageNumber);
-            var ordered = query.OrderBy(s => s.Title ?? string.Empty).ToList();
-            Songs.Clear();
-            foreach (var s in ordered)
-                Songs.Add(s);
+            if (int.TryParse(_pageFilter, out int pageNumber))
+                {
+                IsBusy = true;
+                var all = await _repo.GetAllAsync();
+                var query = all.AsEnumerable();
+                query = query.Where(s => s.Id == pageNumber);
+                var ordered = query.OrderBy(s => s.Title ?? string.Empty).ToList();
+                Songs.Clear();
+                foreach (var s in ordered)
+                    Songs.Add(s);
+            }
         }
         finally
         {

@@ -64,6 +64,9 @@ public class SingingGroup
     [JsonPropertyName("current_song_id")]
     public int? CurrentSongId { get; set; }
 
+    [JsonPropertyName("current_song_user_role")]
+    public string? CurrentSongUserRole { get; set; }
+
     [JsonPropertyName("current_song")]
     public Song? CurrentSong { get; set; }
 }

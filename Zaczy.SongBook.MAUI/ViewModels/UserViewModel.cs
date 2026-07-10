@@ -4,6 +4,7 @@ using MauiIcons.Core.Base;
 using MauiIcons.Fluent;
 using MauiIcons.FontAwesome.Solid;
 using Microsoft.Extensions.Options;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -12,6 +13,7 @@ using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Enums;
 using Zaczy.SongBook.Extensions;
+using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
@@ -247,8 +249,16 @@ public class UserViewModel : INotifyPropertyChanged
     /// Tryb ciemny dla tekstu piosenek
     /// </summary>
     public bool LyricsDarkMode 
-    { 
-        get => _prefs?.LyricsDarkMode ?? false;
+    {
+        get
+        {
+            if(_prefs?.LyricsDarkMode == null)
+            {
+                // Jeśli nie ustawiono preferencji, to ustaw domyślnie na podstawie motywu aplikacji
+                return Application.Current?.RequestedTheme == AppTheme.Dark;
+            }
+            return _prefs?.LyricsDarkMode ?? false;
+        }
         set
         {
             if (_prefs != null && _prefs.LyricsDarkMode != value)
@@ -308,9 +318,6 @@ public class UserViewModel : INotifyPropertyChanged
             }
         }
     }
-
-
-
 
     /// <summary>
     /// Email zalogowanego użytkownika
@@ -590,11 +597,11 @@ public class UserViewModel : INotifyPropertyChanged
     }
 
 
-    private List<SongEntity>? _pendingProposedSongs;
+    private ObservableCollection<SongEntity>? _pendingProposedSongs;
     /// <summary>
     /// Lista propozycji piosenek, które zostały zaproponowane przez innych dyrygentów
     /// </summary>
-    public List<SongEntity>? PendingProposedSongs
+    public ObservableCollection<SongEntity>? PendingProposedSongs
     {
         get => _pendingProposedSongs;
         set
@@ -842,10 +849,43 @@ public class UserViewModel : INotifyPropertyChanged
     public void PendingProposedSongAdd(SongEntity proposedSong)
     {
         if (PendingProposedSongs == null)
-            PendingProposedSongs = new List<SongEntity>();
+            PendingProposedSongs = new ObservableCollection<SongEntity>();
 
-        PendingProposedSongs.Add(proposedSong);
-        OnPropertyChanged(nameof(PendingProposedSongs));
-        OnPropertyChanged(nameof(PendingProposedSongsExist));
+        // Zapobiegnij duplikatom
+        if (!PendingProposedSongs.Any(s => s.Id == proposedSong.Id))
+        {
+            PendingProposedSongs.Add(proposedSong);
+            //OnPropertyChanged(nameof(PendingProposedSongs));
+            OnPropertyChanged(nameof(PendingProposedSongsExist));
+        }
+    }
+
+    public void PendingProposedSongAdd(int songId, SongRepositoryLite songRepository)
+    {
+        SongEntity? proposedSong = songRepository?.GetByIdAsync(songId).Result;
+        
+        if(proposedSong != null)
+            PendingProposedSongAdd(proposedSong);
+    }
+
+    public void PendingProposedSongRemove(SongEntity proposedSong)
+    {
+        if (PendingProposedSongs != null && PendingProposedSongs.Contains(proposedSong))
+        {
+            AddToRejectedLeaderProposals(proposedSong.Id);
+            PendingProposedSongs.Remove(proposedSong);
+            //OnPropertyChanged(nameof(PendingProposedSongs));
+            OnPropertyChanged(nameof(PendingProposedSongsExist));
+        }
+    }
+
+    public void PendingProposedSongsClear()
+    {
+        if (PendingProposedSongs != null)
+        {
+            PendingProposedSongs.Clear();
+            //OnPropertyChanged(nameof(PendingProposedSongs));
+            OnPropertyChanged(nameof(PendingProposedSongsExist));
+        }
     }
 }
