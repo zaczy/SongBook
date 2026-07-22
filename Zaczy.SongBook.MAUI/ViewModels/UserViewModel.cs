@@ -227,7 +227,7 @@ public class UserViewModel : INotifyPropertyChanged
 
     public string ShowOnlyCustomChordsTxt
     {
-        get => _prefs?.ShowOnlyCustomChords == true ? "wyświetlaj diagramy tylko dla niestandardowych przewrotów akordów wykorzystanych w piosence" : "pokazuj diagramy wszystkich chwytów";
+        get => _prefs?.ShowOnlyCustomChords == true ? "wyświetlaj diagramy tylko dla niestandardowych przewrotów akordów wykorzystanych w piosence" : "pokazuje diagramy wszystkich chwytów";
     }
 
 

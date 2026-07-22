@@ -46,7 +46,7 @@ public partial class BluetoothGroupService
 
             var advertiseData = new AdvertiseData.Builder()
                 .AddServiceUuid(Android.OS.ParcelUuid.FromString(ServiceUuid.ToString()))!
-                .AddManufacturerData(0x1234, songIdBytes)!
+                .AddManufacturerData(BLECompanyId, songIdBytes)!
                 .SetIncludeDeviceName(false)!
                 .Build();
 

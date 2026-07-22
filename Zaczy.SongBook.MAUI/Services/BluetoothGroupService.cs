@@ -12,6 +12,7 @@ namespace Zaczy.SongBook.MAUI.Services;
 public partial class BluetoothGroupService : IBluetoothGroupService
 {
     public static readonly Guid ServiceUuid = new("12345678-1234-1234-1234-1234567890AB");
+    public static readonly UInt16 BLECompanyId = 0x1234; // Replace with your actual company ID
 
     private readonly IBluetoothLE _ble;
     private readonly IAdapter _adapter;
@@ -131,8 +132,12 @@ public partial class BluetoothGroupService : IBluetoothGroupService
                 && record.Data?.Length >= 6)
             {
                 var companyId = BitConverter.ToUInt16(record.Data, 0);
-                
-                // Nowy format: sprawdŸ czy dane s¹ tekstem w formacie "songId;role"
+
+                if(companyId != BLECompanyId)
+                {
+                    continue;
+                }
+
                 if (record.Data.Length > 2)
                 {
                     try
@@ -143,7 +148,6 @@ public partial class BluetoothGroupService : IBluetoothGroupService
                         if (_userViewModel.ExtendedApiLogging)
                             _ = _eventApi.SendEventAsync("BLE_SCAN", $"  Text data: '{textData}'");
                         
-                        // Nowy format: "songId;role" (np. "123;A" lub "2;D")
                         if (textData.Contains(';'))
                         {
                             var parts = textData.Split(';');
@@ -182,7 +186,6 @@ public partial class BluetoothGroupService : IBluetoothGroupService
                     }
                     catch (Exception ex)
                     {
-                        // Jeœli nie uda³o siê odczytaæ jako tekst, spróbuj starego formatu binarnego
                         if (_userViewModel.ExtendedApiLogging)
                             _ = _eventApi.SendEventAsync("BLE_SCAN", $"  Error parsing text data: {ex.Message}, trying old format...");
                         

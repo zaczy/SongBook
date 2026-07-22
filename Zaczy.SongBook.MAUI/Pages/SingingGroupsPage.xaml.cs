@@ -20,7 +20,23 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
     private readonly SingingGroupRepositoryLite? _repo;
     private UserViewModel? _userViewModel;
     private readonly Settings? _settings;
-    private readonly ListenersGroupBroadcastService _listenersGroupBroadcastService;
+    private ListenersGroupBroadcastService _listenersGroupBroadcastService;
+
+
+    public ListenersGroupBroadcastService ListenersGroupBroadcastService
+    {
+        get => _listenersGroupBroadcastService;
+        set
+        {
+            if (_listenersGroupBroadcastService != value)
+            {
+                _listenersGroupBroadcastService = value;
+                OnPropertyChanged(nameof(ListenersGroupBroadcastService));
+            }
+        }
+    }
+
+
     private bool _duringGroupCreation;
     public UserViewModel? UserViewModel
     {
@@ -43,7 +59,7 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
     {
         FetchGroupsCommand = new Command(async () => await RefreshFromApiAsync());
         CreateGroupCommand = new Command(async () => await CreateGroupAsync());
-        _listenersGroupBroadcastService = listenersGroupBroadcastService;
+        ListenersGroupBroadcastService = listenersGroupBroadcastService;
 
         InitializeComponent();
         BindingContext = this;
@@ -313,6 +329,7 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
             AmIDirector = (role == SingingGroupRole.Dyrygent);
 
             OnPropertyChanged(nameof(IsEmptyGroups));
+            OnPropertyChanged(nameof(ListenersGroupBroadcastService));
         }
         catch (Exception ex)
         {
@@ -332,11 +349,11 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
             var email = _userViewModel.UserEmail;
             var guid  = _userViewModel.AppGuid;
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(guid))
-            {
-                await DisplayAlert("Uwaga", "Musisz być zalogowany, żeby pełnić rolę Dyrygenta.", "OK");
-                return;
-            }
+            //if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(guid))
+            //{
+            //    await DisplayAlert("Uwaga", "Musisz być zalogowany, żeby pełnić rolę Dyrygenta.", "OK");
+            //    return;
+            //}
 
             try
             {

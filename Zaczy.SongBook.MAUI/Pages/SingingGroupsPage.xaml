@@ -152,7 +152,7 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                 RowDefinitions="Auto,Auto, Auto"
                 Padding="0,5,0,0">
 
-                <Switch
+                <!--Switch
                     Grid.Column="0"
                     Grid.Row="0"
                     IsToggled="{Binding UserViewModel.EnableGroupListeningWhenDirector, Mode=TwoWay}"
@@ -169,12 +169,13 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                     LineBreakMode="WordWrap"
                     FontSize="10"
                     IsVisible="{Binding AmIDirector}"
-                    MaxLines="5" />
+                    MaxLines="5" /-->
 
                 <Switch
                     Grid.Column="0"
                     Grid.Row="1"
                     IsToggled="{Binding UserViewModel.BroadcastWeb, Mode=TwoWay}"
+                    IsVisible="{Binding ListenersGroupBroadcastService.CurrentlySelectedSingingGroup.IsLocalOnly, Converter={StaticResource InverseBooleanConverter}}"
                     VerticalOptions="Center"
                     Margin="0,0,10,0" />
 
@@ -184,6 +185,7 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                     Text="Używaj łącza internetowego do synchronizacji piosenek"
                     VerticalOptions="Center"
                     LineBreakMode="WordWrap"
+                    IsVisible="{Binding ListenersGroupBroadcastService.CurrentlySelectedSingingGroup.IsLocalOnly, Converter={StaticResource InverseBooleanConverter}}"
                     FontSize="10"
                     MaxLines="5" />
 

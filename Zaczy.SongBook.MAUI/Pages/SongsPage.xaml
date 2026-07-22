@@ -17,6 +17,11 @@
         <!--ToolbarItem Text="Import" Command="{Binding FetchCommand}" Order="Primary" Priority="0" /-->
         <ToolbarItem Text="Katalogi piosenek" Command="{Binding CategoriesCommand}" Order="Primary" Priority="0" />
         <ToolbarItem Command="{Binding CategoriesCommand}" Order="Primary" Priority="0" IconImageSource="collect_ico.png" />
+        <ToolbarItem Command="{Binding SettingsPageCommand}" 
+                     Order="Primary" 
+                     Priority="2" 
+                     IconImageSource="gear_white_transparent.png" 
+                     />
     </ContentPage.ToolbarItems>
 
     <ContentPage.Content>
@@ -57,7 +62,7 @@
                     MinimumHeightRequest="28"
                     MinimumWidthRequest="28"
                     BackgroundColor="Transparent"
-                    />-->
+                    />
                 <ImageButton 
                     Source="{mi:FluentFilled Settings20Filled, IconSize=20, IconColor=#999}"
                     Command="{Binding SettingsPageCommand}"
@@ -65,7 +70,7 @@
                     MinimumHeightRequest="16"
                     MinimumWidthRequest="16"
                     BackgroundColor="Transparent"
-                    />
+                    />-->
             </StackLayout>
             
             <!-- Empty state message -->

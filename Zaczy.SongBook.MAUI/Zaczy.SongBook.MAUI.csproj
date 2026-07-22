@@ -38,28 +38,32 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		
+		<!-- Android API Level 36 (Android 16) wymagany przez Google Play -->
+		<AndroidMinimumSupportedApiLevel>21</AndroidMinimumSupportedApiLevel>
+		<AndroidTargetSdkVersion>36</AndroidTargetSdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -73,22 +77,22 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.8.19</ApplicationDisplayVersion>
-	  <ApplicationVersion>19</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
+	  <ApplicationVersion>21</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
