@@ -825,6 +825,23 @@ public class UserViewModel : INotifyPropertyChanged
     public List<int> RejectedLeaderProposals { get; set; } = new List<int>();
 
     /// <summary>
+    /// Tryb edge-to-edge (ukrycie pasków systemowych na Androidzie)
+    /// </summary>
+    public bool EnableEdgeToEdge 
+    { 
+        get => _prefs?.EnableEdgeToEdge ?? true;
+        set
+        {
+            if (_prefs != null && _prefs.EnableEdgeToEdge != value)
+            {
+                _prefs.EnableEdgeToEdge = value;
+                Save();
+                OnPropertyChanged(nameof(EnableEdgeToEdge));
+            }
+        }
+    } 
+
+    /// <summary>
     /// DOdaj element to pobliżenia listy odrzuconych propozycji lidera. Dzięki temu, 
     /// jeśli serwer nadal proponuje piosenkę, możemy odrzucić żądanie ustawienia
     /// </summary>

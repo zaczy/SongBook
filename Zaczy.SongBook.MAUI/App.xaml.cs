@@ -16,13 +16,11 @@ public partial class App : Application
         _startPage = startPage;
         _eventApi = eventApi;
 
-        // Podepnij handlery nieobsłużonych wyjątków
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-        // Android-specific: wyjątki na wątku UI
 #if ANDROID
-            Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += AndroidUnhandledExceptionRaiser;
+        Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += AndroidUnhandledExceptionRaiser;
 #endif
     }
 

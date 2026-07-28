@@ -59,7 +59,7 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
     {
         FetchGroupsCommand = new Command(async () => await RefreshFromApiAsync());
         CreateGroupCommand = new Command(async () => await CreateGroupAsync());
-        ListenersGroupBroadcastService = listenersGroupBroadcastService;
+        _listenersGroupBroadcastService = listenersGroupBroadcastService;
 
         InitializeComponent();
         BindingContext = this;
@@ -358,7 +358,7 @@ public partial class SingingGroupsPage : ContentPage, INotifyPropertyChanged
             try
             {
                 var api = new SingingGroupApi(_settings.ApiBaseUrl);
-                await api.ChangeLeaderAsync(entity.Id, email, guid);
+                await api.ChangeLeaderAsync(entity.Id, email ?? String.Empty, guid);
             }
             catch { }
         }

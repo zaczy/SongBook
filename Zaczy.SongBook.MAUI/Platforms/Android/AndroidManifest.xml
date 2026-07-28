@@ -5,7 +5,8 @@
 		android:icon="@mipmap/appicon"
 		android:roundIcon="@mipmap/appicon_round"
 		android:supportsRtl="true"
-		android:usesCleartextTraffic="true">
+		android:usesCleartextTraffic="true"
+		android:enableOnBackInvokedCallback="false">
 	</application>
 
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36" />

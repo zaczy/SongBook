@@ -48,22 +48,22 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -77,22 +77,22 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.1</ApplicationDisplayVersion>
-	  <ApplicationVersion>21</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.2</ApplicationDisplayVersion>
+	  <ApplicationVersion>22</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -125,6 +125,8 @@
 	  <None Remove="assets\css\Monofonto Regular\Monofonto Regular.ttf" />
 	  <None Remove="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
 	  <None Remove="assets\ikona256.png" />
+	  <None Remove="Platforms\Android\Resources\values-v35\styles.xml" />
+	  <None Remove="Platforms\Android\Resources\values\styles.xml" />
 	  <None Remove="Resources\Images\sync2_ico.png" />
 	</ItemGroup>
 
@@ -155,7 +157,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.120" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="Plugin.BLE" Version="3.2.1" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="3.0.1" />
@@ -223,6 +225,12 @@
     <AndroidAarLibrary Include="Platforms\Android\libs\spotify-app-remote-release.aar" />
     -->
   </ItemGroup>
+
+	<ItemGroup>
+	  <AndroidResource Update="Platforms\Android\Resources\values\Styles.xml">
+	    <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+	  </AndroidResource>
+	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Update="Pages\SingingGroupsPage.xaml.cs">

@@ -140,7 +140,7 @@ public class ApiTests
         // Arrange
         var singingGroupApi = new SingingGroupApi(ApiBaseUrl);
         // When
-        var group = await singingGroupApi.ChangeSongAsync(groupId, songId);
+        var group = await singingGroupApi.ChangeSongAsync(groupId, songId, "D");
 
         if (group != null)
         {

@@ -41,4 +41,5 @@ public class UserPreferences
     public bool EnableGroupListeningWhenDirector { get; set; } = true;
 
     public bool ExtendedApiLogging { get; set; } = false;
+    public bool EnableEdgeToEdge { get; set; } = true;
 }

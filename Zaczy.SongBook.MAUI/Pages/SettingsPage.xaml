@@ -8,7 +8,7 @@
     x:DataType="vm:UserViewModel"
     Title="Ustawienia">
     <ScrollView>
-        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
+        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"  ColumnDefinitions="4*,6*" RowSpacing="12">
         
         <Label 
             Grid.Row="0" 
@@ -487,6 +487,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Switch 
@@ -503,6 +504,24 @@
                     FontSize="10"
                     MaxLines="5">
                 </Label>
+
+                <Switch 
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    IsToggled="{Binding EnableEdgeToEdge, Mode=TwoWay}"
+                    VerticalOptions="Center"
+                    Margin="0,0,10,0" />
+
+                <Label 
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Text="Ukryj systemowe paski statusów"
+                    VerticalOptions="Center"
+                    LineBreakMode="WordWrap"
+                    FontSize="10"
+                    MaxLines="5">
+                </Label>
+
             </Grid>
 
             <Label
@@ -596,7 +615,7 @@
             </Grid>
 
             <StackLayout 
-                Grid.Row="16" 
+                Grid.Row="17" 
                 Orientation="Horizontal" 
                 VerticalOptions="End"
                 Spacing="12"
@@ -610,7 +629,7 @@
             </StackLayout>
 
         <Label 
-            Grid.Row="17" 
+            Grid.Row="18" 
             Grid.Column="1"
             Text="{Binding ApplicationVersion}" 
             FontSize="Micro"

@@ -396,6 +396,23 @@ public class SongListViewModel : INotifyPropertyChanged
         }
     }
 
+    public Thickness BottomNavigationMargin
+    {
+        get
+        {
+#if ANDROID
+            var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page is not null)
+            {
+                var navBarHeight = Platforms.Android.Services.SystemBarsInfoService.GetNavigationBarHeightPx();
+                var navBarType = Platforms.Android.Services.SystemBarsInfoService.GetNavigationBarType();
+                return navBarType == Platforms.Android.Services.SystemBarsInfoService.NavigationType.GestureBar ? new Thickness(0, 0, 0, navBarHeight) : new Thickness(0, 0, 0, 10);
+            }
+#endif
+            return new Thickness(0,0,0,5);
+        }
+    }
+
     /// <summary>
     /// Otwórz inn¹ stronê aplikacji
     /// </summary>
@@ -433,5 +450,10 @@ public class SongListViewModel : INotifyPropertyChanged
     {
         if(_userViewModel != null)
             await this.LoadOtherPage(new SettingsPage(_userViewModel));
+    }
+
+    internal void RefreshNavigationProperty()
+    {
+        OnPropertyChanged(nameof(BottomNavigationMargin));
     }
 }

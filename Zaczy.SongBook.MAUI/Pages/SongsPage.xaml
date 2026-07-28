@@ -216,12 +216,20 @@
             </CollectionView>
 
             <Grid
-                Grid.Row="4">
-
+                Grid.Row="4"
+                Margin="0,0,0,10"
+                >
+                <Grid.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding UserViewModel.EnableEdgeToEdge}" Value="True">
+                        <Setter Property="Margin" Value="{Binding BottomNavigationMargin}" />
+                    </DataTrigger>
+                </Grid.Triggers>
+                
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                
             <Entry 
                 Grid.Column="0"
                 Placeholder="'Która strona?' :)"
@@ -230,6 +238,9 @@
                 Completed="OnPageFilterCompleted" 
                 IsVisible="{Binding HasSongs}"
                 Margin="10,0,10,0"
+                VerticalOptions="End"
+                HorizontalOptions="End"
+                WidthRequest="150"
                 />
 
 

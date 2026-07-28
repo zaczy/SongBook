@@ -71,7 +71,7 @@ public partial class SongsPage : ContentPage, INotifyPropertyChanged
 
 
         _songListViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        UserViewModel = viewModel;
+        _userViewModel = viewModel;
         BindingContext = _songListViewModel;
         _eventApi = eventApi;
         _settings = settings.Value;
@@ -171,6 +171,8 @@ public partial class SongsPage : ContentPage, INotifyPropertyChanged
 
         if (_listenersGroupBroadcastService != null)
             _listenersGroupBroadcastService.OnSongProposedForDirector = OnSongProposedForDirectorCallback;
+
+        _songListViewModel.RefreshNavigationProperty();
 
         StartGroupPolling();
     }
