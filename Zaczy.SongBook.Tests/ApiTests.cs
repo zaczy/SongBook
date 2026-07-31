@@ -66,6 +66,33 @@ public class ApiTests
     }
 
     [Test]
+    public async Task GetCategoriesSong_ReturnsCategoryWithNoSongs()
+    {
+        // Arrange
+        var songApi = new SongApi(ApiBaseUrl);
+        string email = string.Empty; // Use a valid email for testing
+
+        // Act
+        var response = await songApi.GetNoCategoriesSongsListAsync(email);
+
+        if (response != null)
+        {
+            Console.WriteLine($"Piosenek bez kategorii: {response?.Count}");
+            if (response?.Count > 0)
+            {
+                foreach (var song in response)
+                {
+                    Console.WriteLine($"--- {song.Title}");
+                }
+            }
+        }
+
+        // Assert
+        Assert.That(response != null, "API returned empty song list");
+    }
+
+
+    [Test]
     public async Task User_CreateOrUpdateUserAsync_ReturnsSuccess()
     {
         // Arrange

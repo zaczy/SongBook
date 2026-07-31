@@ -127,5 +127,36 @@ namespace Zaczy.SongBook.Maui.Data
 
         }
 
+        /// <summary>
+        /// Dodaje do bazy danych kategoriê "Bez kategorii" jeœli istniej¹ piosenki bez przypisanej kategorii.
+        /// </summary>
+        /// <returns></returns>
+        public async Task AddNoCategorySongsEntry()
+        {
+            var songApi = new SongApi(_apiBaseUrl);
+            var response = await songApi.GetNoCategoriesSongsListAsync(_userViewModel?.UserEmail);
+
+            if(response.Count > 0)
+            {
+
+                var fakeCategory = new SongCategoryEntity
+                {
+                    Id = -1,
+                    Name = "Bez kategorii",
+                    SongsCount = response.Count,
+                    SymbolImage = null,
+                    Description = "Piosenki bez przypisanej kategorii",
+                    IsPrivate = true
+                };
+
+                if (_col.FindById(fakeCategory.Id) == null)
+                    _col.Insert(fakeCategory);
+
+                return;
+            }
+
+        }
+
+
     }
 }

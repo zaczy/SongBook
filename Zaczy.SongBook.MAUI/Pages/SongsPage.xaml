@@ -32,7 +32,7 @@
                 Spacing="8" 
                 Grid.Row="0"
                 Background="{AppThemeBinding Light=#D6C6C0, Dark=#100707}"
-                Padding="12"
+                Padding="{OnIdiom '12,0,12,0', Tablet='0,10,0,8'}"
                 >
                 <Entry Placeholder="Tytuł lub wykonawca"
                        HorizontalOptions="FillAndExpand"
@@ -192,7 +192,7 @@
                             SelectionMode="Single" 
                             Grid.Row="3" 
                             x:Name="SongsCollection" 
-                            Margin="12,20,12,10"
+                            Margin="12,6,12,0"
                             IsVisible="{Binding HasSongs}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="data:SongEntity">
@@ -218,10 +218,12 @@
             <Grid
                 Grid.Row="4"
                 Margin="0,0,0,10"
+                Padding="0"
                 >
                 <Grid.Triggers>
                     <DataTrigger TargetType="Grid" Binding="{Binding UserViewModel.EnableEdgeToEdge}" Value="True">
-                        <Setter Property="Margin" Value="{Binding BottomNavigationMargin}" />
+                        <!--<Setter Property="Margin" Value="{Binding BottomNavigationMargin}" />-->
+                        <Setter Property="Margin" Value="0" />
                     </DataTrigger>
                 </Grid.Triggers>
                 
@@ -237,10 +239,12 @@
                 Keyboard="Numeric"
                 Completed="OnPageFilterCompleted" 
                 IsVisible="{Binding HasSongs}"
-                Margin="10,0,10,0"
+                FontSize="11"
                 VerticalOptions="End"
                 HorizontalOptions="End"
-                WidthRequest="150"
+                WidthRequest="90"
+                MinimumHeightRequest="22"
+                Margin="{OnIdiom '10,0,10,0', Tablet='0,5,10,10'}"
                 />
 
 
@@ -249,11 +253,11 @@
                     mi:MauiIcon.Value="{Binding ListeningGroupIcon}"
                     Grid.Row="3"
                     HorizontalOptions="End"
-                    MinimumHeightRequest="22"
-                    MinimumWidthRequest="22"
+                    MinimumHeightRequest="{OnIdiom 20, Tablet=28}"
+                    MinimumWidthRequest="{OnIdiom 20, Tablet=28}"
                     BackgroundColor="Transparent"
                     Grid.Column="1"
-                    Margin="0,0,10,0"
+                    Margin="{OnIdiom '0,0,10,0', Tablet='0,5,10,10'}"
                     IsVisible="{Binding UserViewModel.GroupModeActive}"
                     Clicked="GroupsButton_Clicked"
                     />

@@ -65,7 +65,7 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                                     <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
                                 </DataTrigger>
                                 <DataTrigger TargetType="Border" Binding="{Binding IsLocalOnly}" Value="true">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#52688a, Dark=#212a38}" />
                                 </DataTrigger>
                             </Border.Triggers>
 
@@ -77,7 +77,7 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                                 <TapGestureRecognizer Tapped="OnGroupTapped" NumberOfTapsRequired="1" />
                             </Border.GestureRecognizers>
 
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" Padding="12,10">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" Padding="52,10,12,10">
 
                                 <!-- Group name -->
                                 <Label Grid.Row="0" Grid.Column="0"
@@ -94,6 +94,19 @@ Wybierz grupę i swoją rolę, aby do niej dołączyć.
                                        VerticalOptions="Center"
                                        HorizontalOptions="End"
                                        IsVisible="{Binding IsSelected}" />
+
+                                <Image Grid.Row="0" 
+                                       Grid.Column="0"
+                                       Grid.RowSpan="5"
+                                       Source="{mi:Fluent BluetoothSearching20, IconSize=28, IconColor=LightBlue}"
+                                       Opacity="0.4"
+                                       WidthRequest="50"
+                                       HeightRequest="40"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Start"
+                                       Margin="-58,0,20,0"
+                                       IsVisible="{Binding IsLocalOnly}" />
+
 
                                 <!-- Leader -->
                                 <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"

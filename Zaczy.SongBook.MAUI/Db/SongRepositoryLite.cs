@@ -94,11 +94,28 @@ namespace Zaczy.SongBook.MAUI.Data
         /// <param name="categoryId"></param>
         /// <param name="songCategoryEntity"></param>
         /// <returns></returns>
-        public async Task FetchCategorySongsFromApiAsync(int categoryId, SongCategoryEntity? songCategoryEntity=null)
+        public async Task FetchCategorySongsFromApiAsync(int categoryId, string userEmail, SongCategoryEntity? songCategoryEntity=null)
         {
             var songApi = new SongApi(_apiBaseUrl);
 
-            var categorySongs = await songApi.GetCategorySongsAsync(categoryId);
+            SongCategory categorySongs;
+
+            if (categoryId > 0)
+                categorySongs = await songApi.GetCategorySongsAsync(categoryId);
+            else
+            {
+                var songs = await songApi.GetNoCategoriesSongsListAsync(userEmail);
+
+                categorySongs = new SongCategory() { Songs = new List<Song>() };
+                if (songs?.Count > 0)
+                {
+                    foreach (var s in songs)
+                    {
+                        categorySongs.Songs.Add(new Song(s));
+                    }
+                }
+            }
+
             if (categorySongs?.Songs != null)
             {
                 foreach (var song in categorySongs.Songs)
@@ -113,7 +130,7 @@ namespace Zaczy.SongBook.MAUI.Data
                         if (existing == null)
                         {
                             var entity = new SongEntity();
-                            if(song?.ServerId != null)
+                            if (song?.ServerId != null)
                                 entity.Id = song.ServerId.Value;
                             entity.initFromSong(song!);
                             entity.CategoryColor = SongEntityTools.ThemeCategoryColor(songCategoryEntity?.CategoryColor ?? string.Empty);

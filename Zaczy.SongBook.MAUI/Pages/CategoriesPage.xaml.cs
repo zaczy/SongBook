@@ -131,6 +131,11 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
             await _repo.DeleteAllAsync();
             await _repo.LoadCategoriesFromApiAsync();
 
+            if(_songListViewModel?.UserViewModel?.IsAdmin == true)
+            {
+                await _repo.AddNoCategorySongsEntry();
+            }
+
             await LoadAsync();
 
             IsBusy = false;
@@ -276,7 +281,7 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
                 {
                     try
                     {
-                        await _songRepo.FetchCategorySongsFromApiAsync(cat.Id, cat);
+                        await _songRepo.FetchCategorySongsFromApiAsync(cat.Id, _songListViewModel?.UserViewModel?.UserEmail ?? string.Empty, cat);
                     }
                     catch (Exception ex)
                     {

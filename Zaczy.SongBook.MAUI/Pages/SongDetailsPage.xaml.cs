@@ -112,7 +112,7 @@ public partial class SongDetailsPage : ContentPage
         _visualization = this.CreateVisualizationOptions();
 
         _ = new MauiIcon() { Icon = MauiIcons.FontAwesome.Solid.FontAwesomeSolidIcons.LockOpen, IconColor = Colors.Green };
-        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.BluetoothSearching20, IconColor = Colors.Green };
+        _ = new MauiIcon() { Icon = MauiIcons.Fluent.FluentIcons.BluetoothConnected20, IconColor = Colors.Green };
 
         InitializeComponent();
 

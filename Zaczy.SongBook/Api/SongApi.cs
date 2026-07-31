@@ -73,6 +73,29 @@ public class SongApi
         }
     }
 
+    public async Task<List<SongEntity>> GetNoCategoriesSongsListAsync(string? email)
+    {
+        var apiClient = new ApiClient(_baseUrl);
+
+        string relativeUrl = $"/song-no-categories/byuser";
+
+        if (!string.IsNullOrEmpty(email))
+        {
+            relativeUrl += $"?email={Uri.EscapeDataString(email)}";
+        }
+
+        var response = await apiClient.GetAsync<List<SongEntity>>(relativeUrl);
+        if (response.IsSuccess && response.Data != null)
+        {
+            return response.Data;
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"GetNoCategoriesListAsync: API error: {response.ErrorMessage} {response.ErrorDetails}");
+            return new List<SongEntity>();
+        }
+    }
+
     /// <summary>
     /// Pobierz piosenki ze wskazanej kategorii
     /// </summary>
