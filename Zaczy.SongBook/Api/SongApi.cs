@@ -152,7 +152,7 @@ public class SongApi
                     else
                     {
                         string message = $"\"{song.Title}\" - nowa piosenka)";
-                        differenciesList!.Add(new SongComparisionResults() { DiffSummary = message, SongTitle = existingSong?.Title ?? String.Empty, DiffSpecification = null, ApiSong = song });
+                        differenciesList!.Add(new SongComparisionResults() { DiffSummary = message, SongTitle = existingSong?.Title ?? song.Title, DiffSpecification = null, ApiSong = song });
                     }
                 }
                 catch (Exception ex)

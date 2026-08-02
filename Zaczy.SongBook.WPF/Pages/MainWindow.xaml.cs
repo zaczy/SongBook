@@ -205,7 +205,7 @@ namespace Zaczy.SongBook.WPF
                 throw new InvalidOperationException("Brak ustawień połączenia do bazy danych.");
 
             var factory = new SongBookDbContextFactory();
-            var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+            var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb, ViewModel.AppSettings.Settings.DbProvider));
 
             if (ViewModel.ConvertedSong != null)
             {
@@ -323,7 +323,7 @@ namespace Zaczy.SongBook.WPF
                 SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
 
                 var factory = new SongBookDbContextFactory();
-                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb, ViewModel.AppSettings.Settings.DbProvider));
 
                 await songApi.SyncApi(songRepository);
             }
@@ -375,7 +375,7 @@ namespace Zaczy.SongBook.WPF
                 SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
 
                 var factory = new SongBookDbContextFactory();
-                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb, ViewModel.AppSettings.Settings.DbProvider));
 
                 var differentSongs = await songApi.CompareWithApiAsync(songRepository);
                 await songApi.CreateOrUpdateSongsAsync(songRepository, differentSongs);
@@ -404,7 +404,7 @@ namespace Zaczy.SongBook.WPF
                 SongApi songApi = new SongApi(ViewModel.AppSettings.Settings.ApiBaseUrl);
 
                 var factory = new SongBookDbContextFactory();
-                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb));
+                var songRepository = new SongRepository(factory.CreateDbContext(ViewModel.AppSettings.ConnectionStrings.SongBookDb, ViewModel.AppSettings.Settings.DbProvider));
 
                 var differencies = await songApi.CompareWithApiAsync(songRepository, checkLocalOnly);
                 return differencies;

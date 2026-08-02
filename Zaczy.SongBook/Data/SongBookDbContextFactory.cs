@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Zaczy.SongBook.Enums;
 
 namespace Zaczy.SongBook.Data;
 
@@ -15,13 +16,29 @@ public class SongBookDbContextFactory : IDesignTimeDbContextFactory<SongBookDbCo
             ? args[0]
             : DefaultConnectionString;
 
-        return CreateDbContext(connectionString);
+        return CreateDbContext(connectionString, SongBookDbProvider.MySql);
     }
 
-    public SongBookDbContext CreateDbContext(string connectionString)
+    /// <summary>
+    /// Utrzymana dla zgodnoœci - domyœlnie MySQL.
+    /// </summary>
+    //public SongBookDbContext CreateDbContext(string connectionString, )
+    //    => CreateDbContext(connectionString, SongBookDbProvider.MySql);
+
+    public SongBookDbContext CreateDbContext(string connectionString, SongBookDbProvider provider)
     {
         var optionsBuilder = new DbContextOptionsBuilder<SongBookDbContext>();
-        optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+
+        switch (provider)
+        {
+            case SongBookDbProvider.Sqlite:
+                optionsBuilder.UseSqlite(connectionString);
+                break;
+            case SongBookDbProvider.MySql:
+            default:
+                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                break;
+        }
 
         return new SongBookDbContext(optionsBuilder.Options);
     }

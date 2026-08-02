@@ -290,7 +290,7 @@ public partial class CategoriesPage : ContentPage, INotifyPropertyChanged
                 }
             }
 
-            _songListViewModel.IsBusy = false;
+            _songListViewModel!.IsBusy = false;
             await _songListViewModel.LoadSongsAsync();
         }
         catch (Exception ex)

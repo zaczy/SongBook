@@ -282,7 +282,7 @@ namespace Zaczy.SongBook.Tests
             var songs = wordParser.ParseFile(filename);
 
             var factory = new SongBookDbContextFactory();
-            var songRepository = new SongRepository(factory.CreateDbContext(connectionString));
+            var songRepository = new SongRepository(factory.CreateDbContext(connectionString, Enums.SongBookDbProvider.MySql));
 
             foreach (var s in songs)
             {

@@ -2,11 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Windows;
 using Zaczy.SongBook.Data;
+using Zaczy.SongBook.Enums;
 
 namespace Zaczy.SongBook.WPF;
 
@@ -21,7 +21,6 @@ public partial class App : Application
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration((context, config) =>
             {
-                // ensure appsettings.json from output is read
                 config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                 config.AddEnvironmentVariables();
@@ -30,31 +29,45 @@ public partial class App : Application
             {
                 var configuration = context.Configuration;
 
-                // bind settings
                 services.Configure<AppSettings>(configuration);
 
-                // register DbContext (example)
                 var conn = configuration.GetSection("ConnectionStrings")["SongBookDb"];
+                var providerString = configuration.GetSection("Settings")["DbProvider"] ?? "MySql";
+                var provider = Enum.TryParse<SongBookDbProvider>(providerString, ignoreCase: true, out var p)
+                    ? p
+                    : SongBookDbProvider.MySql;
+
                 if (!string.IsNullOrEmpty(conn))
                 {
                     services.AddDbContext<SongBookDbContext>(options =>
-                        options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
+                    {
+                        switch (provider)
+                        {
+                            case SongBookDbProvider.Sqlite:
+                                options.UseSqlite(conn);
+                                break;
+                            case SongBookDbProvider.MySql:
+                            default:
+                                options.UseMySql(conn, ServerVersion.AutoDetect(conn));
+                                break;
+                        }
+                    });
                 }
 
-                // register repositories, viewmodels, windows
                 services.AddSingleton<ViewModel>();
-                //services.AddSingleton<SongRepository>();
                 services.AddTransient<SongRepository>();
                 services.AddSingleton<MainWindow>();
-
-                // other services
-                // services.AddTransient<IMyService, MyService>();
             })
             .Build();
 
         await _host.StartAsync();
 
-        // resolve and show MainWindow
+        using (var scope = _host.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<SongBookDbContext>();
+            db.Database.EnsureCreated();
+        }
+
         var main = _host.Services.GetRequiredService<MainWindow>();
         main.Show();
     }

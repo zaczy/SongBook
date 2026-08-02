@@ -14,20 +14,16 @@ namespace Zaczy.SongBook.WPF;
 
 public class ViewModel : INotifyPropertyChanged
 {
-    //private readonly SongRepository _repository;
-    //public SongRepository SongRepository { get => _repository; }
-    
     private readonly AppSettings _settings;
     public AppSettings AppSettings { get => _settings; }
 
     public ViewModel(IOptions<AppSettings> opts)
     {
-        //_repository = repository;
         _settings = opts.Value;
     }
 
     private string? _sourceSongFilename;
-    public string? SourceSongFilename 
+    public string? SourceSongFilename
     {
         get => _sourceSongFilename;
         set
@@ -45,8 +41,8 @@ public class ViewModel : INotifyPropertyChanged
     /// <summary>
     /// Tekst źródłowy piosenki w formacie HTML
     /// </summary>
-    public string? SourceSongHtml 
-    { 
+    public string? SourceSongHtml
+    {
         get => _sourceSongHtml;
         set
         {
@@ -65,13 +61,13 @@ public class ViewModel : INotifyPropertyChanged
     /// </summary>
     public Song? ConvertedSong
     {
-        get 
+        get
         {
             if (_convertedSong == null)
                 _convertedSong = new Song();
-            return _convertedSong; 
+            return _convertedSong;
         }
-        set 
+        set
         {
             if (_convertedSong != value)
             {
@@ -109,6 +105,14 @@ public class ViewModel : INotifyPropertyChanged
         }
     }
 
+    private SongRepository CreateRepository()
+    {
+        var factory = new SongBookDbContextFactory();
+        return new SongRepository(
+            factory.CreateDbContext(
+                AppSettings!.ConnectionStrings!.SongBookDb!,
+                AppSettings.Settings.DbProvider));
+    }
 
     /// <summary>
     /// Zapisuje aktualną piosenkę do bazy danych
@@ -121,9 +125,7 @@ public class ViewModel : INotifyPropertyChanged
         this.CheckDbSettingsValid();
 
         var song = Song.CreateFromW(SourceSongHtml);
-
-        var factory = new SongBookDbContextFactory();
-        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
+        var songRepository = CreateRepository();
 
         await songRepository.AddAsync(song, SourceSongHtml);
     }
@@ -141,11 +143,9 @@ public class ViewModel : INotifyPropertyChanged
     {
         this.CheckDbSettingsValid();
 
-        var factory = new SongBookDbContextFactory();
-        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
-
+        var songRepository = CreateRepository();
         var songs = await songRepository.GetAllAsync();
-        Songs = new ObservableCollection<SongEntity>(songs.OrderBy(s=>s.Title));
+        Songs = new ObservableCollection<SongEntity>(songs.OrderBy(s => s.Title));
         OnPropertyChanged(nameof(Songs));
     }
 
@@ -156,9 +156,7 @@ public class ViewModel : INotifyPropertyChanged
     {
         this.CheckDbSettingsValid();
 
-        var factory = new SongBookDbContextFactory();
-        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
-
+        var songRepository = CreateRepository();
         await songRepository.DeleteAsync(id);
     }
 
@@ -169,12 +167,10 @@ public class ViewModel : INotifyPropertyChanged
     {
         this.CheckDbSettingsValid();
 
-        var factory = new SongBookDbContextFactory();
-        var songRepository = new SongRepository(factory.CreateDbContext(AppSettings!.ConnectionStrings!.SongBookDb!));
-
+        var songRepository = CreateRepository();
         var song = await songRepository.SearchIdAsync(entity.Id);
 
-        if(song!=null)
+        if (song != null)
             ConvertedSong = new Song(song);
         else
             ConvertedSong = new Song();

@@ -113,7 +113,7 @@ public partial class SongSyncWindow : MetroWindow
             SongApi songApi = new SongApi(_viewModel.AppSettings.Settings.ApiBaseUrl);
 
             var factory = new SongBookDbContextFactory();
-            var songRepository = new SongRepository(factory.CreateDbContext(_viewModel.AppSettings.ConnectionStrings.SongBookDb));
+            var songRepository = new SongRepository(factory.CreateDbContext(_viewModel.AppSettings.ConnectionStrings.SongBookDb, _viewModel.AppSettings.Settings.DbProvider));
 
             await songApi.CreateOrUpdateSongsAsync(songRepository, SelectedResults);
         }

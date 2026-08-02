@@ -13,7 +13,7 @@ public class SongComparisionResults
 
     public string FieldsSummary 
     { 
-        get => DiffSpecification != null ? string.Join(", ", DiffSpecification.Select(d => d.FieldName)) : string.Empty;
+        get => DiffSpecification != null ? string.Join(", ", DiffSpecification.Select(d => d.FieldName)) : (DiffSummary ?? String.Empty);
     }
     public SongEntity? BaseSongEntity { get; set; }
     public SongEntity? ApiSong { get; internal set; }
