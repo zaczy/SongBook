@@ -94,6 +94,8 @@ public class ChordService
             newRoot = newRoot.ToLower();
         }
 
+        newRoot = newRoot.Replace("#", "is");
+
         return newRoot + (HashIsIsMode ? suffix.Replace("#", "is") : suffix);
 
     }

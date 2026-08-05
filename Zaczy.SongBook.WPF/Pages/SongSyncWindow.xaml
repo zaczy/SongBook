@@ -84,6 +84,17 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
+                <DataGridTextColumn Header="Data lokalnie"
+                                    Binding="{Binding ModifiedLocal}"
+                                    Width="120"
+                                    IsReadOnly="True"/>
+
+                <DataGridTextColumn Header="Data API"
+                                    Binding="{Binding ModifiedApi}"
+                                    Width="120"
+                                    IsReadOnly="True"/>
+
+
             </DataGrid.Columns>
 
             <DataGrid.RowStyle>

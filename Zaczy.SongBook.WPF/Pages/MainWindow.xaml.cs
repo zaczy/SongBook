@@ -144,7 +144,7 @@ namespace Zaczy.SongBook.WPF
 
             visualization.VisualizationOptions = new SongVisualizationOptions()
             {
-                Instrument = InstrumentType.Ukulele
+                Instrument = InstrumentType.Guitar
             };
 
             // Przyjmujemy, że lokalne zasoby (css, czcionki) znajdą się w folderze "<app>/assets"
@@ -222,6 +222,9 @@ namespace Zaczy.SongBook.WPF
                     //await ViewModel.LoadSongsAsync();
 
                 }
+
+                await ViewModel.LoadSongsAsync();
+
             }
         }
 

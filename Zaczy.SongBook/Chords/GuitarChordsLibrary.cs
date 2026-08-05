@@ -60,7 +60,7 @@ public class GuitarChordsLibrary: IChordsLibrary
             {
                 chord.MutedStrings.Add(stringNumber);
             }
-            else if(c == '0')
+            else if(c == '0' || c == 'o')
             {
                 if(barFret<=0)
                     chord.OpenStrings.Add(stringNumber);

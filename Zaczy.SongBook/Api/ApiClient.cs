@@ -406,7 +406,7 @@ public class ApiClient
                     {
                         apiResponse.Data = JsonSerializer.Deserialize<TResponse>(responseBody, new JsonSerializerOptions
                         {
-                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                         });
                     }
                     catch (JsonException ex)

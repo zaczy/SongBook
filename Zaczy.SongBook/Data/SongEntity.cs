@@ -83,9 +83,11 @@ public partial class SongEntity : INotifyPropertyChanged
     public string? ChordsVariations { get; set; }
 
     [Column("created_at")]
+    [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column("updated_at")]
+    [JsonPropertyName("updated_at")]
     public DateTime? UpdatedAt { get; set; }
 
     [Column("scrolling_delay")]

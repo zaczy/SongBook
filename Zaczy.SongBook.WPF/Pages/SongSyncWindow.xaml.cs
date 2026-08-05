@@ -118,6 +118,8 @@ public partial class SongSyncWindow : MetroWindow
             await songApi.CreateOrUpdateSongsAsync(songRepository, SelectedResults);
         }
 
+        await _viewModel.LoadSongsAsync();
+
         Close();
     }
 
@@ -169,6 +171,9 @@ public class SelectableSongComparisionResult : INotifyPropertyChanged
     public string? SongTitle => Inner.SongTitle;
     public string? DiffSummary => Inner.DiffSummary;
     public string FieldsSummary => Inner.FieldsSummary;
+
+    public string ModifiedLocal => $"{Inner?.BaseSongEntity?.UpdatedAt ?? Inner?.BaseSongEntity?.CreatedAt}";
+    public string ModifiedApi => $"{Inner?.ApiSong?.UpdatedAt ?? Inner?.ApiSong?.CreatedAt}";
 
     public bool IsSelected
     {
