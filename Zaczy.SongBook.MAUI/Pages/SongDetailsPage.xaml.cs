@@ -13,6 +13,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
+using Zaczy.Songbook.MAUI.Helpers;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Extensions;
@@ -151,33 +152,6 @@ public partial class SongDetailsPage : ContentPage
 
         // initialize fonts and then generate initial HTML
         _ = InitializeAsync();
-    }
-
-    /// <summary>
-    /// Dopasuj css dla trybu ciemnego
-    /// </summary>
-    /// <param name="visualizationCssOptions"></param>
-    private void AdjustDarkModeCss(VisualizationCssOptions visualizationCssOptions)
-    {
-        if (_userViewModel.LyricsDarkMode)
-        {
-            var lyricsDarkBg = Application.Current?.Resources["LyricsDarkBackground"] as Color;
-            var lyricsDarkText = Application.Current?.Resources["LyricsDarkText"] as Color;
-            var lyricsDarkChords = Application.Current?.Resources["LyricsDarkChords"] as Color;
-
-            _visualizationCssOptions.Add("body", "background-color", lyricsDarkBg?.ToHex() ?? "#222", "dark");
-            _visualizationCssOptions.Add("body", "color", lyricsDarkText?.ToHex() ?? "#BBB", "dark");
-
-            _visualizationCssOptions.Add(".chord-diagram", "background-color", lyricsDarkBg?.ToHex() ?? "#1e1e1e", "dark");
-            _visualizationCssOptions.Add(".chord-diagram .fret", "background-color", lyricsDarkText?.ToHex() ?? "#1e1e1e", "dark");
-
-            _visualizationCssOptions.Add(".chords", "color", lyricsDarkChords?.ToHex() ?? "#2c2c2c", "dark");
-            _visualizationCssOptions.Add(".chords2", "color", lyricsDarkChords?.ToHex() ?? "#2c2c2c", "dark");
-
-            _visualizationCssOptions.Add(".block-refren", "border-left", "15px solid #262626", "dark");
-        }
-        else
-            _visualizationCssOptions?.CustomOptions?.RemoveWhere(opt => opt.Context == "dark");
     }
 
     /// <summary>
@@ -959,35 +933,13 @@ public partial class SongDetailsPage : ContentPage
     /// <returns></returns>
     private SongVisualization CreateVisualizationOptions()
     {
-        var fontsPath = _visualization?.CssFontsPath;
-
-        this.AdjustDarkModeCss(_visualizationCssOptions);
-
-        var visualization = new SongVisualization()
-        {
-            IncludeFontsAsBase64 = true,
-            VisualizationOptions = new SongVisualizationOptions(_visualizationCssOptions)
-            {
-                CustomChordsOnly = UserViewModel.ShowOnlyCustomChords,
-                SkipLyricChords = UserViewModel.SkipLyricChords,
-                SkipTabulatures = UserViewModel.SkipTabulatures,
-                MoveChordsToLyricsLine = UserViewModel.MoveChordsToLyricsLine,
-                Instrument = UserViewModel.ChordsInstrument
-            }
-        };
-
-        if (_userViewModel.LyricsDarkMode == true)
-        {
-            var lyricsDarkText = Application.Current?.Resources["LyricsDarkText"] as Color;
-            visualization.VisualizationOptions.ChordDiagramColor = lyricsDarkText?.ToHex();
-        }
-
-        if (fontsPath != null)
-            visualization.CssFontsPath = fontsPath;
-
-        return visualization;
+        return LyricsVisualisationHelper.CreateVisualizationOptions(_visualization, _visualizationCssOptions, _userViewModel);
     }
 
+    /// <summary>
+    /// Asynchronously retrieves the top visible line from the lyrics web view.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation, containing the top line result or null if unavailable.</returns>
     private async Task<TopLineResult?> GetTopVisibleLineExampleAsync()
     {
         try

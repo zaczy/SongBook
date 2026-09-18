@@ -400,7 +400,7 @@ public class GuitarChordsLibrary: IChordsLibrary
                 break;
         }
 
-        if (!string.IsNullOrEmpty(variation))
+        if (!string.IsNullOrEmpty(variation) && chord == null)
         {
 
             var vchord = ChordByAscii(name, variation);

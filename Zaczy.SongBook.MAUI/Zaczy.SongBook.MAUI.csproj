@@ -48,22 +48,22 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -77,22 +77,22 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.4</ApplicationDisplayVersion>
-	  <ApplicationVersion>24</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
+	  <ApplicationVersion>26</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -122,8 +122,10 @@
 	<ItemGroup>
 	  <None Remove="assets\css\Inconsolata\Inconsolata-VariableFont_wdth,wght.ttf" />
 	  <None Remove="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf" />
+	  <None Remove="assets\css\Lato\Lato-Regular.ttf" />
 	  <None Remove="assets\css\Monofonto Regular\Monofonto Regular.ttf" />
 	  <None Remove="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
+	  <None Remove="assets\css\Roboto\Roboto-VariableFont_wdth,wght.ttf" />
 	  <None Remove="assets\ikona256.png" />
 	  <None Remove="Platforms\Android\Resources\values-v35\styles.xml" />
 	  <None Remove="Platforms\Android\Resources\values\styles.xml" />
@@ -139,10 +141,12 @@
 	  <MauiAsset Include="assets\css\Inconsolata\static\Inconsolata_SemiCondensed-Medium.ttf">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </MauiAsset>
+	  <MauiAsset Include="assets\css\Lato\Lato-Regular.ttf" />
 	  <MauiAsset Include="assets\css\Monofonto Regular\Monofonto Regular.ttf">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </MauiAsset>
 	  <MauiAsset Include="assets\css\Poltawski_Nowy\PoltawskiNowy-VariableFont_wght.ttf" />
+	  <MauiAsset Include="assets\css\Roboto\Roboto-VariableFont_wdth,wght.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -159,6 +163,7 @@
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.120" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+		<PackageReference Include="nor0x.Maui.ColorPicker" Version="2.0.4" />
 		<PackageReference Include="Plugin.BLE" Version="3.2.1" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="3.0.1" />
 		<PackageReference Include="SpotifyAPI.Web" Version="7.2.1" />
@@ -187,6 +192,9 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="Pages\CategoriesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\LayoutEditorPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\SingingGroupsPage.xaml">

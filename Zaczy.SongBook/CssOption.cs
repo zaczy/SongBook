@@ -23,4 +23,15 @@ public class CssOption
 
     public string? Context { get; set; }
 
+    public int? LineNo { get; set; }
+
+    public int? DefinitionMediaSize { get; set; }
+
+    public int? Priority { get; set; }
+    
+    public override string ToString()
+    {
+        return $"{CssClass} {{ {CssProperty}: {Value}; }}";
+    }
+
 }

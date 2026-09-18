@@ -222,6 +222,44 @@ public class ApiTests
 
     }
 
+    [Test]
+    [TestCase(570)]
+    [TestCase(1440)]
+    [TestCase(-1)]
+    public async Task SongFromApi_CssRecognizedProperly(int screenWidth)
+    {
+        // Arrange
+        var songApi = new SongApi(ApiBaseUrl);
+
+        // Act
+        var response = await songApi.GetSongAsync(3);
+        SongVisualization songVisualization = new SongVisualization();
+
+        string? html = string.Empty;
+        if (response != null)
+        {
+            Song song = new Song(response);
+
+            html = songVisualization.LyricsHtml(song);
+
+            VisualizationCssOptions visualizationCssOptions = VisualizationCssOptions.FromHtml(html, screenWidth);
+
+            var value = visualizationCssOptions.CssValue(".chords2", "font-size", ".lyrics-line");
+            Console.WriteLine($"Znaleziona wartość font-size: {value}");
+
+            if(visualizationCssOptions != null)
+            foreach(var o in visualizationCssOptions?.CssValueList(".chords2", "font-size", ".lyrics-line") ?? Enumerable.Empty<CssOption>())
+            {
+                Console.WriteLine($"{o.CssClass} {{ {o.CssProperty}: {o.Value}; }} (kontekst: {o.Context}, linia: {o.LineNo}  priorytet: {o.Priority}, ms: {o.DefinitionMediaSize}");
+            }
+
+            Assert.That(value, Is.Not.Null);
+
+        }
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(html));
+    }
 
 
 }

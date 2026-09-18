@@ -1,5 +1,6 @@
 ﻿using LiteDB;
 using MauiIcons.Fluent;
+using MauiIcons.Fluent.Filled;
 using MauiIcons.FontAwesome.Solid;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
@@ -7,19 +8,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 using Plugin.Maui.Audio;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Collections.Generic;
+using Zaczy.Songbook.MAUI.Services;
 using Zaczy.SongBook.Api;
 using Zaczy.SongBook.Data;
 using Zaczy.SongBook.Maui.Data;
 using Zaczy.SongBook.MAUI.Data;
 using Zaczy.SongBook.MAUI.Db;
+using Zaczy.SongBook.MAUI.Extensions;
 using Zaczy.SongBook.MAUI.Pages;
+using Zaczy.SongBook.MAUI.Services;
 using Zaczy.SongBook.MAUI.Spotify;
 using Zaczy.SongBook.MAUI.ViewModels;
-using MauiIcons.Fluent.Filled;
-using Zaczy.SongBook.MAUI.Services;
-using Zaczy.SongBook.MAUI.Extensions;
-using Zaczy.Songbook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI
 {
@@ -33,6 +34,7 @@ namespace Zaczy.SongBook.MAUI
                 .UseFontAwesomeSolidMauiIcons()
                 .UseFluentMauiIcons()
                 .UseFluentFilledMauiIcons()
+                .UseSkiaSharp()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -128,6 +130,7 @@ namespace Zaczy.SongBook.MAUI
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<SongWebEditPage>();
             builder.Services.AddTransient<CategoriesPage>();
+            builder.Services.AddTransient<LayoutEditorPage>();
 
             builder.Services.AddSingleton(AudioManager.Current);
             builder.Services.AddSingleton<ListenersGroupBroadcastService>();

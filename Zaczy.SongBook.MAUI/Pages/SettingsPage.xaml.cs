@@ -62,4 +62,11 @@ public partial class SettingsPage : ContentPage
         RadioGuitar.IsChecked = _userViewModel.ChordsInstrument == InstrumentType.Guitar;
         RadioUkulele.IsChecked = _userViewModel.ChordsInstrument == InstrumentType.Ukulele;
     }
+
+    private async void OnLayoutEditorClicked(object sender, EventArgs e)
+    {
+        var page = IPlatformApplication.Current?.Services.GetRequiredService<LayoutEditorPage>();
+        if (page != null)
+            await Navigation.PushAsync(page);
+    }
 }

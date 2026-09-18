@@ -23,17 +23,11 @@ public class SongVisualization
     public SongVisualizationOptions? VisualizationOptions { get; set; }
 
     /// <summary>
-    /// Ładuje czcionkę z pliku i konwertuje do Base64
+    /// Pobiera czcionkę zakodowaną jako Base64 ze współdzielonego cache.
     /// </summary>
     private static string GetFontBase64(string fontPath)
     {
-        if (File.Exists(fontPath))
-        {
-            var fontBytes = File.ReadAllBytes(fontPath);
-            return Convert.ToBase64String(fontBytes);
-        }
-
-        return string.Empty;
+        return FontBase64Cache.Get(fontPath);
     }
 
     /// <summary>
@@ -116,7 +110,7 @@ public class SongVisualization
         sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable'; font-weight: 500; /* display: inlinecd-block; */}");
         
         sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; /* height: 1.2em; */ margin-top: 0.8em; }");
-        sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-1.2em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-0.4em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; line-height: 1em; }");
         
         sb.AppendLine(@".chords, .chords2 { color: #b62610; }");
 
@@ -148,7 +142,6 @@ public class SongVisualization
         sb.AppendLine(".first-row-block { display: inline-block; margin-top: 1em !important; }");
         sb.AppendLine(".top-border-1 { padding-top: 2px; border-top: 1px solid; border-top-color: inherit; }");
 
-
         sb.AppendLine(".debug-log  {font-family: 'InconsolataVariable', Roboto, Consolas, monospace; line-height: 1em; font-size: 0.8em;white-space: pre-wrap;word-wrap: break-word; font-weight: 400; }");
 
         sb.AppendLine("@media (max-width: 576px) {");
@@ -156,7 +149,7 @@ public class SongVisualization
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
         sb.AppendLine("     .lyrics-line.annotated { line-height: 1.85em; margin-top: 0.7em; }");
-        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.95em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.4em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
         sb.AppendLine(@"    .chords2 { font-size: 0.7em; }");
         sb.AppendLine(@"    .chords { font-size: 0.9em; }");
 
@@ -192,7 +185,7 @@ public class SongVisualization
         {
             if (!string.IsNullOrEmpty(song.LyricsAuthor))
             {
-                if(song.LyricsAuthor.StartsWith("tł.") || song.LyricsAuthor.StartsWith("tłum."))
+                if(song.LyricsAuthor.StartsWith("tł.") || song.LyricsAuthor.StartsWith("tłum") || song.LyricsAuthor.StartsWith("przekł"))
                     songMetadata += $"<div class=\"lyrics-author\">{song.LyricsAuthor}</div>";
                 else
                     songMetadata += $"<div class=\"lyrics-author\">sł. {song.LyricsAuthor}</div>";

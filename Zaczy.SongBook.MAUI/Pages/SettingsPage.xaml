@@ -108,7 +108,20 @@
                 CheckedChanged="OnLyricsVersionRadioChanged"                
                 Margin="0,-5,0,0"
                 />
-        </StackLayout>
+            <Label
+                Text="Dopasuj wygląd tekstu piosenki"
+                TextDecorations="Underline"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                FontSize="12"
+                HorizontalOptions="Start"
+                VerticalTextAlignment="Center"
+                Margin="30,-15,0,-15"
+                MinimumHeightRequest="44">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLayoutEditorClicked" />
+                </Label.GestureRecognizers>
+            </Label>
+            </StackLayout>
 
         <!-- NOWY WIERSZ 4: Wybór instrumentu -->
         <Label
@@ -139,7 +152,6 @@
                 />
         </StackLayout>
 
-        <!-- Poprzedni wiersz 4 → teraz 5 -->
         <Label
             Text="Ukryj tabulatury"
             Grid.Row="5"
@@ -161,17 +173,11 @@
 
             <Label 
                 Grid.Column="1"
-                Text="{Binding SkipTabulaturesTxt}"
+                Text="Ukrywa wszystkie tabulatury z tekstu piosenki"
                 VerticalOptions="Center"
                 LineBreakMode="WordWrap"
                 FontSize="10"
-                MaxLines="5">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding SkipTabulatures}" Value="True">
-                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                        </DataTrigger>
-                    </Label.Triggers>
-            </Label>
+                MaxLines="5"/>
             </Grid>
 
 
@@ -216,11 +222,6 @@
                 FontSize="10"
                 MaxLines="5"
                 >
-                <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding SkipLyricChords}" Value="True">
-                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </DataTrigger>
-                </Label.Triggers>
 
             </Label>
             </Grid>

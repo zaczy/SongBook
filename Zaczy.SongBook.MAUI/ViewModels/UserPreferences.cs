@@ -42,4 +42,10 @@ public class UserPreferences
 
     public bool ExtendedApiLogging { get; set; } = false;
     public bool EnableEdgeToEdge { get; set; } = true;
+    public string? TextFontFamily { get;  set; }
+    public string? ChordFontFamily { get;  set; }
+    public int? ChordFontSize { get;  set; }
+    public string? ChordColor { get;  set; }
+    public string? TextColor { get;  set; }
+    public string? BackgroundColor { get;  set; }
 }

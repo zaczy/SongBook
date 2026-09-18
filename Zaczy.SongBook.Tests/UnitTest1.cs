@@ -37,7 +37,7 @@ namespace Zaczy.SongBook.Tests
 
             Console.WriteLine($"{song.Title}");
             Console.WriteLine($"{song.Artist}");
-            if(!string.IsNullOrEmpty(song.Capo))
+            if (!string.IsNullOrEmpty(song.Capo))
                 Console.WriteLine($"Capo: {song.Capo}");
 
             Console.WriteLine("-----");
@@ -130,7 +130,7 @@ namespace Zaczy.SongBook.Tests
             Console.WriteLine(svg);
             Assert.That(!string.IsNullOrEmpty(svg));
         }
-        
+
         [Test]
         public void GuitarChord_FdurToSvg_ReturnsCorrectSvg()
         {
@@ -254,7 +254,7 @@ namespace Zaczy.SongBook.Tests
         public void GuitarChord_ChordsLibrary_ReturnsCorrectVisualisation()
         {
 
-            foreach(var kv in GuitarChordsLibrary.ChordsDict)
+            foreach (var kv in GuitarChordsLibrary.ChordsDict)
             {
                 GuitarChordsLibrary library = new GuitarChordsLibrary();
                 var chord = library.StandardChord(kv.Key, kv.Value);
@@ -286,7 +286,7 @@ namespace Zaczy.SongBook.Tests
 
             foreach (var s in songs)
             {
-                if(s.Lines?.Count == 0)
+                if (s.Lines?.Count == 0)
                     continue;
 
                 s.Lyrics = string.Join("\n", s.Lines!);
@@ -303,9 +303,17 @@ namespace Zaczy.SongBook.Tests
                 }
             }
 
-                Assert.That(songs?.Count > 190);
+            Assert.That(songs?.Count > 190);
         }
 
+        public async Task SpiewnikZaczy_ImportFromWord_ParsesTxtAndSavesToDb()
+        {
+            string html = @"
+";
+            VisualizationCssOptions visualizationCssOptions = VisualizationCssOptions.FromHtml(html);
 
+            Assert.That(visualizationCssOptions.CssValue(".chords, .chords2", "color"), Is.Not.Null);
+
+        }
     }
 }

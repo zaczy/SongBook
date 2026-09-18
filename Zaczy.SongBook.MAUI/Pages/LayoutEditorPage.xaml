@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:controls="clr-namespace:Maui.ColorPicker;assembly=Maui.ColorPicker"
+             x:Class="Zaczy.SongBook.MAUI.Pages.LayoutEditorPage"
+             Title="Domyślny layout piosenek">
+
+    <Grid RowDefinitions="*,*,Auto">
+
+        <!-- GÓRA: panel opcji -->
+        <ScrollView Grid.Row="0" Padding="12"
+                    Background="{AppThemeBinding Light=#F2F2F2, Dark=#1a1a1a}">
+            <VerticalStackLayout Spacing="8">
+
+                <!-- Czcionka -->
+                <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="Czcionka:" VerticalOptions="Center" />
+                    <Picker Grid.Column="1"
+                            x:Name="FontFamilyPicker"
+                            SelectedIndexChanged="OnOptionChanged" />
+                </Grid>
+
+                <!-- Rozmiar tekstu -->
+                <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="Rozmiar (px):" VerticalOptions="Center" />
+                    <Slider Grid.Column="1"
+                            x:Name="FontSizeSlider"
+                            Minimum="10" Maximum="48"
+                            DragCompleted="Slider_DragCompleted"
+                        />
+                    <Label Grid.Column="2"
+                           VerticalOptions="Center"
+                           Text="{Binding Source={x:Reference FontSizeSlider}, Path=Value, StringFormat='{0:F0}'}" />
+                </Grid>
+
+                <!-- Kolor tekstu -->
+                <Grid ColumnDefinitions="140,*"
+                      RowDefinitions="Auto,Auto,Auto"
+                      ColumnSpacing="8"
+                      RowSpacing="0">
+                    <Label Grid.Column="0"
+                           Text="Kolor tekstu:"
+                           VerticalOptions="Center" />
+
+                    <!--<Button Grid.Column="1"
+                            x:Name="TextColorEditButton"
+                            Text="Wybierz kolor"
+                            Clicked="OnColorEditorClicked" />-->
+
+                    <controls:ColorPicker
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        x:Name="TextColorPicker"
+                        HeightRequest="48"
+                        ColorFlowDirection="Horizontal"
+                        ColorSpectrumStyle="ShadeToHueStyle"
+                        PickedColorChanged="TextColorPicker_PickedColorChanged"
+                        PointerRingBorderUnits="0.3"
+                        PointerRingDiameterUnits="0.7" />
+
+                    <Entry Grid.Column="1"
+                           Grid.Row="1"
+                           x:Name="TextColorEntry"
+                           Placeholder="#000000"
+                           Margin="0,-10,0,0"
+                           />
+                </Grid>
+
+                <!-- Kolor akord�w -->
+                <Grid ColumnDefinitions="140,*"
+                      RowDefinitions="Auto,Auto,Auto"
+                      ColumnSpacing="8"
+                      RowSpacing="0">
+                    <Label Grid.Column="0"
+                           Text="Kolor akordów:"
+                           VerticalOptions="Center" />
+
+                    <!--<Button Grid.Column="1"
+                            x:Name="ChordColorEditButton"
+                            Text="Wybierz kolor"
+                            Clicked="OnColorEditorClicked" />-->
+
+                    <controls:ColorPicker
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        x:Name="ChordColorPicker"
+                        HeightRequest="48"
+                        ColorFlowDirection="Horizontal"
+                        ColorSpectrumStyle="ShadeToHueStyle"
+                        PickedColorChanged="ChordColorPicker_PickedColorChanged"
+                        PointerRingBorderUnits="0.3"
+                        PointerRingDiameterUnits="0.7" />
+
+                    <Entry Grid.Column="1"
+                           Grid.Row="1"
+                           x:Name="ChordColorEntry"
+                           Placeholder="#0055AA"
+                           Margin="0,-10,0,0"
+                           />
+                </Grid>
+
+                <!-- Kolor tła -->
+                <Grid ColumnDefinitions="140,*"
+                      RowDefinitions="Auto,Auto,Auto"
+                      ColumnSpacing="8"
+                      RowSpacing="0">
+                    <Label Grid.Column="0"
+                           Text="Kolor tła:"
+                           VerticalOptions="Center" />
+
+                    <controls:ColorPicker
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        x:Name="BackgroundColorPicker"
+                        HeightRequest="48"
+                        ColorFlowDirection="Horizontal"
+                        ColorSpectrumStyle="ShadeToHueStyle"
+                        PickedColorChanged="BackgroundColorPicker_PickedColorChanged"
+                        PointerRingBorderUnits="0.3"
+                        PointerRingDiameterUnits="0.7" />
+
+                    <Entry Grid.Column="1"
+                           Grid.Row="1"
+                           x:Name="BackgroundColorEntry"
+                           Margin="0,0,0,-10"
+                           TextChanged="ColorEntry_TextChanged" 
+                           />
+                </Grid>
+
+                <!-- Czcionka akordów -->
+                <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="Czcionka akordów:" VerticalOptions="Center" />
+                    <Picker Grid.Column="1"
+                            x:Name="ChordFontFamilyPicker"
+                            SelectedIndexChanged="OnOptionChanged" />
+                </Grid>
+
+                <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="Powiększenie czcionki (px):" VerticalOptions="Center" />
+                    <Slider Grid.Column="1"
+                            x:Name="ChordFontSizeSlider"
+                            Minimum="-5" Maximum="20"
+                            DragCompleted="Slider_DragCompleted"
+                            />
+                    <Label Grid.Column="2"
+                           VerticalOptions="Center"
+                           Text="{Binding Source={x:Reference ChordFontSizeSlider}, Path=Value, StringFormat='{0:F0}'}" />
+                </Grid>
+				
+				
+                <!-- Opcje bool -->
+                <HorizontalStackLayout Spacing="6">
+                    <CheckBox x:Name="SkipTabsCheck"
+                              CheckedChanged="OnCheckChanged" />
+                    <Label Text="Pomiń tabulatury" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="6">
+                    <CheckBox x:Name="MoveChordsToLyricsLine"
+                              CheckedChanged="OnCheckChanged" />
+                    <Label Text="Przenieś akordy na koniec linii" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="6">
+                    <CheckBox x:Name="CustomChordsOnlyCheck"
+                              CheckedChanged="OnCheckChanged" />
+                    <Label Text="Tylko niestandardowe akordy" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Info o piosence i przycisk losowania -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,4,0,0">
+                    <Label Grid.Column="0"
+                           x:Name="PreviewSongLabel"
+                           Text="�"
+                           FontAttributes="Italic"
+                           VerticalOptions="Center" />
+                    <Button Grid.Column="1"
+                            Text="Losuj piosenkę"
+                            Clicked="OnRandomSongClicked" />
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- podgląd WebView -->
+        <Grid 
+            Grid.Row="1"
+            Margin="10,0,10,10">
+
+            <WebView x:Name="PreviewWebView" />
+
+            <Grid 
+                x:Name="PreviewLoadingOverlay"
+                ZIndex="1"
+                IsVisible="False"
+                BackgroundColor="#99000000">
+
+                <VerticalStackLayout HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                             Spacing="10">
+
+                    <ActivityIndicator x:Name="PreviewLoadingIndicator"
+                               IsRunning="False"
+                               Color="White"
+                               HeightRequest="40"
+                               WidthRequest="40" />
+
+                    <Label Text="Ładowanie podglądu..."
+                   TextColor="White"
+                   HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+        
+        <!-- Przyciski akcji -->
+        <HorizontalStackLayout Grid.Row="2"
+                               HorizontalOptions="End"
+                               Padding="8"
+                               Spacing="8">
+            <Button Text="Zapisz jako domyślne" Clicked="OnSaveClicked" />
+            <Button Text="Zamknij" Clicked="OnCloseClicked" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

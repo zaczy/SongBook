@@ -31,7 +31,9 @@ namespace Zaczy.SongBook.MAUI.Data
         public Task<List<SongEntity>> GetAllAsync()
         {
             // LiteDB is synchronous by design; wrap to Task for async callers
-            return Task.FromResult(_col.FindAll().ToList());
+            //return Task.FromResult(_col.FindAll().ToList());
+            return Task.Run(() => _col.FindAll().ToList());
+
         }
 
         /// <summary>

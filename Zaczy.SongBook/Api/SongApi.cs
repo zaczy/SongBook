@@ -116,6 +116,23 @@ public class SongApi
         }
     }
 
+    public async Task<SongEntity> GetSongAsync(int songId)
+    {
+        var apiClient = new ApiClient(_baseUrl);
+        var response = await apiClient.GetAsync<SongEntity>($"/songs/{songId}");
+        if (response.IsSuccess && response.Data != null)
+        {
+            return response.Data;
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"GetSongsAsync: API error: {response.ErrorMessage} {response.ErrorDetails}");
+            return new SongEntity();
+        }
+    }
+
+
+
     /// <summary>
     /// Pobierz wszystkie piosenki z API porównaj z intniejącą bazą danych
     /// </summary>

@@ -50,13 +50,14 @@ public class SongInternalDetails
                 string line = song.Lines[i];
                 string? nextLine = i < song.Lines.Count - 1 ? song.Lines[i + 1] : string.Empty;
 
-                if (ChordService.IsChordLine(line) && !ChordService.IsChordLine(nextLine))
+                if (ChordService.IsChordLine(line))
                 {
                     var chords = ChordService.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);
-                    songInternalDetails.ChordLinesAboveLyricsCount++;
+                    if(!ChordService.IsChordLine(nextLine))
+                        songInternalDetails.ChordLinesAboveLyricsCount++;
                 }
-                else if (ChordService.ChordPartStart(line) > 1)
+                else if (ChordService.ChordPartStart(line) >= 1)
                 {
                     var chords = ChordService.ExtractChordsFromLine(line, visualizationOptions?.CustomChordsOnly);
                     songInternalDetails.AddChords(chords);

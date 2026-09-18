@@ -26,6 +26,8 @@ public class UserViewModel : INotifyPropertyChanged
     private UserPreferences? _prefs;
     private readonly Settings _settings;
 
+    private CustomLyricsCss? _customLyricsCss;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public UserViewModel(LiteDatabase liteDb, IOptions<Settings> settings)
@@ -616,6 +618,54 @@ public class UserViewModel : INotifyPropertyChanged
     }
 
     public bool PendingProposedSongsExist => PendingProposedSongs != null && PendingProposedSongs.Count > 0;
+
+
+    public CustomLyricsCss? CustomLyricsCss
+    {
+        get
+        {
+            if(_customLyricsCss == null)
+            {
+                _customLyricsCss = new CustomLyricsCss()
+                {
+                    FontFamily = _prefs?.TextFontFamily,
+                    ChordFontFamily = _prefs?.ChordFontFamily,
+                    ChordFontSize = _prefs?.ChordFontSize,
+                    ChordColor = _prefs?.ChordColor,
+                    TextColor = _prefs?.TextColor,
+                    BackgroundColor = _prefs?.BackgroundColor
+                };
+            }
+
+            return _customLyricsCss;
+        }
+        set
+        {
+            _customLyricsCss = value;
+            if(_customLyricsCss != null && _prefs != null)
+            {
+                if(_customLyricsCss.FontFamily != null)
+                   _prefs.TextFontFamily = _customLyricsCss.FontFamily;
+
+                if (_customLyricsCss.ChordFontFamily != null)
+                    _prefs.ChordFontFamily = _customLyricsCss.ChordFontFamily;
+
+                if (_customLyricsCss.ChordFontSize != null)
+                    _prefs.ChordFontSize = _customLyricsCss.ChordFontSize;
+
+                if (_customLyricsCss.ChordColor != null)
+                    _prefs.ChordColor = _customLyricsCss.ChordColor;
+
+                if (_customLyricsCss.TextColor != null)
+                    _prefs.TextColor = _customLyricsCss.TextColor;
+
+                if( _customLyricsCss.BackgroundColor != null)
+                    _prefs.BackgroundColor = _customLyricsCss.BackgroundColor;
+
+                Save();
+            }
+        }
+    }
 
 
     /// <summary>
