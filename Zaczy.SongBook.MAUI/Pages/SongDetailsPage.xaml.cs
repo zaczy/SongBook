@@ -117,7 +117,7 @@ public partial class SongDetailsPage : ContentPage
 
         InitializeComponent();
 
-        _visualizationCssOptions.Add(".lyrics-line", "font-family", "PoltawskiVariable");
+        _visualizationCssOptions.Add(".lyrics-line", "font-family", "Antykwa Półtawskiego");
         _visualizationCssOptions.Add("pre", "font-weight", "600");
 
         if (DeviceInfo.Idiom == DeviceIdiom.Tablet)
@@ -218,6 +218,9 @@ public partial class SongDetailsPage : ContentPage
     /// <returns></returns>
     private async Task EnsureFontsAvailableAsync()
     {
+        await FontsHelper.EnsureFontsAvailableAsync(_visualization);
+        return;
+
         var fontAssets = new Dictionary<string, string?>
         {
             { "InconsolataVariable", "assets/css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf" },
@@ -418,6 +421,19 @@ public partial class SongDetailsPage : ContentPage
 
             var song = _song ?? new Song(_songEntity);
             string htmlDocument = _visualization!.LyricsHtml(song, _userViewModel.LyricsHtmlVersion, skipHeaders: true);
+
+            var editableCss = CustomLyricsCss.CreatePreviewCss(_userViewModel?.CustomLyricsCss);
+
+            if(!string.IsNullOrEmpty(editableCss))
+            {
+                // inject custom CSS into the <head> section
+                var headCloseTagIndex = htmlDocument.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+                if (headCloseTagIndex >= 0)
+                {
+                    var styleTag = $"<style>{editableCss}</style>";
+                    htmlDocument = htmlDocument.Insert(headCloseTagIndex, styleTag);
+                }
+            }
 
             var insertAt = htmlDocument.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
             if (insertAt >= 0)

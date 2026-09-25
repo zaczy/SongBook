@@ -1,4 +1,6 @@
-﻿namespace Zaczy.SongBook;
+﻿using System.Globalization;
+
+namespace Zaczy.SongBook;
 
 public class CustomLyricsCss
 {
@@ -11,4 +13,45 @@ public class CustomLyricsCss
   
     public string? ChordFontFamily { get; set; }
     public int? ChordFontSize { get; set; }
+
+    public static string CreatePreviewCss(CustomLyricsCss? customLyricsCss)
+    {
+        if (customLyricsCss == null)
+            return string.Empty;
+
+        var cssOptions = new VisualizationCssOptions();
+        cssOptions.ApplyCustomCss(customLyricsCss);
+
+        // ApplyCustomCss targets .lyrics-line; support the Pre format as well.
+        if (!string.IsNullOrEmpty(customLyricsCss.FontFamily))
+            cssOptions.Add("pre", "font-family", customLyricsCss.FontFamily);
+
+        if (customLyricsCss.FontSize > 0)
+        {
+            cssOptions.Add(
+                "pre",
+                "font-size",
+                $"{customLyricsCss.FontSize.ToString(CultureInfo.InvariantCulture)}px");
+        }
+
+        if (!string.IsNullOrEmpty(customLyricsCss.TextColor))
+        {
+            cssOptions.Add("pre", "color", customLyricsCss.TextColor);
+
+            // ToSvgHorizontal embeds presentation attributes.
+            // Override diagram geometry without recoloring finger-number text.
+            cssOptions.Add(
+                ".chord-list svg line",
+                "stroke",
+                customLyricsCss.TextColor);
+
+            cssOptions.Add(
+                ".chord-list svg rect, .chord-list svg circle",
+                "fill",
+                customLyricsCss.TextColor);
+        }
+
+        return cssOptions.GenerateCss() ?? string.Empty;
+    }
+
 }

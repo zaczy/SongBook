@@ -644,23 +644,17 @@ public class UserViewModel : INotifyPropertyChanged
             _customLyricsCss = value;
             if(_customLyricsCss != null && _prefs != null)
             {
-                if(_customLyricsCss.FontFamily != null)
-                   _prefs.TextFontFamily = _customLyricsCss.FontFamily;
+                _prefs.TextFontFamily = _customLyricsCss.FontFamily;
 
-                if (_customLyricsCss.ChordFontFamily != null)
-                    _prefs.ChordFontFamily = _customLyricsCss.ChordFontFamily;
+                _prefs.ChordFontFamily = _customLyricsCss.ChordFontFamily;
 
-                if (_customLyricsCss.ChordFontSize != null)
-                    _prefs.ChordFontSize = _customLyricsCss.ChordFontSize;
+                _prefs.ChordFontSize = _customLyricsCss.ChordFontSize;
 
-                if (_customLyricsCss.ChordColor != null)
-                    _prefs.ChordColor = _customLyricsCss.ChordColor;
+                _prefs.ChordColor = _customLyricsCss.ChordColor;
 
-                if (_customLyricsCss.TextColor != null)
-                    _prefs.TextColor = _customLyricsCss.TextColor;
+                _prefs.TextColor = _customLyricsCss.TextColor;
 
-                if( _customLyricsCss.BackgroundColor != null)
-                    _prefs.BackgroundColor = _customLyricsCss.BackgroundColor;
+                _prefs.BackgroundColor = _customLyricsCss.BackgroundColor;
 
                 Save();
             }

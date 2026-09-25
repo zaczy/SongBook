@@ -74,7 +74,7 @@ public partial class LayoutEditorPage : ContentPage
         var bodyColor = _userViewModel?.CustomLyricsCss?.TextColor ?? visualizationCssOptions.CssValue("body", "color");
         var chordsColor = _userViewModel?.CustomLyricsCss?.ChordColor ?? visualizationCssOptions.CssValue(".chords", "color");
 
-        FontSizeSlider.Value = 17 + _userViewModel.FontSizeAdjustment;
+        FontSizeSlider.Value = _userViewModel?.FontSizeAdjustment ?? 0;
 
         TextColorPicker.PickedColor = Color.FromArgb(bodyColor);
         TextColorEntry.Text = bodyColor;
@@ -82,7 +82,7 @@ public partial class LayoutEditorPage : ContentPage
         ChordColorEntry.Text = chordsColor;
         ChordColorPicker.PickedColor = Color.FromArgb(chordsColor);
 
-        ChordFontSizeSlider.Value = 0;
+        ChordFontSizeSlider.Value = _userViewModel?.CustomLyricsCss?.ChordFontSize ?? 0;
 
         var bgColor = _userViewModel?.CustomLyricsCss?.BackgroundColor ?? visualizationCssOptions.CssValue("body", "background-color");
         BackgroundColorPicker.PickedColor = Color.FromArgb(bgColor);
@@ -98,12 +98,18 @@ public partial class LayoutEditorPage : ContentPage
             if (fontIndex >= 0)
                 FontFamilyPicker.SelectedIndex = fontIndex;
         }
-        if(_userViewModel?.CustomLyricsCss?.ChordFontFamily != null)
+        else
+            FontFamilyPicker.SelectedIndex = 0;
+
+
+        if (_userViewModel?.CustomLyricsCss?.ChordFontFamily != null)
         {
             var chordFontIndex = Array.IndexOf(AvailableFonts, _userViewModel.CustomLyricsCss.ChordFontFamily);
             if (chordFontIndex >= 0)
                 ChordFontFamilyPicker.SelectedIndex = chordFontIndex;
         }
+        else
+            ChordFontFamilyPicker.SelectedIndex = 0;
     }
 
     private async Task LoadRandomSongAsync()
@@ -157,7 +163,7 @@ public partial class LayoutEditorPage : ContentPage
             // All control and view-model access stays on the UI thread.
             var previewSong = _previewSong;
             var customLyricsCss = LyricsCssFromControls();
-            var editableCss = CreatePreviewCss(customLyricsCss);
+            var editableCss = CustomLyricsCss.CreatePreviewCss(customLyricsCss);
 
             var skipTabulatures = SkipTabsCheck.IsChecked;
             var moveChords = MoveChordsToLyricsLine.IsChecked == true;
@@ -251,43 +257,6 @@ public partial class LayoutEditorPage : ContentPage
         }
     }
 
-    private static string CreatePreviewCss(CustomLyricsCss customLyricsCss)
-    {
-        var cssOptions = new VisualizationCssOptions();
-        cssOptions.ApplyCustomCss(customLyricsCss);
-
-        // ApplyCustomCss targets .lyrics-line; support the Pre format as well.
-        if (!string.IsNullOrEmpty(customLyricsCss.FontFamily))
-            cssOptions.Add("pre", "font-family", customLyricsCss.FontFamily);
-
-        if (customLyricsCss.FontSize > 0)
-        {
-            cssOptions.Add(
-                "pre",
-                "font-size",
-                $"{customLyricsCss.FontSize.ToString(CultureInfo.InvariantCulture)}px");
-        }
-
-        if (!string.IsNullOrEmpty(customLyricsCss.TextColor))
-        {
-            cssOptions.Add("pre", "color", customLyricsCss.TextColor);
-
-            // ToSvgHorizontal embeds presentation attributes.
-            // Override diagram geometry without recoloring finger-number text.
-            cssOptions.Add(
-                ".chord-list svg line",
-                "stroke",
-                customLyricsCss.TextColor);
-
-            cssOptions.Add(
-                ".chord-list svg rect, .chord-list svg circle",
-                "fill",
-                customLyricsCss.TextColor);
-        }
-
-        return cssOptions.GenerateCss() ?? string.Empty;
-    }
-
     private async Task<bool> TryUpdatePreviewCssAsync(string styleId, string css)
     {
         // JSON encoding safely embeds strings in JavaScript.
@@ -353,7 +322,7 @@ public partial class LayoutEditorPage : ContentPage
     private CustomLyricsCss LyricsCssFromControls()
     {
         var selectedFont = FontFamilyPicker.SelectedItem?.ToString() ?? AvailableFonts[0];
-        var fontSize = ((int)FontSizeSlider.Value).ToString(CultureInfo.InvariantCulture) + "px";
+        //var fontSize = ((int)FontSizeSlider.Value).ToString(CultureInfo.InvariantCulture) + "px";
         var chordsSelectedFont = ChordFontFamilyPicker.SelectedItem?.ToString();
 
         var textColor = TextColorPicker.PickedColor.ToHex();
@@ -362,7 +331,7 @@ public partial class LayoutEditorPage : ContentPage
         return new Zaczy.SongBook.CustomLyricsCss
         {
             FontFamily = selectedFont,
-            FontSize = (int)FontSizeSlider.Value,
+            FontSize = 17 + (int)FontSizeSlider.Value,
             TextColor = textColor,
             ChordColor = chordColor,
             ChordFontFamily = chordsSelectedFont,
@@ -402,25 +371,20 @@ public partial class LayoutEditorPage : ContentPage
         await UpdatePreviewAsync();
     }
 
-    private async void OnSaveClicked(object sender, EventArgs e)
-    {
-        // TODO: zapisz wybrane wartoœci np. do UserViewModel/Preferences
-        // Preferences.Set("Layout.FontFamily", FontFamilyPicker.SelectedItem?.ToString());
-        // Preferences.Set("Layout.FontSize", (int)FontSizeSlider.Value);
-        // Preferences.Set("Layout.TextColor", SanitizeColor(TextColorEntry.Text, "#000000"));
-        // Preferences.Set("Layout.ChordColor", SanitizeColor(ChordColorEntry.Text, "#0055AA"));
-
-        //_userViewModel.FontSizeAdjustment = (int)FontSizeSlider.Value - 17;
-
-        await DisplayAlert("Zapisano", "Ustawienia layoutu zosta³y zapisane jako domyœlne.", "OK");
-    }
-
     private async void OnCloseClicked(object sender, EventArgs e)
     {
         await Navigation.PopAsync();
     }
 
-    
+    private async void OnResetClicked(object sender, EventArgs e)
+    {
+        _userViewModel.CustomLyricsCss = new CustomLyricsCss();
+        LoadCurrentSettingsIntoUi();
+
+        await UpdatePreviewAsync();
+    }
+
+
     private async void TextColorPicker_PickedColorChanged(object sender, PickedColorChangedEventArgs e)
     {
         TextColorEntry.Text = e.NewPickedColorValue.ToHex();
@@ -480,6 +444,22 @@ public partial class LayoutEditorPage : ContentPage
             _isDuringControlsSync = false;
             await UpdatePreviewAsync();
         }
+    }
+
+    /// <summary>
+    /// Zapisz ustawienia na sta³e
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void OnSaveClicked(object sender, EventArgs e)
+    {
+        _userViewModel.FontSizeAdjustment = (int)FontSizeSlider.Value;
+        _userViewModel.MoveChordsToLyricsLine = MoveChordsToLyricsLine?.IsChecked == true;
+        _userViewModel.ShowOnlyCustomChords = CustomChordsOnlyCheck?.IsChecked == true;
+        _userViewModel.SkipTabulatures = SkipTabsCheck.IsChecked == true;
+
+        _userViewModel.CustomLyricsCss = LyricsCssFromControls();
+        await Navigation.PopAsync();
     }
 
 

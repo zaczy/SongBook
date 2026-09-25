@@ -87,7 +87,7 @@ public class SongVisualization
         string? customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("pre", "font-family");
         sb.AppendLine(@"
             pre {
-                font-family: 'InconsolataVariable', Roboto, Consolas, monospace;
+                font-family: 'Inconsolata', Roboto, Consolas, monospace;
                 line-height: 1em;
                 font-size: 1.1em;
                 white-space: pre-wrap;
@@ -101,13 +101,13 @@ public class SongVisualization
                 font-size: 0.9em;
             }");
 
-        sb.AppendLine("H1 { font-family: InconsolataVariable, RobotoVariable_beta; font-stretch: 100%; color: #b62610; }");
-        sb.AppendLine("H1 .artist { font-family: InconsolataVariable, RobotoVariable_beta; color: #CCC; font-size: 0.6em; }");
+        sb.AppendLine("H1 { font-family: Inconsolata, Roboto; font-stretch: 100%; color: #b62610; }");
+        sb.AppendLine("H1 .artist { font-family: Inconsolata, Roboto; color: #CCC; font-size: 0.6em; }");
 
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
         customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
-        sb.AppendLine(".lyrics-line { position: relative; font-family: 'PoltawskiVariable'; font-weight: 500; /* display: inlinecd-block; */}");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'Antykwa Półtawskiego'; font-weight: 500; /* display: inlinecd-block; */}");
         
         sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; /* height: 1.2em; */ margin-top: 0.8em; }");
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-0.4em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; line-height: 1em; }");
@@ -125,7 +125,7 @@ public class SongVisualization
         sb.AppendLine(".block-bridge { margin-left: 70px; padding-left: 35px; margin-top: 1em; }");
         sb.AppendLine(".block-bridge .block-header { display: none; }");
 
-        sb.AppendLine(".block-tabulatura { font-family: 'InconsolataVariable', Consolas, monospace; font-size: 0.8em; line-height: 1.2em; }");
+        sb.AppendLine(".block-tabulatura { font-family: 'Inconsolata', Consolas, monospace; font-size: 0.8em; line-height: 1.2em; }");
         sb.AppendLine(".block-tabulatura .block-header { display: none; }");
 
         sb.AppendLine(".block-recytacja { font-style: italic; font-size: 0.8em;  }");
@@ -135,14 +135,14 @@ public class SongVisualization
 
         //sb.AppendLine(".capo-info { color: #AAA; font-size: 0.8em; margin-bottom: 10px; }");
         sb.AppendLine(".capo-info, .lyrics-author, .music-author { opacity: 0.7; font-size: 0.8em; margin-bottom: 1px; "
-                + (version == LyricsHtmlVersion.RelativeHtml ? "font-family: 'PoltawskiVariable';" : "")
+                + (version == LyricsHtmlVersion.RelativeHtml ? "font-family: 'Antykwa Półtawskiego';" : "")
                 +"}");
 
         sb.AppendLine(".song-metadata { margin-bottom: 1.2em; }");
         sb.AppendLine(".first-row-block { display: inline-block; margin-top: 1em !important; }");
         sb.AppendLine(".top-border-1 { padding-top: 2px; border-top: 1px solid; border-top-color: inherit; }");
 
-        sb.AppendLine(".debug-log  {font-family: 'InconsolataVariable', Roboto, Consolas, monospace; line-height: 1em; font-size: 0.8em;white-space: pre-wrap;word-wrap: break-word; font-weight: 400; }");
+        sb.AppendLine(".debug-log  {font-family: 'Inconsolata', Roboto, Consolas, monospace; line-height: 1em; font-size: 0.8em;white-space: pre-wrap;word-wrap: break-word; font-weight: 400; }");
 
         sb.AppendLine("@media (max-width: 576px) {");
         sb.AppendLine("body { margin: 0; margin-top: 8px; } ");

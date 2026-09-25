@@ -25,9 +25,10 @@
                 <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
                     <Label Grid.Column="0" Text="Rozmiar (px):" VerticalOptions="Center" />
                     <Slider Grid.Column="1"
-                            x:Name="FontSizeSlider"
-                            Minimum="10" Maximum="48"
-                            DragCompleted="Slider_DragCompleted"
+                        x:Name="FontSizeSlider"
+                        Minimum="-10"
+                        Maximum="20"
+                        DragCompleted="Slider_DragCompleted"
                         />
                     <Label Grid.Column="2"
                            VerticalOptions="Center"
@@ -217,8 +218,9 @@
                                HorizontalOptions="End"
                                Padding="8"
                                Spacing="8">
-            <Button Text="Zapisz jako domyślne" Clicked="OnSaveClicked" />
-            <Button Text="Zamknij" Clicked="OnCloseClicked" />
+            <Button Text="Zapisz" Clicked="OnSaveClicked" />
+            <Button Text="Anuluj" Clicked="OnCloseClicked" />
+            <Button Text="Zeruj" Clicked="OnResetClicked" />
         </HorizontalStackLayout>
     </Grid>
 </ContentPage>
