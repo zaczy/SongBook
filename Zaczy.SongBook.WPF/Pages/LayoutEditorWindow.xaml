@@ -3,7 +3,7 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-                 Title="Edytor domyœlnego layoutu piosenek"
+                 Title="Edytor domyÅ›lnego layoutu piosenek"
                  Height="800" Width="1100"
                  WindowStartupLocation="CenterOwner"
                  Loaded="Window_Loaded">
@@ -58,8 +58,8 @@
                          Margin="4"
                          TextChanged="Option_TextChanged" />
 
-                <!-- Kolor akordów -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Kolor akordów (#RRGGBB):" Margin="4" VerticalAlignment="Center" />
+                <!-- Kolor akordÃ³w -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Kolor akordÃ³w (#RRGGBB):" Margin="4" VerticalAlignment="Center" />
                 <TextBox Grid.Row="3" Grid.Column="1"
                          x:Name="ChordColorBox"
                          Text="#0055AA"
@@ -69,23 +69,23 @@
                 <!-- Opcje bool -->
                 <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                             Orientation="Horizontal" Margin="4">
-                    <CheckBox x:Name="SkipTabsCheck" Content="Pomiñ tabulatury" Margin="0,0,16,0"
+                    <CheckBox x:Name="SkipTabsCheck" Content="PomiÅ„ tabulatury" Margin="0,0,16,0"
                               Checked="Option_Changed" Unchecked="Option_Changed" />
                     <CheckBox x:Name="ChordsAboveLyricsCheck" Content="Akordy nad tekstem" Margin="0,0,16,0"
                               Checked="Option_Changed" Unchecked="Option_Changed" />
-                    <CheckBox x:Name="CustomChordsOnlyCheck" Content="Tylko w³asne akordy"
+                    <CheckBox x:Name="CustomChordsOnlyCheck" Content="Tylko wÅ‚asne akordy"
                               Checked="Option_Changed" Unchecked="Option_Changed" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Podgl¹d -->
+        <!-- PodglÄ…d -->
         <wv2:WebView2 Grid.Row="1" x:Name="PreviewWebView" />
 
         <!-- Dolne przyciski -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
-            <Button Content="Wylosuj inn¹ piosenkê" Padding="10,4" Margin="4" Click="RandomSong_Click" />
-            <Button Content="Zapisz jako domyœlne" Padding="10,4" Margin="4" Click="Save_Click" />
+            <Button Content="Wylosuj innÄ… piosenkÄ™" Padding="10,4" Margin="4" Click="RandomSong_Click" />
+            <Button Content="Zapisz jako domyÅ›lne" Padding="10,4" Margin="4" Click="Save_Click" />
             <Button Content="Zamknij" Padding="10,4" Margin="4" Click="Close_Click" />
         </StackPanel>
     </Grid>

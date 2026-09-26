@@ -552,7 +552,7 @@ public class VisualizationCssOptions
             this.Add(".lyrics-line", "font-family", customLyricsCss.FontFamily);
         
         if((customLyricsCss?.FontSize ?? 0) > 0)
-            this.Add(".lyrics-line", "font-size", $"{customLyricsCss.FontSize}px");
+            this.Add(".lyrics-line", "font-size", $"{customLyricsCss!.FontSize}px");
         
         if(customLyricsCss?.TextColor != null)
             this.Add(".lyrics-line", "color", customLyricsCss.TextColor);

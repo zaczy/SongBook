@@ -18,6 +18,8 @@ using Zaczy.SongBook.MAUI.Services;
 
 namespace Zaczy.SongBook.MAUI.ViewModels;
 
+#pragma warning disable CA1416
+
 public class UserViewModel : INotifyPropertyChanged
 {
     private readonly LiteDatabase _liteDb;
@@ -883,7 +885,36 @@ public class UserViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(EnableEdgeToEdge));
             }
         }
-    } 
+    }
+
+
+    public bool SearchSongAuthors
+    {
+        get => _prefs?.SearchSongAuthors ?? true;
+        set
+        {
+            if (_prefs != null && _prefs.SearchSongAuthors != value)
+            {
+                _prefs.SearchSongAuthors = value;
+                Save();
+                OnPropertyChanged(nameof(SearchSongAuthors));
+            }
+        }
+    }
+
+    public bool SearchLyrics 
+    { 
+        get => _prefs?.SearchLyrics ?? false;
+        set
+        {
+            if (_prefs != null && _prefs.SearchLyrics != value)
+            {
+                _prefs.SearchLyrics = value;
+                Save();
+                OnPropertyChanged(nameof(SearchLyrics));
+            }
+        }
+    }
 
     /// <summary>
     /// DOdaj element to pobliżenia listy odrzuconych propozycji lidera. Dzięki temu, 
@@ -950,3 +981,5 @@ public class UserViewModel : INotifyPropertyChanged
         }
     }
 }
+
+#pragma warning restore CA1416

@@ -34,13 +34,13 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		
 		<!-- Android API Level 36 (Android 16) wymagany przez Google Play -->
-		<AndroidMinimumSupportedApiLevel>21</AndroidMinimumSupportedApiLevel>
+		<AndroidMinimumSupportedApiLevel>24</AndroidMinimumSupportedApiLevel>
 		<AndroidTargetSdkVersion>36</AndroidTargetSdkVersion>
 	</PropertyGroup>
 
@@ -48,22 +48,22 @@
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -77,22 +77,23 @@
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
 	  <RunAOTCompilation>False</RunAOTCompilation>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
+  	  <AndroidLinkTool>r8</AndroidLinkTool>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 	  <ApplicationId>zaczy.songbook.maui</ApplicationId>
 	  <ApplicationTitle>Śpiewajnik</ApplicationTitle>
-	  <ApplicationDisplayVersion>0.9.7</ApplicationDisplayVersion>
-	  <ApplicationVersion>26</ApplicationVersion>
+	  <ApplicationDisplayVersion>0.9.8</ApplicationDisplayVersion>
+	  <ApplicationVersion>29</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
@@ -170,6 +171,7 @@
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.4" />
 	</ItemGroup>
 
 	<ItemGroup>

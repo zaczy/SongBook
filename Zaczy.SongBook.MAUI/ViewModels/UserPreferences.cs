@@ -48,4 +48,6 @@ public class UserPreferences
     public string? ChordColor { get;  set; }
     public string? TextColor { get;  set; }
     public string? BackgroundColor { get;  set; }
+    public bool SearchLyrics { get; set; }
+    public bool SearchSongAuthors { get; set; } = true;
 }

@@ -28,6 +28,7 @@ using Timer = System.Timers.Timer;
 
 namespace Zaczy.SongBook.MAUI.Pages;
 
+#pragma warning disable CA1416
 public partial class SongDetailsPage : ContentPage
 {
     private readonly Timer _hideControlsTimer;
@@ -219,56 +220,6 @@ public partial class SongDetailsPage : ContentPage
     private async Task EnsureFontsAvailableAsync()
     {
         await FontsHelper.EnsureFontsAvailableAsync(_visualization);
-        return;
-
-        var fontAssets = new Dictionary<string, string?>
-        {
-            { "InconsolataVariable", "assets/css/Inconsolata/Inconsolata-VariableFont_wdth,wght.ttf" },
-            //{ "RobotoVariable",  "css/Roboto/Roboto-VariableFont_wdth,wght.ttf" },
-            { "PoltawskiVariable", "assets/css/Poltawski_Nowy/PoltawskiNowy-VariableFont_wght.ttf" }
-        };
-
-        var appData = FileSystem.AppDataDirectory;
-
-        foreach (var kv in fontAssets)
-        {
-            var fontKey = kv.Key;
-            var assetRelative = kv.Value;
-            if (string.IsNullOrEmpty(assetRelative))
-                continue;
-
-            try
-            {
-                var destPath = Path.Combine(appData, assetRelative.Replace('/', Path.DirectorySeparatorChar));
-                var destDir = Path.GetDirectoryName(destPath);
-                if (!Directory.Exists(destDir))
-                    Directory.CreateDirectory(destDir!);
-
-                if (!File.Exists(destPath))
-                {
-                    try
-                    {
-                        using var stream = await FileSystem.OpenAppPackageFileAsync(assetRelative);
-                        using var outFs = File.Create(destPath);
-                        await stream.CopyToAsync(outFs);
-                    }
-                    catch (Exception)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Font asset not found in package: {assetRelative}");
-                        continue;
-                    }
-                }
-
-                if (_visualization.CssFontsPath == null)
-                    _visualization.CssFontsPath = new Dictionary<string, string>();
-
-                _visualization.CssFontsPath[fontKey] = destPath;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to prepare font {assetRelative}: {ex.Message}");
-            }
-        }
     }
 
     /// <summary>
@@ -1570,3 +1521,4 @@ public partial class SongDetailsPage : ContentPage
         this.OnSongProposalAccepted(sender, new EventArgs());
     }
 }
+#pragma warning restore CA1416

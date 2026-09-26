@@ -9,165 +9,212 @@
     <Grid RowDefinitions="*,*,Auto">
 
         <!-- GÓRA: panel opcji -->
-        <ScrollView Grid.Row="0" Padding="12"
+        <ScrollView Grid.Row="0"
+                    Padding="12"
                     Background="{AppThemeBinding Light=#F2F2F2, Dark=#1a1a1a}">
             <VerticalStackLayout Spacing="8">
 
-                <!-- Czcionka -->
-                <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
-                    <Label Grid.Column="0" Text="Czcionka:" VerticalOptions="Center" />
-                    <Picker Grid.Column="1"
-                            x:Name="FontFamilyPicker"
-                            SelectedIndexChanged="OnOptionChanged" />
-                </Grid>
+                <Button x:Name="FontSectionHeader"
+                        Text="Czcionka  ▾"
+                        HorizontalOptions="Fill"
+                        FontAttributes="Bold"
+                        MinimumHeightRequest="48"
+                        SemanticProperties.Hint="Zwiń sekcję"
+                        Clicked="OnFontSectionClicked" />
 
-                <!-- Rozmiar tekstu -->
-                <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
-                    <Label Grid.Column="0" Text="Rozmiar (px):" VerticalOptions="Center" />
-                    <Slider Grid.Column="1"
-                        x:Name="FontSizeSlider"
-                        Minimum="-10"
-                        Maximum="20"
-                        DragCompleted="Slider_DragCompleted"
-                        />
-                    <Label Grid.Column="2"
-                           VerticalOptions="Center"
-                           Text="{Binding Source={x:Reference FontSizeSlider}, Path=Value, StringFormat='{0:F0}'}" />
-                </Grid>
+                <VerticalStackLayout x:Name="FontSectionContent"
+                                     IsVisible="True"
+                                     Padding="0,4,0,12"
+                                     Spacing="8">
 
-                <!-- Kolor tekstu -->
-                <Grid ColumnDefinitions="140,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="8"
-                      RowSpacing="0">
-                    <Label Grid.Column="0"
-                           Text="Kolor tekstu:"
-                           VerticalOptions="Center" />
+                    <!-- Czcionka -->
+                    <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
+                        <Label Grid.Column="0"
+                               Text="Czcionka:"
+                               VerticalOptions="Center" />
+                        <Picker Grid.Column="1"
+                                x:Name="FontFamilyPicker"
+                                SelectedIndexChanged="OnOptionChanged" />
+                    </Grid>
 
-                    <!--<Button Grid.Column="1"
-                            x:Name="TextColorEditButton"
-                            Text="Wybierz kolor"
-                            Clicked="OnColorEditorClicked" />-->
+                    <!-- Rozmiar tekstu -->
+                    <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
+                        <Label Grid.Column="0"
+                               Text="Powiększenie tekstu (px):"
+                               VerticalOptions="Center" />
+                        <Slider Grid.Column="1"
+                                x:Name="FontSizeSlider"
+                                Minimum="-10"
+                                Maximum="20"
+                                DragCompleted="Slider_DragCompleted" />
+                        <Label 
+                            Grid.Column="2"
+                            VerticalOptions="Center"
+                            Text="{Binding Source={x:Reference FontSizeSlider},
+                            Path=Value,
+                            x:DataType={x:Type Slider},
+                            StringFormat='{0:F0}'}" />
+                    </Grid>
 
-                    <controls:ColorPicker
-                        Grid.Column="1"
-                        Grid.Row="0"
-                        x:Name="TextColorPicker"
-                        HeightRequest="48"
-                        ColorFlowDirection="Horizontal"
-                        ColorSpectrumStyle="ShadeToHueStyle"
-                        PickedColorChanged="TextColorPicker_PickedColorChanged"
-                        PointerRingBorderUnits="0.3"
-                        PointerRingDiameterUnits="0.7" />
+                    <!-- Czcionka akordów -->
+                    <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
+                        <Label Grid.Column="0"
+                               Text="Czcionka akordów:"
+                               VerticalOptions="Center" />
+                        <Picker Grid.Column="1"
+                                x:Name="ChordFontFamilyPicker"
+                                SelectedIndexChanged="OnOptionChanged" />
+                    </Grid>
 
-                    <Entry Grid.Column="1"
-                           Grid.Row="1"
-                           x:Name="TextColorEntry"
-                           Placeholder="#000000"
-                           Margin="0,-10,0,0"
-                           />
-                </Grid>
+                    <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
+                        <Label Grid.Column="0"
+                               Text="Powiększenie chwytów (px):"
+                               VerticalOptions="Center" />
+                        <Slider Grid.Column="1"
+                                x:Name="ChordFontSizeSlider"
+                                Minimum="-5"
+                                Maximum="20"
+                                DragCompleted="Slider_DragCompleted" />
+                        <Label 
+                            Grid.Column="2"
+                            VerticalOptions="Center"
+                            Text="{Binding Source={x:Reference ChordFontSizeSlider},
+                                Path=Value,
+                                x:DataType={x:Type Slider},
+                                StringFormat='{0:F0}'}" />
+                    </Grid>
+                </VerticalStackLayout>
 
-                <!-- Kolor akord�w -->
-                <Grid ColumnDefinitions="140,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="8"
-                      RowSpacing="0">
-                    <Label Grid.Column="0"
-                           Text="Kolor akordów:"
-                           VerticalOptions="Center" />
+                <Button x:Name="ColorsSectionHeader"
+                        Text="Kolory  ▸"
+                        HorizontalOptions="Fill"
+                        FontAttributes="Bold"
+                        MinimumHeightRequest="48"
+                        SemanticProperties.Hint="Zwiń sekcję"
+                        Clicked="OnColorsSectionClicked" />
 
-                    <!--<Button Grid.Column="1"
-                            x:Name="ChordColorEditButton"
-                            Text="Wybierz kolor"
-                            Clicked="OnColorEditorClicked" />-->
+                <VerticalStackLayout x:Name="ColorsSectionContent"
+                                     IsVisible="False"
+                                     Padding="0,4,0,12"
+                                     Spacing="8">
 
-                    <controls:ColorPicker
-                        Grid.Column="1"
-                        Grid.Row="0"
-                        x:Name="ChordColorPicker"
-                        HeightRequest="48"
-                        ColorFlowDirection="Horizontal"
-                        ColorSpectrumStyle="ShadeToHueStyle"
-                        PickedColorChanged="ChordColorPicker_PickedColorChanged"
-                        PointerRingBorderUnits="0.3"
-                        PointerRingDiameterUnits="0.7" />
+                    <!-- Kolor tekstu -->
+                    <Grid ColumnDefinitions="140,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          ColumnSpacing="8"
+                          RowSpacing="0">
+                        <Label Grid.Column="0"
+                               Text="Kolor tekstu:"
+                               VerticalOptions="Center" />
 
-                    <Entry Grid.Column="1"
-                           Grid.Row="1"
-                           x:Name="ChordColorEntry"
-                           Placeholder="#0055AA"
-                           Margin="0,-10,0,0"
-                           />
-                </Grid>
+                        <controls:ColorPicker
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            x:Name="TextColorPicker"
+                            HeightRequest="{ OnIdiom 60, Tablet=90}"
+                            ColorFlowDirection="Horizontal"
+                            ColorSpectrumStyle="ShadeToHueStyle"
+                            PickedColorChanged="TextColorPicker_PickedColorChanged"
+                            PointerRingBorderUnits="0.3"
+                            PointerRingDiameterUnits="0.7" />
 
-                <!-- Kolor tła -->
-                <Grid ColumnDefinitions="140,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="8"
-                      RowSpacing="0">
-                    <Label Grid.Column="0"
-                           Text="Kolor tła:"
-                           VerticalOptions="Center" />
+                        <Entry Grid.Column="1"
+                               Grid.Row="1"
+                               x:Name="TextColorEntry"
+                               Placeholder="#000000"
+                               Margin="0,-10,0,0"
+                               />
+                    </Grid>
 
-                    <controls:ColorPicker
-                        Grid.Column="1"
-                        Grid.Row="0"
-                        x:Name="BackgroundColorPicker"
-                        HeightRequest="48"
-                        ColorFlowDirection="Horizontal"
-                        ColorSpectrumStyle="ShadeToHueStyle"
-                        PickedColorChanged="BackgroundColorPicker_PickedColorChanged"
-                        PointerRingBorderUnits="0.3"
-                        PointerRingDiameterUnits="0.7" />
+                    <!-- Kolor akord�w -->
+                    <Grid ColumnDefinitions="140,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          ColumnSpacing="8"
+                          RowSpacing="0">
+                        <Label Grid.Column="0"
+                               Text="Kolor akordów:"
+                               VerticalOptions="Center" />
 
-                    <Entry Grid.Column="1"
-                           Grid.Row="1"
-                           x:Name="BackgroundColorEntry"
-                           Margin="0,0,0,-10"
-                           TextChanged="ColorEntry_TextChanged" 
-                           />
-                </Grid>
+                        <controls:ColorPicker
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            x:Name="ChordColorPicker"
+                            HeightRequest="{ OnIdiom 60, Tablet=90}"
+                            ColorFlowDirection="Horizontal"
+                            ColorSpectrumStyle="ShadeToHueStyle"
+                            PickedColorChanged="ChordColorPicker_PickedColorChanged"
+                            PointerRingBorderUnits="0.3"
+                            PointerRingDiameterUnits="0.7" />
 
-                <!-- Czcionka akordów -->
-                <Grid ColumnDefinitions="140,*" ColumnSpacing="8">
-                    <Label Grid.Column="0" Text="Czcionka akordów:" VerticalOptions="Center" />
-                    <Picker Grid.Column="1"
-                            x:Name="ChordFontFamilyPicker"
-                            SelectedIndexChanged="OnOptionChanged" />
-                </Grid>
+                        <Entry Grid.Column="1"
+                               Grid.Row="1"
+                               x:Name="ChordColorEntry"
+                               Placeholder="#0055AA"
+                               Margin="0,-10,0,0"
+                               />
+                    </Grid>
 
-                <Grid ColumnDefinitions="140,*,40" ColumnSpacing="8">
-                    <Label Grid.Column="0" Text="Powiększenie czcionki (px):" VerticalOptions="Center" />
-                    <Slider Grid.Column="1"
-                            x:Name="ChordFontSizeSlider"
-                            Minimum="-5" Maximum="20"
-                            DragCompleted="Slider_DragCompleted"
-                            />
-                    <Label Grid.Column="2"
-                           VerticalOptions="Center"
-                           Text="{Binding Source={x:Reference ChordFontSizeSlider}, Path=Value, StringFormat='{0:F0}'}" />
-                </Grid>
-				
-				
-                <!-- Opcje bool -->
-                <HorizontalStackLayout Spacing="6">
-                    <CheckBox x:Name="SkipTabsCheck"
-                              CheckedChanged="OnCheckChanged" />
-                    <Label Text="Pomiń tabulatury" VerticalOptions="Center" />
-                </HorizontalStackLayout>
+                    <!-- Kolor tła -->
+                    <Grid ColumnDefinitions="140,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          ColumnSpacing="8"
+                          RowSpacing="0">
+                        <Label Grid.Column="0"
+                               Text="Kolor tła:"
+                               VerticalOptions="Center" />
 
-                <HorizontalStackLayout Spacing="6">
-                    <CheckBox x:Name="MoveChordsToLyricsLine"
-                              CheckedChanged="OnCheckChanged" />
-                    <Label Text="Przenieś akordy na koniec linii" VerticalOptions="Center" />
-                </HorizontalStackLayout>
+                        <controls:ColorPicker
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            x:Name="BackgroundColorPicker"
+                            HeightRequest="{ OnIdiom 60, Tablet=90}"
+                            ColorFlowDirection="Horizontal"
+                            ColorSpectrumStyle="ShadeToHueStyle"
+                            PickedColorChanged="BackgroundColorPicker_PickedColorChanged"
+                            PointerRingBorderUnits="0.3"
+                            PointerRingDiameterUnits="0.7" />
 
-                <HorizontalStackLayout Spacing="6">
-                    <CheckBox x:Name="CustomChordsOnlyCheck"
-                              CheckedChanged="OnCheckChanged" />
-                    <Label Text="Tylko niestandardowe akordy" VerticalOptions="Center" />
-                </HorizontalStackLayout>
+                        <Entry Grid.Column="1"
+                               Grid.Row="1"
+                               x:Name="BackgroundColorEntry"
+                               Margin="0,0,0,-10"
+                               TextChanged="ColorEntry_TextChanged" 
+                               />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <Button x:Name="PresentationSectionHeader"
+                        Text="Prezentacja  ▾"
+                        HorizontalOptions="Fill"
+                        FontAttributes="Bold"
+                        MinimumHeightRequest="48"
+                        SemanticProperties.Hint="Zwiń sekcję"
+                        Clicked="OnPresentationSectionClicked" />
+
+                <VerticalStackLayout x:Name="PresentationSectionContent"
+                                     IsVisible="True"
+                                     Padding="0,4,0,12"
+                                     Spacing="8">
+
+                    <!-- Opcje bool -->
+                    <HorizontalStackLayout Spacing="6">
+                        <CheckBox x:Name="SkipTabsCheck"
+                                  CheckedChanged="OnCheckChanged" />
+                        <Label Text="Pomiń tabulatury" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="6">
+                        <CheckBox x:Name="MoveChordsToLyricsLine"
+                                  CheckedChanged="OnCheckChanged" />
+                        <Label Text="Przenieś akordy na koniec linii" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="6">
+                        <CheckBox x:Name="HideChordsCheck"
+                                  CheckedChanged="OnCheckChanged" />
+                        <Label Text="Nie pokazuj akordów" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
 
                 <!-- Info o piosence i przycisk losowania -->
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,4,0,0">
@@ -220,7 +267,7 @@
                                Spacing="8">
             <Button Text="Zapisz" Clicked="OnSaveClicked" />
             <Button Text="Anuluj" Clicked="OnCloseClicked" />
-            <Button Text="Zeruj" Clicked="OnResetClicked" />
+            <Button Text="Zeruj" Clicked="OnResetClicked" Background="{AppThemeBinding Dark=#666,Light=#888}" />
         </HorizontalStackLayout>
     </Grid>
 </ContentPage>

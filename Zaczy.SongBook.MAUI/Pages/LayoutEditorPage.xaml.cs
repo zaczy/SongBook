@@ -1,4 +1,4 @@
-using Maui.ColorPicker;
+﻿using Maui.ColorPicker;
 using Microsoft.Maui.Graphics.Text;
 using System.Globalization;
 using Zaczy.Songbook.MAUI.Helpers;
@@ -10,6 +10,7 @@ using Zaczy.SongBook.MAUI.ViewModels;
 
 namespace Zaczy.SongBook.MAUI.Pages;
 
+#pragma warning disable CA1416
 public partial class LayoutEditorPage : ContentPage
 {
     private readonly UserViewModel _userViewModel;
@@ -25,8 +26,30 @@ public partial class LayoutEditorPage : ContentPage
 
     private static readonly string[] AvailableFonts = FontsHelper.FontsAvailable();
 
-    private bool _textColorExpanded;
-    private bool _chordColorExpanded;
+    private readonly LayoutEditorChanges _controlChanges;
+
+    private Dictionary<string, object?> ReadControlValues()
+    {
+        return new Dictionary<string, object?>
+        {
+            [nameof(FontFamilyPicker)] = FontFamilyPicker.SelectedItem?.ToString(),
+            [nameof(FontSizeSlider)] = FontSizeSlider.Value,
+            [nameof(ChordFontFamilyPicker)] = ChordFontFamilyPicker.SelectedItem?.ToString(),
+            [nameof(ChordFontSizeSlider)] = ChordFontSizeSlider.Value,
+
+            [nameof(TextColorPicker)] = ReadColorValue(TextColorPicker.PickedColor),
+            [nameof(TextColorEntry)] = TextColorEntry.Text,
+            [nameof(ChordColorPicker)] = ReadColorValue(ChordColorPicker.PickedColor),
+            [nameof(ChordColorEntry)] = ChordColorEntry.Text,
+            [nameof(BackgroundColorPicker)] = ReadColorValue(BackgroundColorPicker.PickedColor),
+            [nameof(BackgroundColorEntry)] = BackgroundColorEntry.Text,
+
+            [nameof(SkipTabsCheck)] = SkipTabsCheck.IsChecked,
+            [nameof(MoveChordsToLyricsLine)] = MoveChordsToLyricsLine.IsChecked,
+            [nameof(HideChordsCheck)] = HideChordsCheck.IsChecked
+        };
+    }
+
 
     public LayoutEditorPage(UserViewModel userViewModel, SongRepositoryLite songRepository)
     {
@@ -39,6 +62,9 @@ public partial class LayoutEditorPage : ContentPage
         _visualization = new SongVisualization { IncludeFontsAsBase64 = true };
 
         InitializeFontList();
+
+        _controlChanges = new LayoutEditorChanges(ReadControlValues);
+
     }
 
     protected override async void OnAppearing()
@@ -49,6 +75,8 @@ public partial class LayoutEditorPage : ContentPage
         await FontsHelper.EnsureFontsAvailableAsync(_visualization);
         await LoadRandomSongAsync();
         LoadCurrentSettingsIntoUi();
+
+        _controlChanges.CaptureInitialValues();
 
         _isLoading = false;
         await UpdatePreviewAsync();
@@ -64,7 +92,7 @@ public partial class LayoutEditorPage : ContentPage
     }
 
     /// <summary>
-    /// Za�aduj obecne warto�ci z UserViewModel do UI.
+    /// Załaduj obecne wartości z UserViewModel do UI.
     /// </summary>
     private void LoadCurrentSettingsIntoUi()
     {
@@ -90,7 +118,7 @@ public partial class LayoutEditorPage : ContentPage
 
         SkipTabsCheck.IsChecked = _userViewModel?.SkipTabulatures ?? false;
         MoveChordsToLyricsLine.IsChecked = _userViewModel?.MoveChordsToLyricsLine ?? false;
-        CustomChordsOnlyCheck.IsChecked = _userViewModel?.ShowOnlyCustomChords ?? false;
+        HideChordsCheck.IsChecked = _userViewModel?.SkipLyricChords ?? false;
 
        if(_userViewModel?.CustomLyricsCss?.FontFamily != null)
         {
@@ -112,6 +140,10 @@ public partial class LayoutEditorPage : ContentPage
             ChordFontFamilyPicker.SelectedIndex = 0;
     }
 
+    /// <summary>
+    /// Załaduj losową piosenkę z bazy danych i ustaw ją jako podgląd.
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadRandomSongAsync()
     {
         var songs = await _songRepository.GetAllAsync();
@@ -123,7 +155,7 @@ public partial class LayoutEditorPage : ContentPage
         }
 
         _previewSong = songs[_rng.Next(songs.Count)];
-        PreviewSongLabel.Text = $"Podgl�d: {_previewSong.Title} � {_previewSong.Artist}";
+        PreviewSongLabel.Text = $"Podgląd: {_previewSong.Title} — {_previewSong.Artist}";
     }
 
     private readonly SemaphoreSlim _previewRenderLock = new(1, 1);
@@ -162,12 +194,12 @@ public partial class LayoutEditorPage : ContentPage
 
             // All control and view-model access stays on the UI thread.
             var previewSong = _previewSong;
-            var customLyricsCss = LyricsCssFromControls();
+            var customLyricsCss = LyricsCssFromControls(false);
             var editableCss = CustomLyricsCss.CreatePreviewCss(customLyricsCss);
 
             var skipTabulatures = SkipTabsCheck.IsChecked;
             var moveChords = MoveChordsToLyricsLine.IsChecked == true;
-            var customChordsOnly = CustomChordsOnlyCheck.IsChecked;
+            var hideChords = HideChordsCheck.IsChecked;
             var instrument = _userViewModel.ChordsInstrument;
             var htmlVersion = _userViewModel.LyricsHtmlVersion;
 
@@ -176,7 +208,7 @@ public partial class LayoutEditorPage : ContentPage
             {
                 SkipTabulatures = skipTabulatures,
                 MoveChordsToLyricsLine = moveChords,
-                CustomChordsOnly = customChordsOnly,
+                HideChords = hideChords,
                 Instrument = instrument,
                 HtmlVersion = htmlVersion,
                 DarkMode = _userViewModel.LyricsDarkMode
@@ -208,7 +240,7 @@ public partial class LayoutEditorPage : ContentPage
             {
                 SkipTabulatures = skipTabulatures,
                 MoveChordsToLyricsLine = moveChords,
-                CustomChordsOnly = customChordsOnly,
+                SkipLyricChords = hideChords,
                 Instrument = instrument,
                 ChordDiagramColor = customLyricsCss.TextColor
             };
@@ -316,10 +348,10 @@ public partial class LayoutEditorPage : ContentPage
     }
 
     /// <summary>
-    /// Zainicjuj obiekt CustomLyricsCss na podstawie aktualnych ustawie� w UI.
+    /// Zainicjuj obiekt CustomLyricsCss na podstawie aktualnych ustawień w UI.
     /// </summary>
     /// <returns></returns>
-    private CustomLyricsCss LyricsCssFromControls()
+    private CustomLyricsCss LyricsCssFromControls(bool changedValuesOnly)
     {
         var selectedFont = FontFamilyPicker.SelectedItem?.ToString() ?? AvailableFonts[0];
         //var fontSize = ((int)FontSizeSlider.Value).ToString(CultureInfo.InvariantCulture) + "px";
@@ -330,16 +362,30 @@ public partial class LayoutEditorPage : ContentPage
 
         return new Zaczy.SongBook.CustomLyricsCss
         {
-            FontFamily = selectedFont,
-            FontSize = 17 + (int)FontSizeSlider.Value,
-            TextColor = textColor,
-            ChordColor = chordColor,
-            ChordFontFamily = chordsSelectedFont,
-            ChordFontSize = (int)ChordFontSizeSlider.Value,
-            BackgroundColor = BackgroundColorPicker.PickedColor.ToHex()
+            FontFamily = !changedValuesOnly || hasControlBeenChanged(nameof(FontFamilyPicker)) ? selectedFont : null,
+            FontSize = !changedValuesOnly || hasControlBeenChanged(nameof(FontSizeSlider)) ? 17 + (int)FontSizeSlider!.Value : null,
+            TextColor = !changedValuesOnly || hasControlBeenChanged(nameof(TextColorPicker)) ? textColor : null,
+            ChordColor = !changedValuesOnly || hasControlBeenChanged(nameof(ChordColorPicker)) ? chordColor : null,
+            ChordFontFamily = !changedValuesOnly || hasControlBeenChanged(nameof(ChordFontFamilyPicker)) ? chordsSelectedFont : null,
+            ChordFontSize = !changedValuesOnly || hasControlBeenChanged(nameof(ChordFontSizeSlider)) ? (int)ChordFontSizeSlider.Value : null,
+            BackgroundColor = !changedValuesOnly || hasControlBeenChanged(nameof(BackgroundColorPicker)) ? BackgroundColorPicker.PickedColor.ToHex() : null    
         };
     }
 
+    private bool hasControlBeenChanged(string controlName)
+    {
+        var controls = _controlChanges.Controls;
+
+        return controls[controlName].IsChanged;
+
+    }
+
+    /// <summary>
+    /// Standaryzacja zapisu kolorów #XXXXXX
+    /// </summary>
+    /// <param name="candidate"></param>
+    /// <param name="fallback"></param>
+    /// <returns></returns>
     private static string SanitizeColor(string? candidate, string fallback)
     {
         if (string.IsNullOrWhiteSpace(candidate)) return fallback;
@@ -356,7 +402,6 @@ public partial class LayoutEditorPage : ContentPage
         PreviewLoadingIndicator.IsRunning = isLoading;
     }
 
-    // --- Handlery zdarze� UI ---
     private async void OnOptionChanged(object sender, EventArgs e) => await UpdatePreviewAsync();
     private async void OnSliderChanged(object sender, ValueChangedEventArgs e) => await UpdatePreviewAsync();
     private async void OnCheckChanged(object sender, CheckedChangedEventArgs e) => await UpdatePreviewAsync();
@@ -376,15 +421,11 @@ public partial class LayoutEditorPage : ContentPage
         await Navigation.PopAsync();
     }
 
-    private async void OnResetClicked(object sender, EventArgs e)
-    {
-        _userViewModel.CustomLyricsCss = new CustomLyricsCss();
-        LoadCurrentSettingsIntoUi();
-
-        await UpdatePreviewAsync();
-    }
-
-
+    /// <summary>
+    /// Zmiana koloru tekstu - picker
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void TextColorPicker_PickedColorChanged(object sender, PickedColorChangedEventArgs e)
     {
         TextColorEntry.Text = e.NewPickedColorValue.ToHex();
@@ -394,6 +435,11 @@ public partial class LayoutEditorPage : ContentPage
         await UpdatePreviewAsync();
     }
 
+    /// <summary>
+    /// Zmiana koloru chwytów - picker
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void ChordColorPicker_PickedColorChanged(object sender, PickedColorChangedEventArgs e)
     {
         ChordColorEntry.Text = e.NewPickedColorValue.ToHex();
@@ -401,6 +447,11 @@ public partial class LayoutEditorPage : ContentPage
         await UpdatePreviewAsync();
     }
 
+    /// <summary>
+    /// Zmiana tła - picker
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void BackgroundColorPicker_PickedColorChanged(object sender, PickedColorChangedEventArgs e)
     {
         System.Diagnostics.Debug.WriteLine($"BackgroundColorPicker_PickedColorChanged {e.NewPickedColorValue.ToHex()} ({_isLoading} {_isDuringControlsSync})");
@@ -411,6 +462,11 @@ public partial class LayoutEditorPage : ContentPage
         await UpdatePreviewAsync();
     }
 
+    /// <summary>
+    /// Zmiana koloru przez edycję kodu hex
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void ColorEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
         System.Diagnostics.Debug.WriteLine($"ColorEntry_TextChanged {e.NewTextValue} ({_isLoading} {_isDuringControlsSync})");
@@ -447,7 +503,85 @@ public partial class LayoutEditorPage : ContentPage
     }
 
     /// <summary>
-    /// Zapisz ustawienia na sta�e
+    /// Włączanie/wyłączanie sekcji 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnFontSectionClicked(object sender, EventArgs e)
+    {
+        ToggleSection(FontSectionContent, FontSectionHeader, "Czcionka");
+    }
+
+    private void OnColorsSectionClicked(object sender, EventArgs e)
+    {
+        ToggleSection(ColorsSectionContent, ColorsSectionHeader, "Kolory");
+    }
+
+    private void OnPresentationSectionClicked(object sender, EventArgs e)
+    {
+        ToggleSection(
+            PresentationSectionContent,
+            PresentationSectionHeader,
+            "Prezentacja");
+    }
+
+    private static void ToggleSection(
+        VisualElement content,
+        Button header,
+        string title)
+    {
+        var isExpanded = !content.IsVisible;
+
+        content.IsVisible = isExpanded;
+        header.Text = $"{title}  {(isExpanded ? "▾" : "▸")}";
+
+        SemanticProperties.SetHint(
+            header,
+            isExpanded ? "Zwiń sekcję" : "Rozwiń sekcję");
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    private static object? ReadColorValue(Color? color)
+    {
+        if (color == null)
+            return null;
+
+        // Capture channel values rather than retaining a Color reference.
+        return (color.Red, color.Green, color.Blue, color.Alpha);
+    }
+
+    private sealed record ControlValueChange(
+        object? InitialValue,
+        object? CurrentValue)
+    {
+        public bool IsChanged => !Equals(InitialValue, CurrentValue);
+    }
+
+    /// <summary>
+    /// Zerowanie ustawień
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void OnResetClicked(object sender, EventArgs e)
+    {
+        _userViewModel.CustomLyricsCss = new CustomLyricsCss();
+
+        _userViewModel.FontSizeAdjustment = 0;
+        _userViewModel.MoveChordsToLyricsLine = false;
+        _userViewModel.ShowOnlyCustomChords = false;
+        _userViewModel.SkipTabulatures = true;
+
+        LoadCurrentSettingsIntoUi();
+
+        await UpdatePreviewAsync();
+    }
+
+    /// <summary>
+    /// Zapisz ustawienia na stałe
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -455,12 +589,79 @@ public partial class LayoutEditorPage : ContentPage
     {
         _userViewModel.FontSizeAdjustment = (int)FontSizeSlider.Value;
         _userViewModel.MoveChordsToLyricsLine = MoveChordsToLyricsLine?.IsChecked == true;
-        _userViewModel.ShowOnlyCustomChords = CustomChordsOnlyCheck?.IsChecked == true;
+        _userViewModel.SkipLyricChords = HideChordsCheck?.IsChecked == true;
         _userViewModel.SkipTabulatures = SkipTabsCheck.IsChecked == true;
 
-        _userViewModel.CustomLyricsCss = LyricsCssFromControls();
+        var controls = _controlChanges.Controls;
+        var changedControlNames = controls
+            .Where(item => item.Value.IsChanged)
+            .Select(item => item.Key)
+            .ToList();
+
+        _userViewModel.CustomLyricsCss = LyricsCssFromControls(true);
+
+        if(_userViewModel?.CustomLyricsCss?.FontSize != null)
+            _userViewModel.CustomLyricsCss.FontSize = null;
+
         await Navigation.PopAsync();
+    }
+
+    private void ControlChangedExamples()
+    {
+            bool anythingChanged = _controlChanges.HasChanges;
+
+            // Read once to obtain a consistent snapshot for multiple checks.
+            var controls = _controlChanges.Controls;
+
+            bool fontChanged = controls[nameof(FontFamilyPicker)].IsChanged;
+            bool backgroundChanged = controls[nameof(BackgroundColorPicker)].IsChanged;
+
+            var originalSize = controls[nameof(FontSizeSlider)].InitialValue;
+            var currentSize = controls[nameof(FontSizeSlider)].CurrentValue;
+
+            var changedControlNames = controls
+                .Where(item => item.Value.IsChanged)
+                .Select(item => item.Key)
+                .ToArray();
+    }
+
+    private sealed class LayoutEditorChanges
+    {
+        private readonly Func<Dictionary<string, object?>> _readValues;
+        private Dictionary<string, object?>? _initialValues;
+
+        public LayoutEditorChanges(Func<Dictionary<string, object?>> readValues)
+        {
+            _readValues = readValues;
+        }
+
+        public bool HasChanges => Controls.Values.Any(change => change.IsChanged);
+
+        public IReadOnlyDictionary<string, ControlValueChange> Controls
+        {
+            get
+            {
+                var currentValues = _readValues();
+                var initialValues = _initialValues ?? currentValues;
+
+                var changes = currentValues.ToDictionary(
+                    item => item.Key,
+                    item => new ControlValueChange(
+                        initialValues[item.Key],
+                        item.Value));
+
+                return new System.Collections.ObjectModel.ReadOnlyDictionary<
+                    string, ControlValueChange>(changes);
+            }
+        }
+
+        public void CaptureInitialValues()
+        {
+            _initialValues = _readValues();
+        }
     }
 
 
 }
+
+#pragma warning restore CA1416

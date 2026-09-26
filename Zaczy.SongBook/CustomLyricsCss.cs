@@ -6,7 +6,7 @@ public class CustomLyricsCss
 {
 
     public string? FontFamily { get; set; }
-    public int FontSize { get; set; }
+    public int? FontSize { get; set; }
     public string? TextColor { get; set; }
     public string? ChordColor { get; set; }
     public string? BackgroundColor { get; set; }
@@ -26,15 +26,16 @@ public class CustomLyricsCss
         if (!string.IsNullOrEmpty(customLyricsCss.FontFamily))
             cssOptions.Add("pre", "font-family", customLyricsCss.FontFamily);
 
-        if (customLyricsCss.FontSize > 0)
+        if ((customLyricsCss?.FontSize ?? 0)> 0)
         {
+            int size = customLyricsCss?.FontSize ?? 0;
             cssOptions.Add(
                 "pre",
                 "font-size",
-                $"{customLyricsCss.FontSize.ToString(CultureInfo.InvariantCulture)}px");
+                $"{size.ToString(CultureInfo.InvariantCulture)}px");
         }
 
-        if (!string.IsNullOrEmpty(customLyricsCss.TextColor))
+        if (!string.IsNullOrEmpty(customLyricsCss?.TextColor))
         {
             cssOptions.Add("pre", "color", customLyricsCss.TextColor);
 

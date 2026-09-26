@@ -147,8 +147,9 @@ public class SongListViewModel : INotifyPropertyChanged
             {
                 query = query.Where(s => (!string.IsNullOrEmpty(s.Title) && s.Title.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
                                         || (!string.IsNullOrEmpty(s.Artist) && s.Artist.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
-                                        || (!string.IsNullOrEmpty(s.LyricsAuthor) && s.LyricsAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
-                                        || (!string.IsNullOrEmpty(s.MusicAuthor) && s.MusicAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                        || (UserViewModel.SearchSongAuthors == true && !string.IsNullOrEmpty(s.LyricsAuthor) && s.LyricsAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                        || (UserViewModel.SearchSongAuthors == true && !string.IsNullOrEmpty(s.MusicAuthor) && s.MusicAuthor.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
+                                        || (UserViewModel.SearchLyrics == true && !string.IsNullOrEmpty(s.Lyrics) && s.Lyrics.Contains(TitleFilter, StringComparison.OrdinalIgnoreCase))
                                         );
             }
 

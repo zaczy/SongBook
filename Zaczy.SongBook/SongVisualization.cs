@@ -101,15 +101,15 @@ public class SongVisualization
                 font-size: 0.9em;
             }");
 
-        sb.AppendLine("H1 { font-family: Inconsolata, Roboto; font-stretch: 100%; color: #b62610; }");
-        sb.AppendLine("H1 .artist { font-family: Inconsolata, Roboto; color: #CCC; font-size: 0.6em; }");
+        sb.AppendLine("H1 { font-family: 'Antykwa Półtawskiego'; font-stretch: 100%; font-size: 1.9em; }");
+        sb.AppendLine("H1 .artist { color: #CCC; font-size: 0.6em; }");
 
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
         customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
-        sb.AppendLine(".lyrics-line { position: relative; font-family: 'Antykwa Półtawskiego'; font-weight: 500; /* display: inlinecd-block; */}");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'Antykwa Półtawskiego'; font-weight: 500; line-height: 1.9em; }");
         
-        sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; /* height: 1.2em; */ margin-top: 0.8em; }");
+        sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; margin-top: 0.8em; }");
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-0.4em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; line-height: 1em; }");
         
         sb.AppendLine(@".chords, .chords2 { color: #b62610; }");
@@ -168,7 +168,7 @@ public class SongVisualization
             sb.AppendLine("</style>");
         }
 
-        sb.AppendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://api.zaczy.net/css/songbook-app-lyrics.css\">");
+        //sb.AppendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://api.zaczy.net/css/songbook-app-lyrics.css\">");
 
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
