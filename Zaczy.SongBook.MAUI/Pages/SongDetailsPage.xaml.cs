@@ -123,6 +123,7 @@ public partial class SongDetailsPage : ContentPage
 
         if (DeviceInfo.Idiom == DeviceIdiom.Tablet)
         {
+            _visualizationCssOptions.DeviceIdiom = $"{DeviceIdiom.Tablet}";
             _visualizationCssOptions.Add("body", "padding-top", "9px");
         }
 

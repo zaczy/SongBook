@@ -40,7 +40,7 @@ public class UkuleleChordsLibrary : IChordsLibrary
         var predefined = ChordsDict.FirstOrDefault(x => x.Value == definition && x.Key == name);
 
         if (!string.IsNullOrEmpty(predefined.Key))
-            return StandardChord(predefined.Key, predefined.Value);
+            return StandardChord(predefined.Key, predefined.Value, predefinedOnly: true);
 
         GuitarChord chord = new GuitarChord(name);
         if (barFret > 0)
@@ -84,7 +84,7 @@ public class UkuleleChordsLibrary : IChordsLibrary
     /// <param name="variation"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public ChordBase? StandardChord(string name, string? variation = null)
+    public ChordBase? StandardChord(string name, string? variation = null, bool predefinedOnly=false)
     {
         if (string.IsNullOrEmpty(name))
             return null;
@@ -386,7 +386,7 @@ public class UkuleleChordsLibrary : IChordsLibrary
                 break;
         }
 
-        if (!string.IsNullOrEmpty(variation))
+        if (!string.IsNullOrEmpty(variation) && !predefinedOnly)
         {
 
             var vchord = ChordByAscii(name, variation);

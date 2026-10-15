@@ -28,6 +28,9 @@ public class VisualizationCssOptions
         }
     }
 
+    public string? DeviceIdiom { get; set; }
+
+
     /// <summary>
     /// Dodaj dyrektywę
     /// </summary>
@@ -571,9 +574,14 @@ public class VisualizationCssOptions
 
         if ((customLyricsCss?.ChordFontSize ?? 0) != 0)
         {
-            var size = 17 + customLyricsCss!.ChordFontSize;
-            this.Add(".chords2", "font-size", $"{size}px");
-            this.Add(".chords", "font-size", $"{size}px");
+            var size = 1+(customLyricsCss!.ChordFontSize/100M);
+            //var size = 17 + customLyricsCss!.ChordFontSize;
+            var fontSize = string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                "{0:F2}em",
+                size);
+            this.Add(".chords2", "font-size", fontSize);
+            this.Add(".chords", "font-size", fontSize);
 
         }
 

@@ -107,9 +107,14 @@ public class SongVisualization
         sb.AppendLine(".chord-line-block { display: inline-block; position: relative; }");
 
         customValue = VisualizationOptions?.VisualizationCssOptions?.CssValue("lyrics-line", "font-family");
-        sb.AppendLine(".lyrics-line { position: relative; font-family: 'Antykwa Półtawskiego'; font-weight: 500; line-height: 1.9em; }");
-        
-        sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; margin-top: 0.8em; }");
+        sb.AppendLine(".lyrics-line { position: relative; font-family: 'Antykwa Półtawskiego'; font-weight: 500; }");
+
+
+        sb.AppendLine(".lyrics-line.annotated { margin-top: 0.8em; }");
+
+        sb.AppendLine(".lyrics-line { line-height: 1.5em; }");
+        sb.AppendLine(".lyrics-line.annotated { line-height: 1.9em; }");
+
         sb.AppendLine(@".lyrics-line.annotated .chords2 {  transform: translateY(-0.4em); font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; line-height: 1em; }");
         
         sb.AppendLine(@".chords, .chords2 { color: #b62610; }");
@@ -149,7 +154,7 @@ public class SongVisualization
         sb.AppendLine("     .block-zwrotka { margin-left: 0px; }");
         sb.AppendLine("     .block-zwrotka .block-header { font-size: 0.6em; color: #CCC; text-align: right; position: absolute; display: inline-block; transform: translateX(-1.4em) translateY(-0.4em); padding: 2px; padding-left: 7px; padding-right: 5px; }");
         sb.AppendLine("     .lyrics-line.annotated { line-height: 1.85em; margin-top: 0.7em; }");
-        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.4em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
+        sb.AppendLine(@"    .lyrics-line.annotated .chords2 { transform: translateY(-0.3em) !important; color: #b62610; font-weight: 700; display: inline-block; position: absolute; white-space: nowrap; font-size: 0.8em; }");
         sb.AppendLine(@"    .chords2 { font-size: 0.7em; }");
         sb.AppendLine(@"    .chords { font-size: 0.9em; }");
 
@@ -168,7 +173,7 @@ public class SongVisualization
             sb.AppendLine("</style>");
         }
 
-        //sb.AppendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://api.zaczy.net/css/songbook-app-lyrics.css\">");
+        sb.AppendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://api.zaczy.net/css/songbook-app-lyrics.css\">");
 
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
@@ -304,7 +309,9 @@ public class SongVisualization
                     var guitarChord = chordsLibrary.StandardChord(chord, chordSuggestion);
                     if (guitarChord != null)
                     {
-                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
+                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor
+                            , width: VisualizationOptions?.VisualizationCssOptions?.DeviceIdiom == "Tablet" ? 150 : 100
+                            , height: VisualizationOptions?.VisualizationCssOptions?.DeviceIdiom == "Tablet" ? 120 : 80));
                     }
                 }
                 sb.AppendLine("</div>");
@@ -320,7 +327,9 @@ public class SongVisualization
                     var guitarChord = chordsLibrary.StandardChord(suggestion.Key, suggestion.Value);
                     if (guitarChord != null)
                     {
-                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor));
+                        sb.AppendLine(guitarChord.ToSvgHorizontal(drawColor: VisualizationOptions?.ChordDiagramColor
+                            , width: VisualizationOptions?.VisualizationCssOptions?.DeviceIdiom == "Tablet" ? 150 :  100
+                            , height: VisualizationOptions?.VisualizationCssOptions?.DeviceIdiom == "Tablet" ? 120 : 80));
                     }
                 }
                 sb.AppendLine("</div>");

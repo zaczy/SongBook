@@ -342,7 +342,7 @@
             VerticalOptions="Start"
             BackgroundColor="Transparent"
             Opacity="0.6"
-            Margin="{OnIdiom '20,0,30,0', Tablet='40,0,30,0'}">
+            Margin="{OnIdiom '30,0,30,0', Tablet='50,0,50,0'}">
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnTopTouched" NumberOfTapsRequired="1" />
             </BoxView.GestureRecognizers>

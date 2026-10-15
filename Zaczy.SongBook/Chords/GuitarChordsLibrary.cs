@@ -44,7 +44,7 @@ public class GuitarChordsLibrary: IChordsLibrary
         var predefined = ChordsDict.FirstOrDefault(x => x.Value == definition && x.Key == name);
         
         if(!string.IsNullOrEmpty(predefined.Key))
-            return StandardChord(predefined.Key, predefined.Value);
+            return StandardChord(predefined.Key, predefined.Value, predefinedOnly:true);
 
         GuitarChord chord = new GuitarChord(name);
         if(barFret > 0)
@@ -81,7 +81,7 @@ public class GuitarChordsLibrary: IChordsLibrary
         return chord;
     }
 
-    public ChordBase? StandardChord(string name, string? variation=null)
+    public ChordBase? StandardChord(string name, string? variation = null, bool predefinedOnly = false)
     {
         if(string.IsNullOrEmpty(name))
             return null;
@@ -400,7 +400,7 @@ public class GuitarChordsLibrary: IChordsLibrary
                 break;
         }
 
-        if (!string.IsNullOrEmpty(variation) && chord == null)
+        if (!string.IsNullOrEmpty(variation) && (!predefinedOnly || chord == null))
         {
 
             var vchord = ChordByAscii(name, variation);

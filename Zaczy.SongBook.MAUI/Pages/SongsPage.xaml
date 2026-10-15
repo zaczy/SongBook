@@ -32,7 +32,7 @@
                 Spacing="8" 
                 Grid.Row="0"
                 Background="{AppThemeBinding Light=#D6C6C0, Dark=#100707}"
-                Padding="{OnIdiom '12,0,12,0', Tablet='0,10,0,8'}"
+                Padding="{OnIdiom '12,0,12,0', Tablet='15,10,15,8'}"
                 >
                 <Entry Placeholder="Tytuł lub wykonawca"
                        HorizontalOptions="FillAndExpand"
